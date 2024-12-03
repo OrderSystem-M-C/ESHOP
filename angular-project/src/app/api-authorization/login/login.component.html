@@ -1,17 +1,16 @@
-@if (authService.authenticated()) {
-  <h1>You're currently logged in.</h1>
-} @else {
-  <form [formGroup]="loginForm" (ngSubmit)="login()">
-    <mat-form-field>
-      <mat-label>Email</mat-label>
-      <input matInput formControlName="email" required>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Enter your password</mat-label>
-      <input matInput [type]="'password'" formControlName="password">
-    </mat-form-field>
-
-    <button mat-raised-button color="primary" type="submit">Login</button>
+<div class="login-component">
+  <form class="login-form">
+    <h1>Login</h1>
+    <div class="field">
+      <label>E-mail</label><br>
+      <input type="email" placeholder="Enter your email">
+    </div>
+    <div class="field">
+      <label>Password</label><br>
+      <input type="password" placeholder="Enter your password">
+    </div>
+    <div class="submit">
+      <button class="btn btn-secondary">Login</button>
+    </div>
   </form>
-}
+</div>
