@@ -1,16 +1,19 @@
 <div class="login-component">
-  <form class="login-form">
+  <form class="login-form" [formGroup]="loginForm">
     <h1>Login</h1>
     <div class="field">
       <label>E-mail</label><br>
-      <input type="email" placeholder="Enter your email">
+      <input type="email" placeholder="Enter your email" formControlName="email">
     </div>
     <div class="field">
       <label>Password</label><br>
-      <input type="password" placeholder="Enter your password">
+      <input type="password" placeholder="Enter your password" formControlName="password">
+    </div>
+    <div [ngClass]="isLogging ? 'isLogging' : 'notLogging'" class="information">
+      <p>Loggin-in, please wait...</p>
     </div>
     <div class="submit">
-      <button class="btn btn-secondary">Login</button>
+      <button class="btn btn-secondary" (click)="login()">Login</button>
     </div>
   </form>
 </div>

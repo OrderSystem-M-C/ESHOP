@@ -1,2 +1,6 @@
-<app-main-nav></app-main-nav>
+<div class="cookie-popup" [ngClass]="isHidden ? 'hidden' : 'not-hidden'">
+    <p>This website uses cookies to store user data and enhance user experience</p>
+    <button class="accept-cookies btn btn-primary" (click)="acceptCookies()">Accept</button>
+    <button class="decline-cookies btn btn-secondary" (click)="declineCookies()">Decline</button>
+</div>
 <router-outlet></router-outlet>

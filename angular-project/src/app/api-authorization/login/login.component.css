@@ -42,3 +42,12 @@
   justify-content: center;
   margin-top: 10px;
 }
+.information{
+  margin-top: 10px;
+}
+.notLogging{
+  display: none;
+}
+.isLogging{
+  display: block;
+}
