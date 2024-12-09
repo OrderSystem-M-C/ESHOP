@@ -11,5 +11,9 @@ namespace AspNetCoreAPI.Data
             : base(options)
         {
         }
+
+        DbSet<OrderModel> Orders { get; set; }
+        DbSet<OrderProductsModel> OrderProducts { get; set; }
+        DbSet<ProductModel> Products { get; set; }
     }
 }
