@@ -1,19 +1,20 @@
+<title>Prihlásenie</title>
 <div class="login-component">
   <form class="login-form" [formGroup]="loginForm">
-    <h1>Login</h1>
+    <h1>Prihlásiť sa</h1>
     <div class="field">
-      <label>E-mail</label><br>
+      <label>E-mailová adresa</label><br>
       <input type="email" placeholder="Enter your email" formControlName="email">
     </div>
     <div class="field">
-      <label>Password</label><br>
+      <label>Heslo</label><br>
       <input type="password" placeholder="Enter your password" formControlName="password">
     </div>
     <div [ngClass]="isLogging ? 'isLogging' : 'notLogging'" class="information">
-      <p>Loggin-in, please wait...</p>
+      <p>Prihlasuje sa, prosím čakajte...</p>
     </div>
     <div class="submit">
-      <button class="btn btn-secondary" (click)="login()">Login</button>
+      <button class="btn btn-secondary" (click)="login()">Potvrdiť</button>
     </div>
   </form>
 </div>

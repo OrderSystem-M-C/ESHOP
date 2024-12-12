@@ -31,7 +31,7 @@ export class LoginComponent {
       this.authService.loginUser({...this.loginForm.value}).subscribe({
         next: (response) => {
           this.authService.storeUserCredentials(response.token, response.username);
-          this.router.navigate(['/']);
+          this.router.navigate(['/order-form']);
         },
         error: (err) => console.log("Oops, something went wrong", err)
       });

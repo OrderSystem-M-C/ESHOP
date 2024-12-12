@@ -1,0 +1,128 @@
+<title>Vytvorenie objednávky</title>
+<div class="order-form-component">
+    <form class="order-form">
+        <h1>Vytvoriť objednávku</h1>
+
+        <div class="form-group">
+            <label for="deliveryOptions">Spôsob dopravy</label>
+            <select id="deliveryOptions" class="form-control" required>
+              <option selected disabled>Zvoliť možnosť</option>
+              <option value="posta">Pošta</option>
+              <option value="kurier">Kuriér</option>
+              <option value="osobny-odber">Osobný odber</option>
+            </select>
+          </div>
+        <div class="field">
+            <label for="paymentOptions">Spôsob platby</label>
+            <select id="paymentOptions" class="form-control" required>
+                <option selected disabled>Zvoliť možnosť</option>
+                <option value="card">Karta</option>
+                <option value="cash">Hotovosť</option>
+                <option value="bank-transfer">Bankový prevod</option>
+            </select>
+        </div>
+        <div class="field">
+            <label for="discountAmount" class="form-label">Zľava (%)</label>
+            <input type="number" id="discountAmount" class="form-control" min="0" max="100">
+        </div>
+
+        <div class="customer-info">
+            <h3>Objednávateľ</h3>
+            <div class="field">
+                <label for="name" class="form-label">Meno</label>
+                <input type="text" id="name" class="form-control">
+            </div>
+            <div class="field">
+                <label for="company" class="form-label">Firma</label>
+                <input type="text" id="company" class="form-control">
+            </div>
+            <div class="field">
+                <label for="ico" class="form-label">IČO</label>
+                <input type="text" id="ico" class="form-control">
+            </div>
+            <div class="field">
+                <label for="dic" class="form-label">DIČ</label>
+                <input type="text" id="dic" class="form-control">
+            </div>
+            <div class="field">
+                <label for="icDph" class="form-label">IČ DPH</label>
+                <input type="text" id="icDph" class="form-control">
+            </div>
+            <div class="field">
+                <label for="address" class="form-label">Adresa</label>
+                <input type="text" id="address" class="form-control">
+            </div>
+            <div class="field">
+                <label for="city" class="form-label">Mesto</label>
+                <input type="text" id="city" class="form-control">
+            </div>
+            <div class="field">
+                <label for="postalCode" class="form-label">PSČ</label>
+                <input type="text" id="postalCode" class="form-control">
+            </div>
+            <div class="field">
+                <label for="email" class="form-label">E-mailová adresa</label>
+                <input type="email" id="email" class="form-control">
+            </div>
+            <div class="field">
+                <label for="phoneNumber" class="form-label">Telefónne číslo</label>
+                <input type="text" id="phoneNumber" class="form-control">
+            </div>
+            <div class="field">
+                <label for="note" class="form-label"></label>
+                <textarea id="note" class="form-control"></textarea>
+            </div>
+        </div>
+        <div class="invoice-settings">
+            <h3>Nastavenia faktúry</h3>
+            <div class="field">
+                <label>Faktúra</label>
+                <button class="btn btn-secondary">Vytvoriť faktúru</button>
+            </div>
+            <div class="field">
+                <label for="invoiceNumber" class="form-label">Číslo faktúry</label>
+                <input type="number" id="invoiceNumber" class="form-control">
+            </div>
+            <div class="field">
+                <label for="variableSymbol" class="form-label">Variabilný symbol</label>
+                <input type="text" id="variableSymbol" class="form-control">
+            </div>
+            <div class="field">
+                <label for="documentType">Typ dokladu</label>
+                <input id="documentType" class="form-control" value="Faktúra" readonly>
+            </div>
+            <div class="field">
+                <label for="invoiceIssueDate" class="form-label">Dátum vystavenia faktúry</label>
+                <input type="date" id="invoiceIssueDate" class="form-control">
+            </div>
+            <div class="field">
+                <label for="dueDate" class="form-label">Dátum splatnosti</label>
+                <input type="date" id="dueDate" class="form-control">
+            </div>
+            <div class="field">
+                <label for="deliveryDate" class="form-label">Dátum dodania</label>
+                <input type="date" id="deliveryDate" class="form-control">
+            </div>
+            <div class="field">
+                <label for="invoiceName" class="form-label">Meno</label>
+                <input type="text" id="invoiceName" class="form-control">
+            </div>
+            <div class="field">
+                <label for="invoiceCompany" class="form-label">Firma</label>
+                <input type="text" id="invoiceCompany" class="form-control">
+            </div>
+            <div class="field">
+                <label for="invoiceIco" class="form-label">IČO</label>
+                <input type="text" id="invoiceIco" class="form-control">
+            </div>
+            <div class="field">
+                <label for="invoiceDic" class="form-label">DIČ</label>
+                <input type="text" id="invoiceDic" class="form-control">
+            </div>
+        </div>
+
+        <div class="submit">
+            <button type="submit" class="btn btn-primary">Vytvoriť objednávku</button>
+        </div>
+    </form>
+</div>
