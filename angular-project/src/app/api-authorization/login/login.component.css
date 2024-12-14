@@ -43,7 +43,11 @@
   margin-top: 10px;
 }
 .information{
-  margin-top: 10px;
+  text-align: center;
+  margin: 7.5px 0 0 0;
+}
+.information p{
+  margin: 0;
 }
 .notLogging{
   display: none;

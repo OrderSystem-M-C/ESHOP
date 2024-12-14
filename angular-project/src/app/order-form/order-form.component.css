@@ -1,0 +1,129 @@
+.order-form-component{
+    padding: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+h1{
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 5px 0;
+}
+h3{
+    text-align: center;
+    font-weight: 600;
+    color: #333;
+}
+.form-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+}
+.field, .form-group{
+    margin-bottom: 15px;
+}
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+.create-invoice-btn{
+    margin-left: 10px;
+}
+.submit{
+    text-align: center;
+    margin-top: 20px;
+}
+.customer-info, .invoice-settings, .delivery-payment-discount, .order-status{
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+}
+.order-status{
+    margin-top: 10px;
+}
+.customer-info h3, .invoice-settings h3, .order-status h3 {
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.form-control {
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    transition: border-color 0.2s ease;
+}
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 5px #0d6efd;
+    outline: none;
+}
+.delivery-payment-discount .form-control{
+    width: 50%;
+}
+.discount-input{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: row;
+}
+.total-price{
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    margin-top: 10px;
+    background-color: #0d6efd;
+    padding: 10px;
+    color: white;
+    border-radius: 10px;
+}
+.total-price p{
+    margin: 0;
+}
+.delivery-options-wrapper, .payment-options-wrapper{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+}
+.delivery-price p, .payment-options-wrapper p, .discount-input p{
+    margin: 0 0 0 10px;
+}
+.char-count{
+    margin-top: 7.5px;
+}
+.status-container-with-email img{
+    height: 20px;
+    width: 20px;
+    overflow: hidden;
+    display: inline-block;
+    margin-bottom: 2px;
+    padding: 0;
+}
+.status-container-with-email{
+    border-right: 1px solid #ddd;
+}
+.status-container-with-email, .status-container-no-email{
+    padding-left: 30px;
+}
+.status-container-no-email label{
+    line-height: 1.61;
+}
+input[type="radio"]{
+    cursor: pointer;
+}
+.status-form-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 10px 0 10px 0;
+}
+.default-status{
+    font-weight: normal;
+    font-size: 14px;
+}

@@ -1,128 +1,336 @@
 <title>Vytvorenie objednávky</title>
 <div class="order-form-component">
-    <form class="order-form">
-        <h1>Vytvoriť objednávku</h1>
-
-        <div class="form-group">
-            <label for="deliveryOptions">Spôsob dopravy</label>
-            <select id="deliveryOptions" class="form-control" required>
-              <option selected disabled>Zvoliť možnosť</option>
-              <option value="posta">Pošta</option>
-              <option value="kurier">Kuriér</option>
-              <option value="osobny-odber">Osobný odber</option>
-            </select>
-          </div>
-        <div class="field">
-            <label for="paymentOptions">Spôsob platby</label>
-            <select id="paymentOptions" class="form-control" required>
-                <option selected disabled>Zvoliť možnosť</option>
-                <option value="card">Karta</option>
-                <option value="cash">Hotovosť</option>
-                <option value="bank-transfer">Bankový prevod</option>
-            </select>
+    <form class="order-form" [formGroup]="orderForm" (ngSubmit)="submitOrder()">
+        <div class="title-date">
+            <h1>Vytvoriť objednávku</h1>
+            <p>{{currentDate}}</p>
         </div>
-        <div class="field">
-            <label for="discountAmount" class="form-label">Zľava (%)</label>
-            <input type="number" id="discountAmount" class="form-control" min="0" max="100">
+        <div class="delivery-payment-discount">
+            <div class="form-group">
+                <label for="deliveryOptions" class="form-label">Spôsob dopravy</label>
+                <div class="delivery-options-wrapper">
+                    <select formControlName="deliveryOption" id="deliveryOptions" class="form-control" required>
+                        <option selected disabled>Zvoliť možnosť</option>
+                        <option value="posta">Pošta</option>
+                        <option value="kurier">Kuriér</option>
+                        <option value="osobny-odber">Osobný odber</option>
+                    </select>
+                    <div class="delivery-price">
+                        <p>0€</p>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="paymentOptions" class="form-label">Spôsob platby</label>
+                <div class="payment-options-wrapper">
+                    <select formControlName="paymentOption" id="paymentOptions" class="form-control" required>
+                        <option selected disabled>Zvoliť možnosť</option>
+                        <option value="card">Karta</option>
+                        <option value="cash">Hotovosť</option>
+                        <option value="bank-transfer">Bankový prevod</option>
+                    </select>
+                    <div class="payment-price">
+                        <p>0€</p>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="discountAmount" class="form-label">Zľava (%)</label>
+                <div class="discount-input">
+                  <input formControlName="discountAmount" type="number" id="discountAmount" class="form-control" min="0" max="100" placeholder="Zadajte zľavu">
+                  <p>% (-0€)</p>
+                </div>
+            </div>
         </div>
 
+        <div class="total-price">
+            <p>CELKOM</p>
+            <p>0€</p>
+        </div>
+
+        <div class="form-grid">
         <div class="customer-info">
             <h3>Objednávateľ</h3>
             <div class="field">
                 <label for="name" class="form-label">Meno</label>
-                <input type="text" id="name" class="form-control">
+                <input formControlName="name" type="text" id="name" class="form-control" placeholder="Zadajte meno">
             </div>
             <div class="field">
                 <label for="company" class="form-label">Firma</label>
-                <input type="text" id="company" class="form-control">
+                <input formControlName="company" type="text" id="company" class="form-control" placeholder="Zadajte názov firmy">
             </div>
             <div class="field">
                 <label for="ico" class="form-label">IČO</label>
-                <input type="text" id="ico" class="form-control">
+                <input formControlName="ico" type="text" id="ico" class="form-control" placeholder="Zadajte IČO">
             </div>
             <div class="field">
                 <label for="dic" class="form-label">DIČ</label>
-                <input type="text" id="dic" class="form-control">
+                <input formControlName="dic" type="text" id="dic" class="form-control" placeholder="Zadajte DIČ">
             </div>
             <div class="field">
                 <label for="icDph" class="form-label">IČ DPH</label>
-                <input type="text" id="icDph" class="form-control">
+                <input formControlName="icDph" type="text" id="icDph" class="form-control" placeholder="Zadajte IČ DPH">
             </div>
             <div class="field">
                 <label for="address" class="form-label">Adresa</label>
-                <input type="text" id="address" class="form-control">
+                <input formControlName="address" type="text" id="address" class="form-control" placeholder="Zadajte adresu">
             </div>
             <div class="field">
                 <label for="city" class="form-label">Mesto</label>
-                <input type="text" id="city" class="form-control">
+                <input formControlName="city" type="text" id="city" class="form-control" placeholder="Zadajte mesto">
             </div>
             <div class="field">
                 <label for="postalCode" class="form-label">PSČ</label>
-                <input type="text" id="postalCode" class="form-control">
+                <input formControlName="postalCode" type="text" id="postalCode" class="form-control" placeholder="Zadajte PSČ">
             </div>
             <div class="field">
                 <label for="email" class="form-label">E-mailová adresa</label>
-                <input type="email" id="email" class="form-control">
+                <input formControlName="email" type="email" id="email" class="form-control" placeholder="Zadajte e-mail">
             </div>
             <div class="field">
                 <label for="phoneNumber" class="form-label">Telefónne číslo</label>
-                <input type="text" id="phoneNumber" class="form-control">
+                <input formControlName="phoneNumber" type="text" id="phoneNumber" class="form-control" placeholder="Zadajte telefónne číslo">
             </div>
             <div class="field">
-                <label for="note" class="form-label"></label>
-                <textarea id="note" class="form-control"></textarea>
+                <label for="note" class="form-label">Poznámka</label>
+                <textarea formControlName="note" name="note" id="note" class="form-control" placeholder="Napíšte poznámku" minlength="0" maxlength="250" [(ngModel)]="userMessage" (input)="update()"></textarea>
+                @if(userMessage.length > 0){
+                    <div class="char-count">{{ charactersCount }} / 250 písmen</div>
+                }
+                @else{
+                    
+                }
             </div>
         </div>
         <div class="invoice-settings">
             <h3>Nastavenia faktúry</h3>
             <div class="field">
                 <label>Faktúra</label>
-                <button class="btn btn-secondary">Vytvoriť faktúru</button>
+                <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn">Vytvoriť faktúru</button>
             </div>
             <div class="field">
                 <label for="invoiceNumber" class="form-label">Číslo faktúry</label>
-                <input type="number" id="invoiceNumber" class="form-control">
+                <input type="number" id="invoiceNumber" class="form-control" placeholder="Zadajte číslo faktúry">
             </div>
             <div class="field">
                 <label for="variableSymbol" class="form-label">Variabilný symbol</label>
-                <input type="text" id="variableSymbol" class="form-control">
+                <input type="text" id="variableSymbol" class="form-control" placeholder="Zadajte variabilný symbol">
             </div>
             <div class="field">
                 <label for="documentType">Typ dokladu</label>
-                <input id="documentType" class="form-control" value="Faktúra" readonly>
+                <input id="documentType" class="form-control" value="Faktúra" readonly placeholder="Typ dokladu (Faktúra)">
             </div>
             <div class="field">
                 <label for="invoiceIssueDate" class="form-label">Dátum vystavenia faktúry</label>
-                <input type="date" id="invoiceIssueDate" class="form-control">
+                <input type="date" id="invoiceIssueDate" class="form-control" placeholder="Vyberte dátum vystavenia">
             </div>
             <div class="field">
                 <label for="dueDate" class="form-label">Dátum splatnosti</label>
-                <input type="date" id="dueDate" class="form-control">
+                <input type="date" id="dueDate" class="form-control" placeholder="Vyberte dátum splatnosti">
             </div>
             <div class="field">
                 <label for="deliveryDate" class="form-label">Dátum dodania</label>
-                <input type="date" id="deliveryDate" class="form-control">
+                <input type="date" id="deliveryDate" class="form-control" placeholder="Vyberte dátum dodania">
             </div>
             <div class="field">
                 <label for="invoiceName" class="form-label">Meno</label>
-                <input type="text" id="invoiceName" class="form-control">
+                <input type="text" id="invoiceName" class="form-control" placeholder="Zadajte meno na faktúre">
             </div>
             <div class="field">
                 <label for="invoiceCompany" class="form-label">Firma</label>
-                <input type="text" id="invoiceCompany" class="form-control">
+                <input type="text" id="invoiceCompany" class="form-control" placeholder="Zadajte názov firmy na faktúre">
             </div>
             <div class="field">
                 <label for="invoiceIco" class="form-label">IČO</label>
-                <input type="text" id="invoiceIco" class="form-control">
+                <input type="text" id="invoiceIco" class="form-control" placeholder="Zadajte IČO na faktúre">
             </div>
             <div class="field">
                 <label for="invoiceDic" class="form-label">DIČ</label>
-                <input type="text" id="invoiceDic" class="form-control">
+                <input type="text" id="invoiceDic" class="form-control" placeholder="Zadajte DIČ na faktúre">
             </div>
         </div>
+    </div>
+
+    <div class="order-status">
+        <h3>Stav objednávky<br><span class="default-status">Bez výberu je status "Nezpracované - nová objednávka"</span></h3>
+        <div class="status-form-grid">
+            <div class="status-container-with-email">
+                <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="vybavit-posta-mail">
+                      Vybaviť - Pošta + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="uhradene-vybavit-mail">
+                      Uhradené - Vybavit + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-cakam-na-platbu-mail">
+                      Neuhradené, čakám na platbu + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-udaje-k-platbe-poslat-zakaznikovi-mail">
+                      Neuhradené - Údaje k platbe, poslať zákazníkovi mail + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-2xmail-poslany-zakaznikovi">
+                      Neuhradené - 2x poslaný mail zákazníkovi + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="vybavit-odlozene-osobny-odber-mail">
+                      Vybaviť - Odložené, osobný odber + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="poslane-neuhradene-mail">
+                      Poslané, neuhradené + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="dobierka-info-k-objednavke-mail">
+                      Dobierka - info k objednávke (poslať zákazníkovi email) + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="zasielanie-cisla-zasielky-posta-mail">
+                      Zasielanie čísla zásielky (Pošta) + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="oprava-mail">
+                      Oprava + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="objednavka-odoslana-cakam-na-uhradu-dobierkou-mail">
+                      Objednávka odoslaná, čakám na úhradu dobierkou + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="objednavka-vybavena-mail">
+                      Objednávka vybavená + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="storno-mail">
+                      Storno + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="rozbite-znicene-vratene-mail">
+                      Rozbité, zničené, vrátené + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                    </label>
+                  </div>
+            </div>
+            <div class="status-container-no-email">
+                <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="vybavit-posta">
+                      Vybaviť - Pošta
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="uhradene-vybavit">
+                      Uhradené - Vybavit
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-cakam-na-platbu">
+                      Neuhradené, čakám na platbu
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-udaje-k-platbe-poslat-zakaznikovi-mail">
+                      Neuhradené - Údaje k platbe, poslať zákazníkovi mail
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-2xmail-poslany-zakaznikovi">
+                      Neuhradené - 2x poslaný mail zákazníkovi
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="vybavit-odlozene-osobny-odber">
+                      Vybaviť - Odložené, osobný odber
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="poslane-neuhradene">
+                      Poslané, neuhradené
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="dobierka-info-k-objednavke-mail">
+                      Dobierka - info k objednávke (poslať zákazníkovi email)
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="zasielanie-cisla-zasielky-posta-mail">
+                      Zasielanie čísla zásielky (Pošta)
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="oprava">
+                      Oprava
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="objednavka-odoslana-cakam-na-uhradu-dobierkou">
+                      Objednávka odoslaná, čakám na úhradu dobierkou
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="objednavka-vybavena">
+                      Objednávka vybavená
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="storno">
+                      Storno
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="rozbite-znicene-vratene">
+                      Rozbité, zničené, vrátené
+                    </label>
+                  </div>
+            </div>
+        </div>
+    </div>
 
         <div class="submit">
-            <button type="submit" class="btn btn-primary">Vytvoriť objednávku</button>
+            <button type="submit" [disabled]="!orderForm.valid" class="btn btn-primary">Vytvoriť objednávku</button>
         </div>
     </form>
 </div>

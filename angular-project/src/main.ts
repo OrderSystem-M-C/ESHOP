@@ -8,7 +8,6 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { LoginComponent } from './app/api-authorization/login/login.component';
 import { JwtModule } from '@auth0/angular-jwt';
 import { errorHandlerInterceptor } from './app/api-authorization/error-handler.interceptor';
-import { authGuard } from './app/api-authorization/auth.guard';
 import { jwtInterceptor } from './app/api-authorization/jwt.interceptor';
 import { OrderFormComponent } from './app/order-form/order-form.component';
 
@@ -37,6 +36,7 @@ bootstrapApplication(AppComponent, {
       provideAnimations(),
       provideHttpClient(withInterceptors([errorHandlerInterceptor, jwtInterceptor])),
       provideRouter([
+        { path: '', component: LoginComponent},
         { path: 'login', component: LoginComponent},
         { path: 'register', component: RegistrationComponent},
         { path: 'order-form', component: OrderFormComponent}
