@@ -1,6 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, NgModel, ReactiveFormsModule, Validators } from '@angular/forms';
+import * as html2pdf from 'html2pdf.js';
 
 @Component({
   selector: 'app-order-form',
@@ -46,4 +47,21 @@ export class OrderFormComponent implements OnInit {
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
   }
+}
+export interface OrderDTO {
+  name: string;
+  company: string;
+  ico: string;
+  dic: string;
+  icDph: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  email: string;
+  phoneNumber: string;
+  note: string;
+  deliveryOption: string;
+  paymentOption: string;
+  discountAmount: number;
+  orderStatus: string;
 }
