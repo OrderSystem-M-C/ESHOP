@@ -1,1 +1,28 @@
 <title>Objednávky</title>
+<div class="orders-page-component">
+  <h2>Prehľad objednávok</h2>
+  <table class="orders-table">
+    <thead>
+      <tr>
+        <th>Meno</th>
+        <th>Spoločnosť</th>
+        <th>Adresa</th>
+        <th>Mesto</th>
+        <th>Email</th>
+        <th>Telefón</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let order of ordersData">
+        <td>{{ order.name }}</td>
+        <td>{{ order.company }}</td>
+        <td>{{ order.address }}</td>
+        <td>{{ order.city }}</td>
+        <td>{{ order.email }}</td>
+        <td>{{ order.phoneNumber }}</td>
+        <td>{{ order.orderStatus }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

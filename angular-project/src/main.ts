@@ -10,6 +10,7 @@ import { JwtModule } from '@auth0/angular-jwt';
 import { errorHandlerInterceptor } from './app/api-authorization/error-handler.interceptor';
 import { jwtInterceptor } from './app/api-authorization/jwt.interceptor';
 import { OrderFormComponent } from './app/order-form/order-form.component';
+import { OrdersPageComponent } from './app/orders-page/orders-page.component';
 
 export function getBaseUrl() {
   return 'https://localhost:7186/api';
@@ -39,7 +40,8 @@ bootstrapApplication(AppComponent, {
         { path: '', component: LoginComponent},
         { path: 'login', component: LoginComponent},
         { path: 'register', component: RegistrationComponent},
-        { path: 'order-form', component: OrderFormComponent}
+        { path: 'order-form', component: OrderFormComponent},
+        { path: 'orders-page', component: OrdersPageComponent}
       ])
     ]
 })

@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit{
   authService = inject(AuthenticationService);
   private router = inject(Router);
 
@@ -31,10 +31,15 @@ export class LoginComponent {
       this.authService.loginUser({...this.loginForm.value}).subscribe({
         next: (response) => {
           this.authService.storeUserCredentials(response.token, response.username);
-          this.router.navigate(['/order-form']);
+          this.router.navigate(['/orders-page']);
         },
         error: (err) => console.log("Oops, something went wrong", err)
       });
+    }
+  }
+  ngOnInit(): void {
+    if(this.authService.isAuthenticated()){
+      this.router.navigate(['/orders-page']);
     }
   }
 }
