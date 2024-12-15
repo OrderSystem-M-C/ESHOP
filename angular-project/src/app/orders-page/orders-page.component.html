@@ -1,6 +1,12 @@
 <title>Objednávky</title>
 <div class="orders-page-component">
-  <h2>Prehľad objednávok</h2>
+  <div class="title">
+    <div class="title-container-1">
+      <h2>Prehľad objednávok</h2>
+      <p>{{currentDate}}</p>
+    </div>
+    <button class="btn btn-primary" [routerLink]="['/order-form']">Vytvoriť objednávku</button>
+  </div>
   <table class="orders-table">
     <thead>
       <tr>
