@@ -106,14 +106,20 @@ textarea {
     margin-bottom: 2px;
     padding: 0;
 }
-.status-container-with-email{
-    border-right: 1px solid #ddd;
+.status-container-with-email label{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
 }
-.status-container-with-email, .status-container-no-email{
+.status-container-with-email input{
+    margin: 0;
+}
+.status-container-with-email{
     padding-left: 30px;
 }
-.status-container-no-email label{
-    line-height: 1.61;
+.status-container-with-email div:not(.default-container) {
+    margin: 3.5px 0 3.5px 0;
 }
 input[type="radio"]{
     cursor: pointer;
@@ -123,7 +129,17 @@ input[type="radio"]{
     grid-template-columns: 1fr 1fr;
     margin: 10px 0 10px 0;
 }
-.default-status{
+.default-status, .order-summary-title-text{
     font-weight: normal;
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
+}
+.default-status input{
+    margin: 0;
+}
+.order-summary p{
+    margin: 4.1px 0 4.1px 0;
 }

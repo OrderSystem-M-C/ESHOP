@@ -4,6 +4,7 @@ namespace AspNetCoreAPI.DTOs
 {
     public class OrderDTO
     {
+        public int OrderId { get; set; }
         [Required]
         public string Name { get; set; }
         public string Company { get; set; }
@@ -30,5 +31,7 @@ namespace AspNetCoreAPI.DTOs
         public int DiscountAmount { get; set; }
         [Required]
         public string OrderStatus { get; set; }
+        [Required]
+        public string OrderDate { get; set; }
     }
 }

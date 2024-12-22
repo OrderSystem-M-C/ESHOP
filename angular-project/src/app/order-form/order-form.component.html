@@ -7,7 +7,7 @@
         </div>
         <div class="delivery-payment-discount">
             <div class="form-group">
-                <label for="deliveryOptions" class="form-label">Spôsob dopravy</label>
+                <label for="deliveryOptions" class="form-label">Spôsob dopravy*</label>
                 <div class="delivery-options-wrapper">
                     <select formControlName="deliveryOption" id="deliveryOptions" class="form-control" required>
                         <option selected disabled>Zvoliť možnosť</option>
@@ -20,12 +20,12 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="paymentOptions" class="form-label">Spôsob platby</label>
+                <label for="paymentOptions" class="form-label">Spôsob platby*</label>
                 <div class="payment-options-wrapper">
                     <select formControlName="paymentOption" id="paymentOptions" class="form-control" required>
                         <option selected disabled>Zvoliť možnosť</option>
-                        <option value="cash">Hotovosť</option>
-                        <option value="bank-transfer">Bankový prevod</option>
+                        <option value="hotovost">Hotovosť</option>
+                        <option value="bankovy-prevod">Bankový prevod</option>
                     </select>
                     <div class="payment-price">
                         <p>0€</p>
@@ -50,7 +50,7 @@
         <div class="customer-info">
             <h3>Objednávateľ</h3>
             <div class="field">
-                <label for="name" class="form-label">Meno</label>
+                <label for="name" class="form-label">Meno*</label>
                 <input formControlName="name" type="text" id="name" class="form-control" placeholder="Zadajte meno">
             </div>
             <div class="field">
@@ -70,23 +70,23 @@
                 <input formControlName="icDph" type="text" id="icDph" class="form-control" placeholder="Zadajte IČ DPH">
             </div>
             <div class="field">
-                <label for="address" class="form-label">Adresa</label>
+                <label for="address" class="form-label">Adresa*</label>
                 <input formControlName="address" type="text" id="address" class="form-control" placeholder="Zadajte adresu">
             </div>
             <div class="field">
-                <label for="city" class="form-label">Mesto</label>
+                <label for="city" class="form-label">Mesto*</label>
                 <input formControlName="city" type="text" id="city" class="form-control" placeholder="Zadajte mesto">
             </div>
             <div class="field">
-                <label for="postalCode" class="form-label">PSČ</label>
+                <label for="postalCode" class="form-label">PSČ*</label>
                 <input formControlName="postalCode" type="text" id="postalCode" class="form-control" placeholder="Zadajte PSČ">
             </div>
             <div class="field">
-                <label for="email" class="form-label">E-mailová adresa</label>
+                <label for="email" class="form-label">E-mailová adresa*</label>
                 <input formControlName="email" type="email" id="email" class="form-control" placeholder="Zadajte e-mail">
             </div>
             <div class="field">
-                <label for="phoneNumber" class="form-label">Telefónne číslo</label>
+                <label for="phoneNumber" class="form-label">Telefónne číslo*</label>
                 <input formControlName="phoneNumber" type="text" id="phoneNumber" class="form-control" placeholder="Zadajte telefónne číslo">
             </div>
             <div class="field">
@@ -104,7 +104,7 @@
             <h3>Nastavenia faktúry</h3>
             <div class="field">
                 <label>Faktúra</label>
-                <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn">Vytvoriť faktúru</button>
+                <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn" (click)="createInvoice()">Vytvoriť faktúru</button>
             </div>
             <div class="field">
                 <label for="invoiceNumber" class="form-label">Číslo faktúry</label>
@@ -150,9 +150,15 @@
     </div>
 
     <div class="order-status">
-        <h3>Stav objednávky<br><span class="default-status">Bez výberu je status "Nezpracované - nová objednávka"</span></h3>
         <div class="status-form-grid">
             <div class="status-container-with-email">
+              <h3>Stav objednávky<br><div class="default-container">
+                <label class="default-status">Bez výberu: 
+                  <input formControlName="orderStatus" type="radio" class="form-check-input" value="nezpracovane-nova-objednavka" checked>
+                  Nezpracované - nová objednávka
+                </label>
+              </div>
+            </h3>
                 <div>
                     <label>
                       <input formControlName="orderStatus" type="radio" class="form-check-input" value="vybavit-posta">
@@ -162,7 +168,7 @@
                   <div>
                     <label>
                       <input formControlName="orderStatus" type="radio" class="form-check-input" value="uhradene-vybavit">
-                      Uhradené - Vybavit 
+                      Uhradené - Vybaviť 
                     </label>
                   </div>
                   <div>
@@ -174,13 +180,13 @@
                   <div>
                     <label>
                       <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-udaje-k-platbe-poslat-zakaznikovi-mail">
-                      Neuhradené - Údaje k platbe, poslať zákazníkovi mail + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                      Neuhradené - Údaje k platbe, poslať zákazníkovi e-mail
                     </label>
                   </div>
                   <div>
                     <label>
                       <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-2xmail-poslany-zakaznikovi">
-                      Neuhradené - 2x poslaný mail zákazníkovi + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                      Neuhradené - 2x poslaný e-mail zákazníkovi
                     </label>
                   </div>
                   <div>
@@ -198,13 +204,13 @@
                   <div>
                     <label>
                       <input formControlName="orderStatus" type="radio" class="form-check-input" value="dobierka-info-k-objednavke-mail">
-                      Dobierka - info k objednávke (poslať zákazníkovi email) + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                      Dobierka - Info k objednávke (poslať zákazníkovi e-mail)
                     </label>
                   </div>
                   <div>
                     <label>
                       <input formControlName="orderStatus" type="radio" class="form-check-input" value="zasielanie-cisla-zasielky-posta-mail">
-                      Zasielanie čísla zásielky (Pošta) + <img src="https://cdn-icons-png.flaticon.com/512/297/297170.png" alt="envelope-icon">
+                      Zasielanie čísla zásielky (Pošta)
                     </label>
                   </div>
                   <div>
@@ -237,6 +243,26 @@
                       Rozbité, zničené, vrátené
                     </label>
                   </div>
+            </div>
+            <div class="order-summary-container">
+              <h3>Zhrnutie objednávky<br>
+              <span class="order-summary-title-text">Pred vytvorením objednávky skontrolujte zadané údaje</span></h3>
+              <div class="order-summary">
+                <p><strong>Spôsob dopravy:</strong> {{ orderForm.get('deliveryOption').value || 'Nezvolený' }}</p>
+                <p><strong>Spôsob platby:</strong> {{ orderForm.get('paymentOption').value || 'Nezvolený' }}</p>
+                <p><strong>Celková cena:</strong> 0€ (so zľavou {{orderForm.get('discountAmount').value}}%)</p> <!-- Tento údaj bude dynamicky vypočítaný na základe ďalších polí -->
+                <p><strong>Meno:</strong> {{ orderForm.get('name').value || 'Nezadané' }}</p>
+                <p><strong>Firma:</strong> {{ orderForm.get('company').value || 'Nezadané' }}</p>
+                <p><strong>IČO:</strong> {{ orderForm.get('ico').value || 'Nezadané' }}</p>
+                <p><strong>DIČ:</strong> {{ orderForm.get('dic').value || 'Nezadané' }}</p>
+                <p><strong>IČ DPH:</strong> {{ orderForm.get('icDph').value || 'Nezadané' }}</p>
+                <p><strong>Adresa:</strong> {{ orderForm.get('address').value || 'Nezadané' }}</p>
+                <p><strong>Mesto:</strong> {{ orderForm.get('city').value || 'Nezadané' }}</p>
+                <p><strong>PSČ:</strong> {{ orderForm.get('postalCode').value || 'Nezadané' }}</p>
+                <p><strong>E-mailová adresa:</strong> {{ orderForm.get('email').value || 'Nezadané' }}</p>
+                <p><strong>Telefónne číslo:</strong> {{ orderForm.get('phoneNumber').value || 'Nezadané' }}</p>
+                <p><strong>Stav:</strong> {{ orderForm.get('orderStatus').value || 'Bez výberu' }}</p>
+              </div>
             </div>
         </div>
     </div>

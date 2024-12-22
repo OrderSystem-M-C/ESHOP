@@ -40,7 +40,8 @@ namespace AspNetCoreAPI.Controllers
                 DeliveryOption = orderDto.DeliveryOption,
                 PaymentOption = orderDto.PaymentOption,
                 DiscountAmount = orderDto.DiscountAmount,
-                OrderStatus = orderDto.OrderStatus
+                OrderStatus = orderDto.OrderStatus,
+                OrderDate = orderDto.OrderDate,
             };
 
             try
@@ -52,7 +53,7 @@ namespace AspNetCoreAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("pls");
+                return BadRequest("An error occurred");
             }
 
         }
@@ -63,6 +64,7 @@ namespace AspNetCoreAPI.Controllers
             {
                 var orders = _context.Orders.Select(o => new OrderDTO
                 {
+                    OrderId = o.OrderId,
                     Name = o.CustomerName,
                     Company = o.Company,
                     ICO = o.ICO,
@@ -77,7 +79,8 @@ namespace AspNetCoreAPI.Controllers
                     DeliveryOption = o.DeliveryOption,
                     PaymentOption = o.PaymentOption,
                     DiscountAmount = o.DiscountAmount,
-                    OrderStatus = o.OrderStatus
+                    OrderStatus = o.OrderStatus,
+                    OrderDate = o.OrderDate,
                 }).ToList();
 
                 return Ok(orders);

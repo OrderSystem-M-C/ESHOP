@@ -10,24 +10,20 @@
   <table class="orders-table">
     <thead>
       <tr>
+        <th>Dátum</th>
+        <th>Číslo objednávky</th>
         <th>Meno</th>
-        <th>Spoločnosť</th>
-        <th>Adresa</th>
-        <th>Mesto</th>
-        <th>Email</th>
-        <th>Telefón</th>
-        <th>Status</th>
+        <th>Stav objednávky</th>
+        <th>Celková cena</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let order of ordersData">
+        <td>{{ order.orderDate }}</td>
+        <td>{{ order.orderId }}</td>
         <td>{{ order.name }}</td>
-        <td>{{ order.company }}</td>
-        <td>{{ order.address }}</td>
-        <td>{{ order.city }}</td>
-        <td>{{ order.email }}</td>
-        <td>{{ order.phoneNumber }}</td>
         <td>{{ order.orderStatus }}</td>
+        <td>0€</td>
       </tr>
     </tbody>
   </table>
