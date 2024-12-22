@@ -11,6 +11,7 @@ import { errorHandlerInterceptor } from './app/api-authorization/error-handler.i
 import { jwtInterceptor } from './app/api-authorization/jwt.interceptor';
 import { OrderFormComponent } from './app/order-form/order-form.component';
 import { OrdersPageComponent } from './app/orders-page/orders-page.component';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 export function getBaseUrl() {
   return 'https://localhost:7186/api';
@@ -42,7 +43,7 @@ bootstrapApplication(AppComponent, {
         { path: 'register', component: RegistrationComponent},
         { path: 'order-form', component: OrderFormComponent},
         { path: 'orders-page', component: OrdersPageComponent}
-      ])
+      ]), provideAnimationsAsync()
     ]
 })
   .catch(err => console.error(err));

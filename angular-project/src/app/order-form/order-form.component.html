@@ -2,7 +2,7 @@
 <div class="order-form-component">
     <form class="order-form" [formGroup]="orderForm" (ngSubmit)="submitOrder()">
         <div class="title-date">
-            <h1>Vytvoriť objednávku</h1>
+            <h1>Vytvoriť objednávku č. {{orderId}}</h1>
             <p>{{currentDate}}</p>
         </div>
         <div class="delivery-payment-discount">
@@ -50,7 +50,7 @@
         <div class="customer-info">
             <h3>Objednávateľ</h3>
             <div class="field">
-                <label for="name" class="form-label">Meno*</label>
+                <label for="name" class="form-label">Meno a priezvisko*</label>
                 <input formControlName="name" type="text" id="name" class="form-control" placeholder="Zadajte meno">
             </div>
             <div class="field">
@@ -83,7 +83,7 @@
             </div>
             <div class="field">
                 <label for="email" class="form-label">E-mailová adresa*</label>
-                <input formControlName="email" type="email" id="email" class="form-control" placeholder="Zadajte e-mail">
+                <input formControlName="email" type="email" id="email" class="form-control" placeholder="Zadajte e-mailovú adresu">
             </div>
             <div class="field">
                 <label for="phoneNumber" class="form-label">Telefónne číslo*</label>
@@ -103,49 +103,57 @@
         <div class="invoice-settings">
             <h3>Nastavenia faktúry</h3>
             <div class="field">
-                <label>Faktúra</label>
-                <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn" (click)="createInvoice()">Vytvoriť faktúru</button>
+                <label for="invoiceNumber" class="form-label">Číslo faktúry*</label>
+                <input type="number" id="invoiceNumber" class="form-control" value="{{orderId}}" readonly placeholder="Zadajte číslo faktúry">
             </div>
             <div class="field">
-                <label for="invoiceNumber" class="form-label">Číslo faktúry</label>
-                <input type="number" id="invoiceNumber" class="form-control" placeholder="Zadajte číslo faktúry">
+                <label for="variableSymbol" class="form-label">Variabilný symbol* (Ak je iný ako číslo faktúry)</label>
+                <input type="text" id="variableSymbol" class="form-control" value="{{orderId}}" placeholder="Zadajte variabilný symbol">
             </div>
             <div class="field">
-                <label for="variableSymbol" class="form-label">Variabilný symbol</label>
-                <input type="text" id="variableSymbol" class="form-control" placeholder="Zadajte variabilný symbol">
-            </div>
-            <div class="field">
-                <label for="documentType">Typ dokladu</label>
+                <label for="documentType">Typ dokladu*</label>
                 <input id="documentType" class="form-control" value="Faktúra" readonly placeholder="Typ dokladu (Faktúra)">
             </div>
             <div class="field">
-                <label for="invoiceIssueDate" class="form-label">Dátum vystavenia faktúry</label>
-                <input type="date" id="invoiceIssueDate" class="form-control" placeholder="Vyberte dátum vystavenia">
+                <label for="invoiceIssueDate" class="form-label">Dátum vystavenia faktúry*</label>
+                <input type="date" id="invoiceIssueDate" [value]="invoiceDateCreation" class="form-control" placeholder="Vyberte dátum vystavenia">
             </div>
             <div class="field">
-                <label for="dueDate" class="form-label">Dátum splatnosti</label>
+                <label for="dueDate" class="form-label">Dátum splatnosti*</label>
                 <input type="date" id="dueDate" class="form-control" placeholder="Vyberte dátum splatnosti">
             </div>
             <div class="field">
-                <label for="deliveryDate" class="form-label">Dátum dodania</label>
+                <label for="deliveryDate" class="form-label">Dátum dodania*</label>
                 <input type="date" id="deliveryDate" class="form-control" placeholder="Vyberte dátum dodania">
             </div>
             <div class="field">
-                <label for="invoiceName" class="form-label">Meno</label>
-                <input type="text" id="invoiceName" class="form-control" placeholder="Zadajte meno na faktúre">
+              <label for="invoiceName" class="form-label">Meno a priezvisko*</label>
+              <input type="text" id="invoiceName" class="form-control" placeholder="Zadajte meno a priezvisko na faktúre" [value]="orderForm.value.name">
             </div>
             <div class="field">
-                <label for="invoiceCompany" class="form-label">Firma</label>
-                <input type="text" id="invoiceCompany" class="form-control" placeholder="Zadajte názov firmy na faktúre">
+              <label for="invoiceCompany" class="form-label">Firma</label>
+              <input type="text" id="invoiceCompany" class="form-control" placeholder="Zadajte názov firmy na faktúre" [value]="orderForm.value.company">
             </div>
             <div class="field">
-                <label for="invoiceIco" class="form-label">IČO</label>
-                <input type="text" id="invoiceIco" class="form-control" placeholder="Zadajte IČO na faktúre">
+              <label for="invoiceICO" class="form-label">IČO</label>
+              <input type="text" id="invoiceICO" class="form-control" placeholder="Zadajte IČO" [value]="orderForm.value.ico">
             </div>
             <div class="field">
-                <label for="invoiceDic" class="form-label">DIČ</label>
-                <input type="text" id="invoiceDic" class="form-control" placeholder="Zadajte DIČ na faktúre">
+              <label for="invoiceDIC" class="form-label">DIČ</label>
+              <input type="text" id="invoiceDIC" class="form-control" placeholder="Zadajte DIČ" [value]="orderForm.value.dic">
             </div>
+            <div class="field">
+              <label for="invoiceEmail" class="form-label">E-mailová adresa*</label>
+              <input type="text" id="invoiceEmail" class="form-control" placeholder="Zadajte e-malovú adresu na faktúre" [value]="orderForm.value.email">
+            </div>
+            <div class="field">
+              <label for="invoicePhoneNumber" class="form-label">Telefónne číslo*</label>
+              <input type="text" id="invoicePhoneNumber" class="form-control" placeholder="Zadajte telefónne číslo na faktúre" [value]="orderForm.value.phoneNumber">
+            </div>
+            <div class="field">
+              <label>Pred vytvorením faktúry overte, či zadané údaje sú správne</label><br>
+              <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn" (click)="createInvoice()">Vytvoriť faktúru</button>
+          </div>
         </div>
     </div>
 

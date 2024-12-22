@@ -3,13 +3,13 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import * as html2pdf from 'html2pdf.js';
 import { OrderService } from '../services/order.service';
-import { HttpResponse } from '@angular/common/http';
-import html2canvas from 'html2canvas';
+import { Router } from '@angular/router';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-order-form',
   standalone: true,
-  imports: [DatePipe, CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [DatePipe, CommonModule, FormsModule, ReactiveFormsModule, MatSnackBarModule],
   providers: [DatePipe, OrderService],
   templateUrl: './order-form.component.html',
   styleUrl: './order-form.component.css'
@@ -21,7 +21,10 @@ export class OrderFormComponent implements OnInit {
 
   orderId: number = 0;
 
-  constructor(private datePipe: DatePipe, private fb: FormBuilder, public orderService: OrderService){}
+  invoiceCreated: boolean = false;
+  invoiceDateCreation: string = '';
+
+  constructor(private datePipe: DatePipe, private fb: FormBuilder, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar){}
 
   orderForm = new FormGroup({
     name: new FormControl('', Validators.required),
@@ -45,7 +48,7 @@ export class OrderFormComponent implements OnInit {
     this.charactersCount = this.userMessage.length;
   }
   submitOrder(){
-    if(this.orderForm.valid){
+    if(this.orderForm.valid && this.invoiceCreated){
       let order: OrderDTO = {
         name: this.orderForm.value.name,
         company: this.orderForm.value.company,
@@ -66,11 +69,16 @@ export class OrderFormComponent implements OnInit {
       };
       this.orderService.createOrder(order).subscribe((response: OrderDTO) => {
         console.log("Order created successfully!", response);
-        this.orderId = response.orderId;
-        this.createInvoice();
+        if(response){
+          this.orderId = response.orderId;
+          this.createInvoice();
+          this.router.navigate(['/orders-page']);
+        }
       }, (error) => {
         console.error("An error occured while trying to create order", error)
       });
+    }else{
+      this.snackBar.open('Nezabudnite na faktúru!', '', {duration: 1000});
     }
   }
 
@@ -185,6 +193,9 @@ export class OrderFormComponent implements OnInit {
   ngOnInit(): void {
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
+    this.invoiceDateCreation = this.datePipe.transform(now, 'dd.MM.yyyy');
+
+    this.orderId = Math.floor(100000 + Math.random() * 900000);
   }
 }
 export interface OrderDTO {
