@@ -3,6 +3,7 @@ using AspNetCoreAPI.DTOs;
 using AspNetCoreAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCoreAPI.Controllers
 {
@@ -26,6 +27,7 @@ namespace AspNetCoreAPI.Controllers
             }
             var order = new OrderModel
             {
+                OrderId = orderDto.OrderId,
                 CustomerName = orderDto.Name,
                 Company = orderDto.Company,
                 ICO = orderDto.ICO,
@@ -53,7 +55,7 @@ namespace AspNetCoreAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("An error occurred");
+                return BadRequest($"An error occurred {ex}");
             }
 
         }

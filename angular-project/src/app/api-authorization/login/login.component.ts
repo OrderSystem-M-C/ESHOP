@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent implements OnInit{
+export class LoginComponent implements OnInit {
   authService = inject(AuthenticationService);
   private router = inject(Router);
 
@@ -37,6 +37,7 @@ export class LoginComponent implements OnInit{
       });
     }
   }
+
   ngOnInit(): void {
     if(this.authService.isAuthenticated()){
       this.router.navigate(['/orders-page']);

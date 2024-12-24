@@ -4,13 +4,12 @@ namespace AspNetCoreAPI.DTOs
 {
     public class OrderDTO
     {
+        [Required]
         public int OrderId { get; set; }
         [Required]
         public string Name { get; set; }
         public string Company { get; set; }
-        [Required]
         public string ICO { get; set; }
-        [Required]
         public string DIC { get; set; }
         public string ICDPH { get; set; }
         [Required]

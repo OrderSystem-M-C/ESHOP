@@ -1,10 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace AspNetCoreAPI.Models
 {
+    [Keyless]
     public class OrderModel
     {
         [Key]
+        public int Id { get; set; }
+        [Required(ErrorMessage = "OrderId je povinné")]
         public int OrderId { get; set; }
 
         [Required(ErrorMessage = "Meno zákazníka je povinné.")]

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatButton } from '@angular/material/button';
@@ -17,7 +17,7 @@ import { NgIf } from '@angular/common';
   templateUrl: './main-nav.component.html',
   styleUrl: './main-nav.component.css'
 })
-export class MainNavComponent {
+export class MainNavComponent{
   authService = inject(AuthenticationService);
   private router = inject(Router);
 

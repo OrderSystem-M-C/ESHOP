@@ -9,7 +9,7 @@
             <div class="form-group">
                 <label for="deliveryOptions" class="form-label">Spôsob dopravy*</label>
                 <div class="delivery-options-wrapper">
-                    <select formControlName="deliveryOption" id="deliveryOptions" class="form-control" required>
+                    <select formControlName="deliveryOption" id="deliveryOptions" class="form-control" [ngClass]="{'is-invalid': orderForm.get('deliveryOption').invalid && orderForm.get('deliveryOption').touched}">
                         <option selected disabled>Zvoliť možnosť</option>
                         <option value="kurier">Kuriér</option>
                         <option value="osobny-odber">Osobný odber</option>
@@ -22,7 +22,7 @@
             <div class="form-group">
                 <label for="paymentOptions" class="form-label">Spôsob platby*</label>
                 <div class="payment-options-wrapper">
-                    <select formControlName="paymentOption" id="paymentOptions" class="form-control" required>
+                    <select formControlName="paymentOption" id="paymentOptions" class="form-control" [ngClass]="{'is-invalid': orderForm.get('paymentOption').invalid && orderForm.get('paymentOption').touched}">
                         <option selected disabled>Zvoliť možnosť</option>
                         <option value="hotovost">Hotovosť</option>
                         <option value="bankovy-prevod">Bankový prevod</option>
@@ -51,43 +51,43 @@
             <h3>Objednávateľ</h3>
             <div class="field">
                 <label for="name" class="form-label">Meno a priezvisko*</label>
-                <input formControlName="name" type="text" id="name" class="form-control" placeholder="Zadajte meno">
+                <input formControlName="name" type="text" id="name" class="form-control" placeholder="Zadajte meno" [ngClass]="{'is-invalid': orderForm.get('name').invalid && orderForm.get('name').touched}">
             </div>
             <div class="field">
                 <label for="company" class="form-label">Firma</label>
                 <input formControlName="company" type="text" id="company" class="form-control" placeholder="Zadajte názov firmy">
             </div>
             <div class="field">
-                <label for="ico" class="form-label">IČO</label>
+                <label for="ico" class="form-label">IČO (povinné v prípade firmy)</label>
                 <input formControlName="ico" type="text" id="ico" class="form-control" placeholder="Zadajte IČO">
             </div>
             <div class="field">
-                <label for="dic" class="form-label">DIČ</label>
+                <label for="dic" class="form-label">DIČ (povinné v prípade firmy)</label>
                 <input formControlName="dic" type="text" id="dic" class="form-control" placeholder="Zadajte DIČ">
             </div>
             <div class="field">
-                <label for="icDph" class="form-label">IČ DPH</label>
+                <label for="icDph" class="form-label">IČ DPH (ak má firma)</label>
                 <input formControlName="icDph" type="text" id="icDph" class="form-control" placeholder="Zadajte IČ DPH">
             </div>
             <div class="field">
                 <label for="address" class="form-label">Adresa*</label>
-                <input formControlName="address" type="text" id="address" class="form-control" placeholder="Zadajte adresu">
+                <input formControlName="address" type="text" id="address" class="form-control" placeholder="Zadajte adresu" [ngClass]="{'is-invalid': orderForm.get('address').invalid && orderForm.get('address').touched}">
             </div>
             <div class="field">
                 <label for="city" class="form-label">Mesto*</label>
-                <input formControlName="city" type="text" id="city" class="form-control" placeholder="Zadajte mesto">
+                <input formControlName="city" type="text" id="city" class="form-control" placeholder="Zadajte mesto" [ngClass]="{'is-invalid': orderForm.get('city').invalid && orderForm.get('city').touched}">
             </div>
             <div class="field">
                 <label for="postalCode" class="form-label">PSČ*</label>
-                <input formControlName="postalCode" type="text" id="postalCode" class="form-control" placeholder="Zadajte PSČ">
+                <input formControlName="postalCode" type="text" id="postalCode" class="form-control" placeholder="Zadajte PSČ" [ngClass]="{'is-invalid': orderForm.get('postalCode').invalid && orderForm.get('postalCode').touched}">
             </div>
             <div class="field">
                 <label for="email" class="form-label">E-mailová adresa*</label>
-                <input formControlName="email" type="email" id="email" class="form-control" placeholder="Zadajte e-mailovú adresu">
+                <input formControlName="email" type="email" id="email" class="form-control" placeholder="Zadajte e-mailovú adresu" [ngClass]="{'is-invalid': orderForm.get('email').invalid && orderForm.get('email').touched}">
             </div>
             <div class="field">
                 <label for="phoneNumber" class="form-label">Telefónne číslo*</label>
-                <input formControlName="phoneNumber" type="text" id="phoneNumber" class="form-control" placeholder="Zadajte telefónne číslo">
+                <input formControlName="phoneNumber" type="text" id="phoneNumber" class="form-control" placeholder="Zadajte telefónne číslo" [ngClass]="{'is-invalid': orderForm.get('phoneNumber').invalid && orderForm.get('phoneNumber').touched}">
             </div>
             <div class="field">
                 <label for="note" class="form-label">Poznámka</label>
@@ -102,13 +102,14 @@
         </div>
         <div class="invoice-settings">
             <h3>Nastavenia faktúry</h3>
-            <div class="field">
+            <form [formGroup]="invoiceForm" (ngSubmit)="createInvoice()">
+              <div class="field">
                 <label for="invoiceNumber" class="form-label">Číslo faktúry*</label>
-                <input type="number" id="invoiceNumber" class="form-control" value="{{orderId}}" readonly placeholder="Zadajte číslo faktúry">
+                <input type="number" id="invoiceNumber" class="form-control" value="{{orderId}}" readonly placeholder="Zadajte číslo faktúry" formControlName="invoiceNumber" [ngClass]="{'is-invalid': invoiceForm.get('invoiceNumber').invalid && invoiceForm.get('invoiceNumber').touched}">
             </div>
             <div class="field">
                 <label for="variableSymbol" class="form-label">Variabilný symbol* (Ak je iný ako číslo faktúry)</label>
-                <input type="text" id="variableSymbol" class="form-control" value="{{orderId}}" placeholder="Zadajte variabilný symbol">
+                <input type="text" id="variableSymbol" class="form-control" value="{{orderId}}" placeholder="Zadajte variabilný symbol" formControlName="invoiceVariable" [ngClass]="{'is-invalid': invoiceForm.get('invoiceVariable').invalid && invoiceForm.get('invoiceVariable').touched}">
             </div>
             <div class="field">
                 <label for="documentType">Typ dokladu*</label>
@@ -116,44 +117,45 @@
             </div>
             <div class="field">
                 <label for="invoiceIssueDate" class="form-label">Dátum vystavenia faktúry*</label>
-                <input type="date" id="invoiceIssueDate" [value]="invoiceDateCreation" class="form-control" placeholder="Vyberte dátum vystavenia">
+                <input type="date" id="invoiceIssueDate" class="form-control" placeholder="Vyberte dátum splatnosti" formControlName="invoiceIssueDate" [ngClass]="{'is-invalid': invoiceForm.get('invoiceIssueDate').invalid && invoiceForm.get('invoiceIssueDate').touched}">
             </div>
             <div class="field">
                 <label for="dueDate" class="form-label">Dátum splatnosti*</label>
-                <input type="date" id="dueDate" class="form-control" placeholder="Vyberte dátum splatnosti">
+                <input type="date" id="dueDate" class="form-control" placeholder="Vyberte dátum splatnosti" formControlName="invoiceDueDate" [ngClass]="{'is-invalid': invoiceForm.get('invoiceDueDate').invalid && invoiceForm.get('invoiceDueDate').touched}">
             </div>
             <div class="field">
                 <label for="deliveryDate" class="form-label">Dátum dodania*</label>
-                <input type="date" id="deliveryDate" class="form-control" placeholder="Vyberte dátum dodania">
+                <input type="date" id="deliveryDate" class="form-control" placeholder="Vyberte dátum dodania" formControlName="invoiceDeliveryDate" [ngClass]="{'is-invalid': invoiceForm.get('invoiceDeliveryDate').invalid && invoiceForm.get('invoiceDeliveryDate').touched}">
             </div>
             <div class="field">
               <label for="invoiceName" class="form-label">Meno a priezvisko*</label>
-              <input type="text" id="invoiceName" class="form-control" placeholder="Zadajte meno a priezvisko na faktúre" [value]="orderForm.value.name">
+              <input type="text" id="invoiceName" class="form-control" placeholder="Zadajte meno a priezvisko na faktúre" formControlName="invoiceName" [ngClass]="{'is-invalid': invoiceForm.get('invoiceName').invalid && invoiceForm.get('invoiceName').touched}">
             </div>
             <div class="field">
               <label for="invoiceCompany" class="form-label">Firma</label>
-              <input type="text" id="invoiceCompany" class="form-control" placeholder="Zadajte názov firmy na faktúre" [value]="orderForm.value.company">
+              <input type="text" id="invoiceCompany" class="form-control" placeholder="Zadajte názov firmy na faktúre" formControlName="invoiceCompany">
             </div>
             <div class="field">
-              <label for="invoiceICO" class="form-label">IČO</label>
-              <input type="text" id="invoiceICO" class="form-control" placeholder="Zadajte IČO" [value]="orderForm.value.ico">
+              <label for="invoiceICO" class="form-label">IČO (povinné v prípade firmy)</label>
+              <input type="text" id="invoiceICO" class="form-control" placeholder="Zadajte IČO" formControlName="invoiceICO">
             </div>
             <div class="field">
-              <label for="invoiceDIC" class="form-label">DIČ</label>
-              <input type="text" id="invoiceDIC" class="form-control" placeholder="Zadajte DIČ" [value]="orderForm.value.dic">
+              <label for="invoiceDIC" class="form-label">DIČ (povinné v prípade firmy)</label>
+              <input type="text" id="invoiceDIC" class="form-control" placeholder="Zadajte DIČ" formControlName="invoiceDIC">
             </div>
             <div class="field">
               <label for="invoiceEmail" class="form-label">E-mailová adresa*</label>
-              <input type="text" id="invoiceEmail" class="form-control" placeholder="Zadajte e-malovú adresu na faktúre" [value]="orderForm.value.email">
+              <input type="text" id="invoiceEmail" class="form-control" placeholder="Zadajte e-malovú adresu na faktúre" formControlName="invoiceEmail" [ngClass]="{'is-invalid': invoiceForm.get('invoiceEmail').invalid && invoiceForm.get('invoiceEmail').touched}">
             </div>
             <div class="field">
               <label for="invoicePhoneNumber" class="form-label">Telefónne číslo*</label>
-              <input type="text" id="invoicePhoneNumber" class="form-control" placeholder="Zadajte telefónne číslo na faktúre" [value]="orderForm.value.phoneNumber">
+              <input type="text" id="invoicePhoneNumber" class="form-control" placeholder="Zadajte telefónne číslo na faktúre" formControlName="invoicePhoneNumber" [ngClass]="{'is-invalid': invoiceForm.get('invoicePhoneNumber').invalid && invoiceForm.get('invoicePhoneNumber').touched}">
             </div>
             <div class="field">
               <label>Pred vytvorením faktúry overte, či zadané údaje sú správne</label><br>
               <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn" (click)="createInvoice()">Vytvoriť faktúru</button>
-          </div>
+            </div>
+            </form>
         </div>
     </div>
 
@@ -276,7 +278,7 @@
     </div>
 
         <div class="submit">
-            <button type="submit" [disabled]="!orderForm.valid" class="btn btn-primary">Vytvoriť objednávku</button>
+            <button type="submit" class="btn btn-primary">Vytvoriť objednávku</button>
         </div>
     </form>
 </div>

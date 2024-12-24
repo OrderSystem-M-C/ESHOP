@@ -15,5 +15,13 @@ namespace AspNetCoreAPI.Data
         public DbSet<OrderModel> Orders { get; set; }
         public DbSet<OrderProductsModel> OrderProducts { get; set; }
         public DbSet<ProductModel> Products { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<OrderModel>()
+                .HasKey(o => o.Id);
+
+            base.OnModelCreating(builder);
+        }
     }
 }
