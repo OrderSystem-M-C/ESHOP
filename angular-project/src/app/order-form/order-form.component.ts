@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import * as html2pdf from 'html2pdf.js';
 import { OrderService } from '../services/order.service';
 import { Router } from '@angular/router';
@@ -77,7 +77,7 @@ export class OrderFormComponent implements OnInit {
     if(this.orderForm.valid && this.invoiceCreated){
       let order: OrderDTO = {
         orderId: this.orderId,
-        name: this.orderForm.value.name,
+        customerName: this.orderForm.value.name,
         company: this.orderForm.value.company,
         ico: this.orderForm.value.ico,
         dic: this.orderForm.value.dic,
@@ -107,17 +107,22 @@ export class OrderFormComponent implements OnInit {
         console.error("An error occured while trying to create order", error)
       });
     }else if(this.orderForm.invalid){
-      Object.keys(this.orderForm.controls).forEach(field => {
-        const control = this.orderForm.get(field);
-        if(control?.invalid){
-          control.markAsTouched(); //oznaci ho ako dotknuty aby sa spustila validácia
-        }
-      })
+      this.validateAllFormFields(this.orderForm);
+      this.validateAllFormFields(this.invoiceForm);
       this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
     }
     else if(!this.invoiceCreated){
       this.snackBar.open('Nezabudnite na vytvorenie faktúry!', '', {duration: 1000});
     }
+  }
+
+  validateAllFormFields(formGroup: FormGroup){
+    Object.keys(formGroup.controls).forEach(field => {
+      const control = formGroup.get(field);
+      if(control?.invalid){
+        control.markAsTouched(); 
+      }
+    })
   }
 
   createInvoice(){
@@ -205,12 +210,7 @@ export class OrderFormComponent implements OnInit {
         this.invoiceCreated = true;
       }
     }else{
-      Object.keys(this.invoiceForm.controls).forEach(field => {
-        const control = this.invoiceForm.get(field);
-        if(control?.invalid){
-          control.markAsTouched(); 
-        }
-      })
+      this.validateAllFormFields(this.invoiceForm);
       this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
     }
   }
@@ -222,7 +222,7 @@ export class OrderFormComponent implements OnInit {
 }
 export interface OrderDTO {
   orderId: number;
-  name: string;
+  customerName: string;
   company: string;
   ico: string;
   dic: string;

@@ -2,29 +2,38 @@
 <div class="orders-page-component">
   <div class="title">
     <div class="title-container-1">
-      <h2>Prehľad objednávok</h2>
+      <h1>Prehľad objednávok</h1>
       <p>{{currentDate}}</p>
     </div>
-    <button class="btn btn-primary" [routerLink]="['/order-form']">Vytvoriť objednávku</button>
+    <div class="button-container">
+      <button class="btn btn-secondary">Moje produkty</button>
+      <button class="btn btn-primary" [routerLink]="['/order-form']">Vytvoriť objednávku</button>
+    </div>
   </div>
-  <table class="orders-table">
-    <thead>
-      <tr>
-        <th>Dátum</th>
-        <th>Číslo objednávky</th>
-        <th>Meno</th>
-        <th>Stav objednávky</th>
-        <th>Celková cena</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let order of ordersData">
-        <td>{{ order.orderDate }}</td>
-        <td>{{ order.orderId }}</td>
-        <td>{{ order.name }}</td>
-        <td>{{ order.orderStatus }}</td>
-        <td>0€</td>
-      </tr>
-    </tbody>
-  </table>
+  @if(ordersData.length > 0){
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>Dátum</th>
+          <th>Číslo objednávky</th>
+          <th>Meno</th>
+          <th>Stav objednávky</th>
+          <th>Celková cena</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of ordersData" class="order-row" [routerLink]="['/order-details', order.orderId]">
+          <td>{{ order.orderDate }}</td>
+          <td>{{ order.orderId }}</td>
+          <td>{{ order.customerName }}</td>
+          <td>{{ order.orderStatus }}</td>
+          <td>0€</td>
+        </tr>
+      </tbody>
+    </table>
+  }@else{
+    <div class="no-orders-container">
+      <h3>Nemáte žiadne objednávky, kliknutím <span class="order-link" [routerLink]="['/order-form']">sem</span> si vytvorte objednávku</h3>
+    </div>
+  }
 </div>

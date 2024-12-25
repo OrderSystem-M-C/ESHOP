@@ -1,14 +1,15 @@
-.orders-page-component{
-    padding: 20px;
-    max-width: 1400px;
-    margin: 20px auto;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+.orders-page-component {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 20px auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
 }
-h2{
+h1 {
   text-align: left;
   font-weight: bold;
   margin: 0;
+  color: #333;
 }
 .title {
   width: 100%;
@@ -16,34 +17,52 @@ h2{
   align-items: center;
   justify-content: space-between;
   flex-direction: row;
-  margin-bottom: 10px;
   text-align: left;
 }
-.title-container-1{
+.title-container-1 {
   display: flex;
   justify-content: flex-start;
   flex-direction: column;
 }
-.orders-table{
+.orders-table {
   width: 100%;
   border-collapse: collapse;
   margin: 0 auto;
 }
-.orders-table th, .orders-table td {
+.orders-table th,
+.orders-table td {
   padding: 15px;
   text-align: left;
-  border: 1px solid #ddd;
+  border: 1px solid #ccc;
 }
-.orders-table th{
+.orders-table th {
   background-color: #f2f2f2;
   font-weight: bold;
+  color: #333;
 }
-.orders-table td{
+.orders-table td {
   background-color: #fff;
 }
 .orders-table tr:nth-child(even) {
   background-color: #f9f9f9;
 }
-.orders-table tr:hover{
-  background-color: #f1f1f1;
+.button-container{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 10px;
+}
+.order-row:hover td{
+  background-color: #fbfbfb;
+  cursor: pointer;
+}
+.no-orders-container{
+  width: 100%;
+  text-align: center;
+  margin-top: 50px;
+}
+.order-link{
+  text-decoration: underline;
+  cursor: pointer;
 }

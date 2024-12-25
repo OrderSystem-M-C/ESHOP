@@ -1,0 +1,61 @@
+<title>Detaily objednávky č.{{orderId}}</title>
+<div class="order-details-component">
+    <div class="title">
+        <div class="title-container-1">
+          <h1>Objednávka č.{{orderId}}</h1>
+          <p>{{currentDate}}</p>
+        </div>
+        <div class="button-container">
+          <button class="btn btn-danger">Vymazať objednávku</button>
+          <button class="btn btn-primary" [routerLink]="['/order-form']">Upraviť objednávku</button>
+        </div>
+    </div>
+    <div class="details-container">
+      <div class="customer-info">
+        <h3>Objednávateľ</h3>
+        <p><strong>Meno:</strong> {{ order?.customerName }}</p>
+        <p><strong>Spoločnosť:</strong> {{ order?.company ? order.company : 'Nezadané' }}</p>
+        <p><strong>IČO (v prípade firmy):</strong> {{ order?.ico ? order.ico : 'Nezadané'}}</p>
+        <p><strong>DIČ (v prípade firmy):</strong> {{ order?.dic ? order.dic: 'Nezadané'}}</p>
+        <p><strong>IČ DPH (v prípade firmy):</strong> {{ order?.icDph }}</p>
+        <p><strong>Adresa:</strong> {{ order?.address }}, {{ order?.city }}, {{ order?.postalCode }}</p>
+        <p><strong>Email:</strong> {{ order?.email }}</p>
+        <p><strong>Telefón:</strong> {{ order?.phoneNumber }}</p>
+      </div>
+      <div class="other-information">
+        <h3>Ďaľšie podrobnosti</h3>
+        <p><strong>Spôsob dopravy:</strong> {{ order?.deliveryOption }}</p>
+        <p><strong>Spôsob platby:</strong> {{ order?.paymentOption }}</p>
+        <p><strong>Stav objednávky:</strong> {{ order?.orderStatus }}</p>
+        <p><strong>Dátum objednávky:</strong> {{ order?.orderDate }}</p>
+        <p><strong>Hmotnosť objednávky: </strong>0kg</p>
+        <p><strong>Celkový počet produktov: </strong>0ks</p>
+        <p><strong>Zľava:</strong> {{order?.discountAmount > 0 ? 'Áno (-{{order.discountAmount}}%)' : 'Nie'}}</p>
+        <p><strong>Poznámka:</strong> {{ order?.note ? order.note : 'Nezadané' }}</p>
+      </div>
+      <div class="products-information">
+        <table class="products-table">
+          <thead>
+              <tr>
+                  <th>Položka</th>
+                  <th>Množstvo</th>
+                  <th>Cena za kus</th>
+                  <th>Celkom</th>
+              </tr>
+          </thead>
+          <tbody>
+              <!-- Repeat for each item -->
+              <tr class="product-row">
+                  <td>polozkaNazov </td>
+                  <td>polozkaMnozstvo </td>
+                  <td>polozkaCena </td>
+                  <td>polozkaCelkom </td>
+              </tr>
+          </tbody>
+      </table>
+      </div>
+    <div class="total-summary">
+      <h3><strong>Celkom na zaplatenie:</strong> 0€ (-{{order.discountAmount}}%)</h3>
+    </div>
+    </div>
+</div>

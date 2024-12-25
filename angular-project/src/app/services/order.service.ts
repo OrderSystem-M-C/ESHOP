@@ -20,4 +20,8 @@ export class OrderService {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.get<OrderDTO[]>(url, {headers});
   }
+  getOrderDetails(orderId: number){
+    const url = `${this.baseUrl}/order/get-order-details/${orderId}`;
+    return this.http.get<OrderDTO>(url);
+  }
 }

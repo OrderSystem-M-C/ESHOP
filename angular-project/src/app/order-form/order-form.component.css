@@ -143,14 +143,13 @@ input[type="radio"]{
 .order-summary p{
     margin: 4.1px 0 4.1px 0;
 }
-/*Pre neplatné polia*/
-.form-control.ng-invalid.ng-touched {
-    border-color: red !important;
+.order-summary p strong{
+    color: #333;
 }
+/*Pre neplatné polia*/
 .form-control.is-invalid {
     border-color: red !important;
 }
-/*Pre platné polia*/
-.form-control.ng-valid.ng-touched[required]{
-    border-color: green;
+.form-control.ng-invalid.ng-touched{
+    border-color: red;
 }

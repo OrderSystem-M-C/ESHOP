@@ -117,15 +117,15 @@
             </div>
             <div class="field">
                 <label for="invoiceIssueDate" class="form-label">Dátum vystavenia faktúry*</label>
-                <input type="date" id="invoiceIssueDate" class="form-control" placeholder="Vyberte dátum splatnosti" formControlName="invoiceIssueDate" [ngClass]="{'is-invalid': invoiceForm.get('invoiceIssueDate').invalid && invoiceForm.get('invoiceIssueDate').touched}">
+                <input type="date" id="invoiceIssueDate" class="form-control" placeholder="Vyberte dátum splatnosti" formControlName="invoiceIssueDate">
             </div>
             <div class="field">
                 <label for="dueDate" class="form-label">Dátum splatnosti*</label>
-                <input type="date" id="dueDate" class="form-control" placeholder="Vyberte dátum splatnosti" formControlName="invoiceDueDate" [ngClass]="{'is-invalid': invoiceForm.get('invoiceDueDate').invalid && invoiceForm.get('invoiceDueDate').touched}">
+                <input type="date" id="dueDate" class="form-control" placeholder="Vyberte dátum splatnosti" formControlName="invoiceDueDate">
             </div>
             <div class="field">
                 <label for="deliveryDate" class="form-label">Dátum dodania*</label>
-                <input type="date" id="deliveryDate" class="form-control" placeholder="Vyberte dátum dodania" formControlName="invoiceDeliveryDate" [ngClass]="{'is-invalid': invoiceForm.get('invoiceDeliveryDate').invalid && invoiceForm.get('invoiceDeliveryDate').touched}">
+                <input type="date" id="deliveryDate" class="form-control" placeholder="Vyberte dátum dodania" formControlName="invoiceDeliveryDate">
             </div>
             <div class="field">
               <label for="invoiceName" class="form-label">Meno a priezvisko*</label>
@@ -260,7 +260,6 @@
               <div class="order-summary">
                 <p><strong>Spôsob dopravy:</strong> {{ orderForm.get('deliveryOption').value || 'Nezvolený' }}</p>
                 <p><strong>Spôsob platby:</strong> {{ orderForm.get('paymentOption').value || 'Nezvolený' }}</p>
-                <p><strong>Celková cena:</strong> 0€ (so zľavou {{orderForm.get('discountAmount').value}}%)</p> <!-- Tento údaj bude dynamicky vypočítaný na základe ďalších polí -->
                 <p><strong>Meno:</strong> {{ orderForm.get('name').value || 'Nezadané' }}</p>
                 <p><strong>Firma:</strong> {{ orderForm.get('company').value || 'Nezadané' }}</p>
                 <p><strong>IČO:</strong> {{ orderForm.get('ico').value || 'Nezadané' }}</p>
@@ -272,6 +271,7 @@
                 <p><strong>E-mailová adresa:</strong> {{ orderForm.get('email').value || 'Nezadané' }}</p>
                 <p><strong>Telefónne číslo:</strong> {{ orderForm.get('phoneNumber').value || 'Nezadané' }}</p>
                 <p><strong>Stav:</strong> {{ orderForm.get('orderStatus').value || 'Bez výberu' }}</p>
+                <p><strong>Celková cena:</strong> 0€ (-{{orderForm.get('discountAmount').value}}%)</p> <!-- Tento údaj bude dynamicky vypočítaný na základe ďalších polí -->
               </div>
             </div>
         </div>

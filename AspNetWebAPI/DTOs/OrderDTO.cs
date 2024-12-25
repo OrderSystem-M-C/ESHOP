@@ -7,7 +7,7 @@ namespace AspNetCoreAPI.DTOs
         [Required]
         public int OrderId { get; set; }
         [Required]
-        public string Name { get; set; }
+        public string CustomerName { get; set; }
         public string Company { get; set; }
         public string ICO { get; set; }
         public string DIC { get; set; }

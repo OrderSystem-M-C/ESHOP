@@ -28,7 +28,7 @@ namespace AspNetCoreAPI.Controllers
             var order = new OrderModel
             {
                 OrderId = orderDto.OrderId,
-                CustomerName = orderDto.Name,
+                CustomerName = orderDto.CustomerName,
                 Company = orderDto.Company,
                 ICO = orderDto.ICO,
                 DIC = orderDto.DIC,
@@ -67,7 +67,7 @@ namespace AspNetCoreAPI.Controllers
                 var orders = _context.Orders.Select(o => new OrderDTO
                 {
                     OrderId = o.OrderId,
-                    Name = o.CustomerName,
+                    CustomerName = o.CustomerName,
                     Company = o.Company,
                     ICO = o.ICO,
                     DIC = o.DIC,
@@ -90,6 +90,24 @@ namespace AspNetCoreAPI.Controllers
             catch(Exception ex)
             {
                 return StatusCode(500, ex);
+            }
+        }
+        [HttpGet("get-order-details/{orderId}")]
+        public ActionResult<OrderDTO> GetOrderDetails(int orderId)
+        {
+            try
+            {
+                var order = _context.Orders.FirstOrDefault(o => o.OrderId == orderId);
+                if(order == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(order);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex);
             }
         }
     }

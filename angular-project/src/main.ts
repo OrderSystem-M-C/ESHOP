@@ -12,6 +12,8 @@ import { jwtInterceptor } from './app/api-authorization/jwt.interceptor';
 import { OrderFormComponent } from './app/order-form/order-form.component';
 import { OrdersPageComponent } from './app/orders-page/orders-page.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { authGuard } from './app/api-authorization/auth.guard';
+import { OrderDetailsComponent } from './app/order-details/order-details.component';
 
 export function getBaseUrl() {
   return 'https://localhost:7186/api';
@@ -41,8 +43,9 @@ bootstrapApplication(AppComponent, {
         { path: '', component: LoginComponent},
         { path: 'login', component: LoginComponent},
         { path: 'register', component: RegistrationComponent},
-        { path: 'order-form', component: OrderFormComponent},
-        { path: 'orders-page', component: OrdersPageComponent}
+        { path: 'order-form', component: OrderFormComponent, canActivate: [authGuard]},
+        { path: 'orders-page', component: OrdersPageComponent, canActivate: [authGuard]},
+        { path: 'order-details/:orderId', component: OrderDetailsComponent, canActivate: [authGuard]}
       ]), provideAnimationsAsync()
     ]
 })
