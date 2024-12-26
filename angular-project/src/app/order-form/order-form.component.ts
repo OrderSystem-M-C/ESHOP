@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import * as html2pdf from 'html2pdf.js';
 import { OrderService } from '../services/order.service';
 import { Router } from '@angular/router';
@@ -24,7 +24,7 @@ export class OrderFormComponent implements OnInit {
   invoiceCreated: boolean = false;
   invoiceDateCreation: string = '';
 
-  constructor(private datePipe: DatePipe, private fb: FormBuilder, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar){}
+  constructor(private datePipe: DatePipe, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar){}
 
   orderForm = new FormGroup({
     name: new FormControl('', Validators.required),
@@ -58,7 +58,7 @@ export class OrderFormComponent implements OnInit {
     invoicePhoneNumber: new FormControl('', Validators.required),
   })
 
-  onCompanyChange(){
+  /*onCompanyChange(){
     const companyValue = this.orderForm.value.company;
     const icoControl = this.orderForm.get('ico');
     const dicControl = this.orderForm.get('dic');
@@ -68,7 +68,7 @@ export class OrderFormComponent implements OnInit {
     }else{
       console.log('No company was entered');
     }
-  }
+  }*/
 
   update(){
     this.charactersCount = this.userMessage.length;
@@ -112,6 +112,7 @@ export class OrderFormComponent implements OnInit {
       this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
     }
     else if(!this.invoiceCreated){
+      this.validateAllFormFields(this.invoiceForm);
       this.snackBar.open('Nezabudnite na vytvorenie faktúry!', '', {duration: 1000});
     }
   }
@@ -221,6 +222,7 @@ export class OrderFormComponent implements OnInit {
   }
 }
 export interface OrderDTO {
+  id?: number;
   orderId: number;
   customerName: string;
   company: string;

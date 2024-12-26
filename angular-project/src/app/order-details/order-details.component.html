@@ -1,12 +1,12 @@
-<title>Detaily objednávky č.{{orderId}}</title>
+<title>Detaily objednávky č. {{orderId}}</title>
 <div class="order-details-component">
     <div class="title">
         <div class="title-container-1">
-          <h1>Objednávka č.{{orderId}}</h1>
+          <h1>Objednávka č. {{orderId}}</h1>
           <p>{{currentDate}}</p>
         </div>
         <div class="button-container">
-          <button class="btn btn-danger">Vymazať objednávku</button>
+          <button class="btn btn-danger" (click)="removeOrder(confirmDialog)">Vymazať objednávku</button>
           <button class="btn btn-primary" [routerLink]="['/order-form']">Upraviť objednávku</button>
         </div>
     </div>
@@ -55,7 +55,19 @@
       </table>
       </div>
     <div class="total-summary">
-      <h3><strong>Celkom na zaplatenie:</strong> 0€ (-{{order.discountAmount}}%)</h3>
+      <h3><strong>Celkom na zaplatenie:</strong> <span class="total-summary-span"> 0€ (-{{order?.discountAmount}}%)</span></h3>
     </div>
     </div>
 </div>
+<ng-template #confirmDialog>
+  <div class="confirm-dialog">
+    <h2>Potvrdenie</h2>
+    <div class="dialog-text">
+      <p>Ste si istý, že chcete vymazať túto objednávku?</p>
+    </div>
+    <div class="dialog-buttons">
+      <button class="btn btn-danger" (click)="dialogRef.close(true)">Áno</button>
+      <button class="btn btn-secondary" (click)="dialogRef.close(false)">Nie</button>
+    </div>
+  </div>
+</ng-template>

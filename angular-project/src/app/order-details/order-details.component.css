@@ -59,7 +59,10 @@ h1 {
 }
 .total-summary h3{
   width: 100%;
-  margin-top: 5px;
+  margin-top: 12.5px;
+}
+.total-summary-span{
+  font-weight: normal;
 }
 .products-table{
   width: 100%;
@@ -86,4 +89,20 @@ h1 {
 .product-row:hover td{
   background-color: #fbfbfb;
   cursor: pointer;
+}
+.confirm-dialog{
+  padding: 20px;
+  width: 400px;
+}
+.dialog h2{
+  margin-bottom: 5px;
+}
+.dialog-buttons{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+.dialog-buttons button{
+  padding: 5px 12.5px;
 }

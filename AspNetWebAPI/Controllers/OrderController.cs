@@ -66,6 +66,7 @@ namespace AspNetCoreAPI.Controllers
             {
                 var orders = _context.Orders.Select(o => new OrderDTO
                 {
+                    Id = o.Id,
                     OrderId = o.OrderId,
                     CustomerName = o.CustomerName,
                     Company = o.Company,
@@ -109,6 +110,27 @@ namespace AspNetCoreAPI.Controllers
             {
                 return BadRequest(ex);
             }
+        }
+        [HttpDelete("delete-order/{id}")]
+        public IActionResult DeleteOrder(int Id)
+        {
+            try
+            {
+                var order = _context.Orders.FirstOrDefault(o => o.Id == Id);
+                if (order == null)
+                {
+                    return NotFound(new {message = $"Order with ID {Id} not found." });
+                }
+
+                _context.Orders.Remove(order);
+                _context.SaveChanges();
+
+                return Ok(new {message = $"Successfully deleted order with id {Id}" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message}); 
+            }    
         }
     }
 }

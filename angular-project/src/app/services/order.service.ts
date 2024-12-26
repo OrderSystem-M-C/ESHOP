@@ -24,4 +24,8 @@ export class OrderService {
     const url = `${this.baseUrl}/order/get-order-details/${orderId}`;
     return this.http.get<OrderDTO>(url);
   }
+  deleteOrder(rowId: number){
+    const url = `${this.baseUrl}/order/delete-order/${rowId}`;
+    return this.http.delete(url);
+  }
 }
