@@ -17,12 +17,15 @@ export class OrdersPageComponent implements OnInit{
 
   currentDate: string;
 
+  isLoading: boolean = true;
+
   constructor(private orderService: OrderService, private datePipe: DatePipe){}
 
   ngOnInit(): void {
     this.orderService.getOrders().subscribe((result) =>{
       console.log("Objednávky načítané:", result);
       this.ordersData = result;
+      this.isLoading = false;
     }, (error) =>{
       console.error("An error have occurred while trying to get data of orders", error);
     });

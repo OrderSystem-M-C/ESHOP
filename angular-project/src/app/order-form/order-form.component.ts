@@ -24,6 +24,8 @@ export class OrderFormComponent implements OnInit {
   invoiceCreated: boolean = false;
   invoiceDateCreation: string = '';
 
+  isLoading: boolean = false;
+
   constructor(private datePipe: DatePipe, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar){}
 
   orderForm = new FormGroup({
@@ -58,17 +60,24 @@ export class OrderFormComponent implements OnInit {
     invoicePhoneNumber: new FormControl('', Validators.required),
   })
 
-  /*onCompanyChange(){
-    const companyValue = this.orderForm.value.company;
+  onCompanyChange(event: Event){
+    const inputElement = event.target as HTMLInputElement;
+    const companyValue = inputElement.value;
+
     const icoControl = this.orderForm.get('ico');
     const dicControl = this.orderForm.get('dic');
+
     if(companyValue && companyValue.trim().length > 0){
       icoControl.setValidators([Validators.required]);
       dicControl.setValidators([Validators.required]);
     }else{
-      console.log('No company was entered');
+      icoControl.clearValidators();
+      dicControl.clearValidators();
     }
-  }*/
+
+    icoControl.updateValueAndValidity({ emitEvent: false });
+    dicControl.updateValueAndValidity({ emitEvent: false });
+  }
 
   update(){
     this.charactersCount = this.userMessage.length;
@@ -94,14 +103,18 @@ export class OrderFormComponent implements OnInit {
         orderStatus: this.orderForm.value.orderStatus,
         orderDate: this.currentDate
       };
+
+      this.isLoading = true;
+
       this.orderService.createOrder(order).subscribe((response: OrderDTO) => {
-        this.snackBar.open('Objednávka bola úspešne vytvorená!', '', {duration: 1000});
         if(response){
-          this.orderId = response.orderId;
+          this.isLoading = false;
           if(!this.invoiceCreated){
             this.createInvoice();
+          }else{
+            this.snackBar.open('Objednávka bola úspešne vytvorená!', '', {duration: 1000});
+            this.router.navigate(['/orders-page']);
           }
-          this.router.navigate(['/orders-page']);
         }
       }, (error) => {
         console.error("An error occured while trying to create order", error)

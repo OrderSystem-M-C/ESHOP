@@ -23,7 +23,7 @@ namespace AspNetCoreAPI.Controllers
         {
             if (orderDto == null)
             {
-                return NotFound();
+                return NotFound("Data transfer object was not found");
             }
             var order = new OrderModel
             {
@@ -55,7 +55,7 @@ namespace AspNetCoreAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"An error occurred {ex}");
+                return StatusCode(500, new { error = ex.Message });
             }
 
         }
@@ -90,7 +90,7 @@ namespace AspNetCoreAPI.Controllers
             }
             catch(Exception ex)
             {
-                return StatusCode(500, ex);
+                return StatusCode(500, new { error = ex.Message });
             }
         }
         [HttpGet("get-order-details/{orderId}")]
@@ -101,14 +101,14 @@ namespace AspNetCoreAPI.Controllers
                 var order = _context.Orders.FirstOrDefault(o => o.OrderId == orderId);
                 if(order == null)
                 {
-                    return NotFound();
+                    return NotFound(new { message = $"Details for order with orderId {orderId} were not found." });
                 }
 
                 return Ok(order);
             }
             catch(Exception ex)
             {
-                return BadRequest(ex);
+                return StatusCode(500, new { error = ex.Message });
             }
         }
         [HttpDelete("delete-order/{id}")]

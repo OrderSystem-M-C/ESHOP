@@ -55,15 +55,15 @@
             </div>
             <div class="field">
                 <label for="company" class="form-label">Firma</label>
-                <input formControlName="company" type="text" id="company" class="form-control" placeholder="Zadajte názov firmy">
+                <input formControlName="company" type="text" id="company" class="form-control" placeholder="Zadajte názov firmy" (input)="onCompanyChange($event)" (change)="onCompanyChange($event)">
             </div>
             <div class="field">
                 <label for="ico" class="form-label">IČO (povinné v prípade firmy)</label>
-                <input formControlName="ico" type="text" id="ico" class="form-control" placeholder="Zadajte IČO">
+                <input formControlName="ico" type="text" id="ico" class="form-control" placeholder="Zadajte IČO" [ngClass]="{'is-invalid': orderForm.get('company').value?.trim().length > 0 && orderForm.get('ico').invalid || orderForm.get('ico').touched}">
             </div>
             <div class="field">
                 <label for="dic" class="form-label">DIČ (povinné v prípade firmy)</label>
-                <input formControlName="dic" type="text" id="dic" class="form-control" placeholder="Zadajte DIČ">
+                <input formControlName="dic" type="text" id="dic" class="form-control" placeholder="Zadajte DIČ" [ngClass]="{'is-invalid': orderForm.get('company').value?.trim().length > 0 && orderForm.get('dic').invalid || orderForm.get('dic').touched}">
             </div>
             <div class="field">
                 <label for="icDph" class="form-label">IČ DPH (ak má firma)</label>
@@ -276,9 +276,16 @@
             </div>
         </div>
     </div>
-
-        <div class="submit">
-            <button type="submit" class="btn btn-primary">Vytvoriť objednávku</button>
+    @if(!isLoading){
+      <div class="submit">
+        <button type="submit" class="btn btn-primary">Vytvoriť objednávku</button>
+      </div>
+    }@else{
+      <div class="spinner-container">
+        <div class="spinner">
         </div>
+        Načítava sa
+      </div>
+    }
     </form>
 </div>
