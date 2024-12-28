@@ -55,15 +55,15 @@
             </div>
             <div class="field">
                 <label for="company" class="form-label">Firma</label>
-                <input formControlName="company" type="text" id="company" class="form-control" placeholder="Zadajte názov firmy" (input)="onCompanyChange($event)" (change)="onCompanyChange($event)">
+                <input formControlName="company" type="text" id="company" class="form-control" placeholder="Zadajte názov firmy" (input)="onCompanyChange($event, 'order')" (change)="onCompanyChange($event, 'order')">
             </div>
             <div class="field">
-                <label for="ico" class="form-label">IČO (povinné v prípade firmy)</label>
-                <input formControlName="ico" type="text" id="ico" class="form-control" placeholder="Zadajte IČO" [ngClass]="{'is-invalid': orderForm.get('company').value?.trim().length > 0 && orderForm.get('ico').invalid || orderForm.get('ico').touched}">
+                <label for="ico" class="form-label">IČO* (povinné v prípade firmy)</label>
+                <input formControlName="ico" type="text" id="ico" class="form-control" placeholder="Zadajte IČO" [ngClass]="{'is-invalid': orderForm.get('company').value?.trim().length > 0 && orderForm.get('ico').invalid && orderForm.get('ico').touched}">
             </div>
             <div class="field">
-                <label for="dic" class="form-label">DIČ (povinné v prípade firmy)</label>
-                <input formControlName="dic" type="text" id="dic" class="form-control" placeholder="Zadajte DIČ" [ngClass]="{'is-invalid': orderForm.get('company').value?.trim().length > 0 && orderForm.get('dic').invalid || orderForm.get('dic').touched}">
+                <label for="dic" class="form-label">DIČ* (povinné v prípade firmy)</label>
+                <input formControlName="dic" type="text" id="dic" class="form-control" placeholder="Zadajte DIČ" [ngClass]="{'is-invalid': orderForm.get('company').value?.trim().length > 0 && orderForm.get('dic').invalid && orderForm.get('dic').touched}">
             </div>
             <div class="field">
                 <label for="icDph" class="form-label">IČ DPH (ak má firma)</label>
@@ -133,15 +133,15 @@
             </div>
             <div class="field">
               <label for="invoiceCompany" class="form-label">Firma</label>
-              <input type="text" id="invoiceCompany" class="form-control" placeholder="Zadajte názov firmy na faktúre" formControlName="invoiceCompany">
+              <input type="text" id="invoiceCompany" class="form-control" placeholder="Zadajte názov firmy na faktúre" formControlName="invoiceCompany" (input)="onCompanyChange($event, 'invoice')" (change)="onCompanyChange($event, 'invoice')">
             </div>
             <div class="field">
-              <label for="invoiceICO" class="form-label">IČO (povinné v prípade firmy)</label>
-              <input type="text" id="invoiceICO" class="form-control" placeholder="Zadajte IČO" formControlName="invoiceICO">
+              <label for="invoiceICO" class="form-label">IČO* (povinné v prípade firmy)</label>
+              <input type="text" id="invoiceICO" class="form-control" placeholder="Zadajte IČO" formControlName="invoiceICO" [ngClass]="{'is-invalid': invoiceForm.get('invoiceCompany').value?.trim().length > 0 && invoiceForm.get('invoiceICO').invalid && invoiceForm.get('invoiceICO').touched}">
             </div>
             <div class="field">
-              <label for="invoiceDIC" class="form-label">DIČ (povinné v prípade firmy)</label>
-              <input type="text" id="invoiceDIC" class="form-control" placeholder="Zadajte DIČ" formControlName="invoiceDIC">
+              <label for="invoiceDIC" class="form-label">DIČ* (povinné v prípade firmy)</label>
+              <input type="text" id="invoiceDIC" class="form-control" placeholder="Zadajte DIČ" formControlName="invoiceDIC" [ngClass]="{'is-invalid': invoiceForm.get('invoiceCompany').value?.trim().length > 0 && invoiceForm.get('invoiceDIC').invalid && invoiceForm.get('invoiceDIC').touched}">
             </div>
             <div class="field">
               <label for="invoiceEmail" class="form-label">E-mailová adresa*</label>

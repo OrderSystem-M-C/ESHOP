@@ -6,7 +6,7 @@
           <p>{{currentDate}}</p>
         </div>
         <div class="button-container">
-          <button class="btn btn-danger" (click)="removeOrder(confirmDialog)">Vymazať objednávku</button>
+          <button class="btn btn-secondary remove-btn" (click)="removeOrder(confirmDialog)"><img src="../../assets/Images/bin-icon.png" class="remove-btn-icon">Vymazať objednávku</button>
           <button class="btn btn-primary" [routerLink]="['/order-form']">Upraviť objednávku</button>
         </div>
     </div>
@@ -66,8 +66,8 @@
       <p>Ste si istý, že chcete vymazať túto objednávku?</p>
     </div>
     <div class="dialog-buttons">
-      <button class="btn btn-danger" (click)="dialogRef.close(true)">Áno</button>
-      <button class="btn btn-secondary" (click)="dialogRef.close(false)">Nie</button>
+      <button class="btn btn-secondary" (click)="dialogRef.close(true)">Áno</button>
+      <button class="btn btn-primary" (click)="dialogRef.close(false)">Nie</button>
     </div>
   </div>
 </ng-template>

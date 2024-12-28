@@ -60,23 +60,37 @@ export class OrderFormComponent implements OnInit {
     invoicePhoneNumber: new FormControl('', Validators.required),
   })
 
-  onCompanyChange(event: Event){
+  onCompanyChange(event: Event, formType: 'order' | 'invoice'){
     const inputElement = event.target as HTMLInputElement;
     const companyValue = inputElement.value;
 
-    const icoControl = this.orderForm.get('ico');
-    const dicControl = this.orderForm.get('dic');
+    const form = formType === 'order' ? this.orderForm : this.invoiceForm;
+    const icoControlName = formType === 'order' ? 'ico' : 'invoiceICO';
+    const dicControlName = formType === 'order' ? 'dic': 'invoiceDIC';
 
-    if(companyValue && companyValue.trim().length > 0){
-      icoControl.setValidators([Validators.required]);
-      dicControl.setValidators([Validators.required]);
+    const icoControl = this.getFormControl(form, icoControlName);
+    const dicControl = this.getFormControl(form, dicControlName);
+
+    if(icoControl && dicControl){
+      if(companyValue && companyValue.trim().length > 0){
+        icoControl.setValidators([Validators.required]);
+        dicControl.setValidators([Validators.required]);
+      }else{
+        icoControl.clearValidators();
+        dicControl.clearValidators();
+      }
+      icoControl.updateValueAndValidity({ emitEvent: false });
+      dicControl.updateValueAndValidity({ emitEvent: false });
     }else{
-      icoControl.clearValidators();
-      dicControl.clearValidators();
+      console.error('Nastala chyba');
     }
+  }
 
-    icoControl.updateValueAndValidity({ emitEvent: false });
-    dicControl.updateValueAndValidity({ emitEvent: false });
+  private getFormControl(form: FormGroup, controlName: string | null) : FormControl {
+    if(!controlName){
+      return null;
+    }
+    return form.get(controlName) as FormControl;
   }
 
   update(){

@@ -31,6 +31,17 @@ h1 {
   flex-direction: row;
   gap: 10px;
 }
+.remove-btn{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex-direction: row;
+}
+.remove-btn-icon{
+  height: 20px;
+  width: 20px;
+}
 .details-container{
   border-radius: 10px;
   display: grid;
