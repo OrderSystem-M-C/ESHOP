@@ -24,6 +24,62 @@ h1 {
   justify-content: flex-start;
   flex-direction: column;
 }
+.button-container{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 10px;
+}
+.is-visible{
+  display: block;
+}
+.is-not-visible{
+  display: none;
+}
+.checkbox-dropdown-container{
+  max-width: 350px;
+  position: relative;
+  margin-bottom: 15px;
+}
+.dropdown-label{
+  display: block;
+  margin-bottom: 10px;
+}
+.dropdown-content{
+  background-color: #f2f2f2;
+  padding: 10px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow-y: auto;
+  z-index: 10;
+}
+.checkbox-item{
+  padding: 4px 0;
+  border-radius: 5px;
+}
+.checkbox-item:hover{
+  background-color: #fbfbfb;
+}
+.checkbox-item input[type="checkbox"] {
+  cursor: pointer;
+  border: 2px solid #ccc;
+  height: 20px;
+  width: 20px;
+  margin-bottom: 5px;
+}
+.checkbox-label{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: row;
+  gap: 5px;
+  cursor: pointer;
+  margin-left: 5px;
+}
 .orders-table {
   width: 100%;
   border-collapse: collapse;
@@ -45,13 +101,6 @@ h1 {
 }
 .orders-table tr:nth-child(even) {
   background-color: #f9f9f9;
-}
-.button-container{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: row;
-  gap: 10px;
 }
 .order-row:hover td{
   background-color: #fbfbfb;

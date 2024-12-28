@@ -22,9 +22,11 @@ export class OrderDetailsComponent implements OnInit{
   order: OrderDTO;
   dialogRef!: MatDialogRef<any>; //akoby pristupujeme k otvorenemu dialogovemu oknu aby sme mohli s nim komunikovať => získať samotný výsledok
 
+  isLoading: boolean = true;
+
   constructor(private dialog: MatDialog, private route: ActivatedRoute, private router: Router, private datePipe: DatePipe, private orderService: OrderService, private snackBar: MatSnackBar){} /* private dialog: MatDialog => na otvaranie dialogovych okien atd */
 
-  removeOrder(confirmDialog: TemplateRef<any>){
+  removeOrder(confirmDialog: TemplateRef<any>){ //to vkladame ten dialog aby sme mohli s ním narábať
     this.dialogRef = this.dialog.open(confirmDialog);  // Otvorí dialógové okno s potvrdením to áno/nie
 
     this.dialogRef.afterClosed().subscribe((result) => {
@@ -50,6 +52,7 @@ export class OrderDetailsComponent implements OnInit{
 
     this.orderService.getOrderDetails(this.orderId).subscribe((result) => {
       this.order = result;
+      this.isLoading = false;
     }, (error) =>{
       console.error("An error occurred while trying to get order details", error);
     })

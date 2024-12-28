@@ -23,7 +23,7 @@ namespace AspNetCoreAPI.Controllers
         {
             if (orderDto == null)
             {
-                return NotFound("Data transfer object was not found");
+                return NotFound("Data transfer object was not found.");
             }
             var order = new OrderModel
             {
