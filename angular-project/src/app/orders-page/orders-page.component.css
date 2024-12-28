@@ -46,6 +46,9 @@ h1 {
   display: block;
   margin-bottom: 10px;
 }
+.dropdown-button{
+  margin-top: 5px;
+}
 .dropdown-content{
   background-color: #f2f2f2;
   padding: 10px;
