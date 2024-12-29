@@ -37,12 +37,50 @@ export class OrdersPageComponent implements OnInit{
   currentDate: string;
 
   isLoading: boolean = true;
-  isVisible: boolean = false;
+  isVisibleCheckbox: boolean = false;
+  isVisibleDateFilter: boolean = false;
 
   constructor(private orderService: OrderService, private datePipe: DatePipe){}
 
-  toggleDropdown(){
-    this.isVisible = !this.isVisible;
+  toggleDropdown(dropdown: 'status' | 'date'){
+    if(dropdown === 'status'){
+      this.isVisibleCheckbox = !this.isVisibleCheckbox;
+    }else{
+      this.isVisibleDateFilter = !this.isVisibleDateFilter;
+    }
+  }
+
+  sortByDate(order: 'newest' | 'oldest'): void {
+    this.filteredOrders = [...this.ordersData];
+
+    this.filteredOrders.sort((a, b) => {
+      const dateA = this.parseDate(a.orderDate).getTime();
+      const dateB = this.parseDate(b.orderDate).getTime();
+
+      return order === 'newest' ? dateB - dateA : dateA - dateB;
+    })
+  }
+
+  parseDate(dateString: string): Date {
+    if(!dateString.includes(' ')){
+      console.error('An error have occurred with dateString');
+    }
+    
+    const[datePart, timePart] = dateString.split(' ');
+
+    if(!datePart.includes('.') || !timePart.includes(':')){
+      console.error('An error have occurred with datePart or timePart');
+    }
+
+    const[day, month, year] = datePart.split('.').map(Number);
+    const [hours, minutes, seconds] = timePart.split(':').map(Number);
+
+    if (!day || !month || !year || !hours || !minutes || seconds === undefined){
+      console.error('Invalid time or date values');
+    }
+
+    const parsedDate = new Date(year, month - 1, day, hours, minutes, seconds);
+    return parsedDate;
   }
 
   onCheckboxChange(event: Event){

@@ -31,22 +31,29 @@ h1 {
   flex-direction: row;
   gap: 10px;
 }
+.sorting-container{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 30px;
+}
 .is-visible{
   display: block;
 }
 .is-not-visible{
   display: none;
 }
-.checkbox-dropdown-container{
+.checkbox-dropdown-container, .filter-date-container{
   max-width: 350px;
   position: relative;
   margin-bottom: 15px;
 }
-.dropdown-label{
+.dropdown-label {
   display: block;
   margin-bottom: 10px;
 }
-.dropdown-button{
+.dropdown-button, .filter-date-dropdown-btn{
   margin-top: 5px;
 }
 .dropdown-content{
@@ -60,12 +67,16 @@ h1 {
   overflow-y: auto;
   z-index: 10;
 }
-.checkbox-item{
+.checkbox-item, .filter-date-item{
   padding: 4px 0;
   border-radius: 5px;
 }
-.checkbox-item:hover{
+.filter-date-field{
+  padding: 8px;
+}
+.checkbox-item:hover, .filter-date-field:hover{
   background-color: #fbfbfb;
+  cursor: pointer;
 }
 .checkbox-item input[type="checkbox"] {
   cursor: pointer;
