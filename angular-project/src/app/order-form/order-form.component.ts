@@ -96,15 +96,16 @@ export class OrderFormComponent implements OnInit {
   update(){
     this.charactersCount = this.userMessage.length;
   }
+  
   submitOrder(){
     if(this.orderForm.valid && this.invoiceCreated){
       let order: OrderDTO = {
         orderId: this.orderId,
         customerName: this.orderForm.value.name,
-        company: this.orderForm.value.company,
-        ico: this.orderForm.value.ico,
-        dic: this.orderForm.value.dic,
-        icDph: this.orderForm.value.icDph,
+        company: this.orderForm.value.company || '',
+        ico: this.orderForm.value.ico || '',
+        dic: this.orderForm.value.dic || '',
+        icDph: this.orderForm.value.icDph || '',
         address: this.orderForm.value.address,
         city: this.orderForm.value.city,
         postalCode: this.orderForm.value.postalCode,
@@ -113,9 +114,20 @@ export class OrderFormComponent implements OnInit {
         note: this.orderForm.value.note || '',
         deliveryOption: this.orderForm.value.deliveryOption,
         paymentOption: this.orderForm.value.paymentOption,
-        discountAmount: this.orderForm.value.discountAmount,
+        discountAmount: this.orderForm.value.discountAmount || 0,
         orderStatus: this.orderForm.value.orderStatus,
-        orderDate: this.currentDate
+        orderDate: this.currentDate,
+        invoiceNumber: this.invoiceForm.value.invoiceNumber,
+        variableSymbol: this.invoiceForm.value.invoiceVariable,
+        invoiceIssueDate: this.invoiceForm.value.invoiceIssueDate,
+        invoiceDueDate: this.invoiceForm.value.invoiceDueDate,
+        invoiceDeliveryDate: this.invoiceForm.value.invoiceDeliveryDate,
+        invoiceName: this.invoiceForm.value.invoiceName,
+        invoiceCompany: this.invoiceForm.value.invoiceCompany || '',
+        invoiceICO: this.invoiceForm.value.invoiceICO || '',
+        invoiceDIC: this.invoiceForm.value.invoiceDIC || '',
+        invoiceEmail: this.invoiceForm.value.invoiceEmail,
+        invoicePhoneNumber: this.invoiceForm.value.invoicePhoneNumber,
       };
 
       this.isLoading = true;
@@ -252,19 +264,30 @@ export interface OrderDTO {
   id?: number;
   orderId: number;
   customerName: string;
-  company: string;
-  ico: string;
-  dic: string;
-  icDph: string;
+  company?: string;
+  ico?: string;
+  dic?: string;
+  icDph?: string;
   address: string;
   city: string;
   postalCode: string;
   email: string;
   phoneNumber: string;
-  note: string;
+  note?: string;
   deliveryOption: string;
   paymentOption: string;
-  discountAmount: number;
+  discountAmount?: number;
   orderStatus: string;
   orderDate?: string;
+  invoiceNumber: string;
+  variableSymbol: string;
+  invoiceIssueDate: string; 
+  invoiceDueDate: string;  
+  invoiceDeliveryDate: string;
+  invoiceName: string;
+  invoiceCompany?: string; 
+  invoiceICO?: string; 
+  invoiceDIC?: string;
+  invoiceEmail: string;
+  invoicePhoneNumber: string;
 }

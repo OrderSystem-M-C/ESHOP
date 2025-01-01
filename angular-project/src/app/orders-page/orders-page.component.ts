@@ -3,6 +3,7 @@ import { OrderService } from '../services/order.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { OrderDTO } from '../order-form/order-form.component';
 import { RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-orders-page',
@@ -40,6 +41,8 @@ export class OrdersPageComponent implements OnInit{
   isVisibleCheckbox: boolean = false;
   isVisibleDateFilter: boolean = false;
 
+  dateSortOrder: string = '';
+
   constructor(private orderService: OrderService, private datePipe: DatePipe){}
 
   toggleDropdown(dropdown: 'status' | 'date'){
@@ -51,14 +54,27 @@ export class OrdersPageComponent implements OnInit{
   }
 
   sortByDate(order: 'newest' | 'oldest'): void {
-    this.filteredOrders = [...this.ordersData];
+   this.dateSortOrder = order;
+   this.applyFilters();
+  }
+  
+  applyFilters(): void {
+    let filtered = [...this.ordersData];
 
-    this.filteredOrders.sort((a, b) => {
-      const dateA = this.parseDate(a.orderDate).getTime();
-      const dateB = this.parseDate(b.orderDate).getTime();
+    if(this.selectedStatuses.length > 0){
+      filtered = filtered.filter(order => this.selectedStatuses.includes(order.orderStatus));
+    }
 
-      return order === 'newest' ? dateB - dateA : dateA - dateB;
-    })
+    if(this.dateSortOrder){
+      filtered = filtered.sort((a, b) => {
+        const dateA = this.parseDate(a.orderDate).getDate();
+        const dateB = this.parseDate(b.orderDate).getDate();
+
+        return this.dateSortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+      })
+    }
+
+    this.filteredOrders = filtered;
   }
 
   parseDate(dateString: string): Date {
@@ -75,11 +91,11 @@ export class OrdersPageComponent implements OnInit{
     const[day, month, year] = datePart.split('.').map(Number);
     const [hours, minutes, seconds] = timePart.split(':').map(Number);
 
-    if (!day || !month || !year || !hours || !minutes || seconds === undefined){
+    if (!day || !month || !year || !hours || !minutes || seconds === undefined){ //v seconds === undefined preto lebo seconds niekedy nemusia byt definovane v case a nech je jasne ze hodnota neexistuje
       console.error('Invalid time or date values');
     }
 
-    const parsedDate = new Date(year, month - 1, day, hours, minutes, seconds);
+    const parsedDate = new Date(year, month - 1, day, hours, minutes, seconds); //v javascripte sa mesiace pocitaju od indexu 0 preto je tam month - 1
     return parsedDate;
   }
 
@@ -93,15 +109,7 @@ export class OrdersPageComponent implements OnInit{
       this.selectedStatuses = this.selectedStatuses.filter(status => status !== value);
     }
 
-    this.filterOrders();
-  }
-
-  filterOrders(): void{
-    if(this.selectedStatuses.length === 0){
-      this.filteredOrders = [...this.ordersData];
-    }else{
-      this.filteredOrders = this.ordersData.filter(order => this.selectedStatuses.includes(order.orderStatus));
-    }
+    this.applyFilters();
   }
 
   ngOnInit(): void {

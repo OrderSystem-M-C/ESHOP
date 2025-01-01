@@ -37,14 +37,15 @@
           <p><strong>Dátum objednávky:</strong> {{ order?.orderDate }}</p>
           <p><strong>Hmotnosť objednávky: </strong>0kg</p>
           <p><strong>Celkový počet produktov: </strong>0ks</p>
-          <p><strong>Zľava:</strong> {{order?.discountAmount > 0 ? 'Áno (-{{order.discountAmount}}%)' : 'Nie'}}</p>
+          <p><strong>Zľava:</strong> {{order?.discountAmount > 0 ? 'Áno (-' + order?.discountAmount + '%)' : 'Nie'}}</p>
           <p><strong>Poznámka:</strong> {{ order?.note ? order.note : 'Nezadané' }}</p>
         </div>
         <div class="products-information">
+          <h3>Objednané produkty</h3>
           <table class="products-table">
             <thead>
                 <tr>
-                    <th>Položka</th>
+                    <th>Názov produktu</th>
                     <th>Množstvo</th>
                     <th>Cena za kus</th>
                     <th>Celkom</th>
@@ -53,16 +54,19 @@
             <tbody>
                 <!-- Repeat for each item -->
                 <tr class="product-row">
-                    <td>polozkaNazov </td>
-                    <td>polozkaMnozstvo </td>
-                    <td>polozkaCena </td>
-                    <td>polozkaCelkom </td>
+                    <td>nazov-produktu</td>
+                    <td>mnozstvo-produktu</td>
+                    <td>cena-produktu</td>
+                    <td>celkova-cena</td>
                 </tr>
             </tbody>
         </table>
         </div>
-      <div class="total-summary">
-        <h3><strong>Celkom na zaplatenie:</strong> <span class="total-summary-span"> 0€ (-{{order?.discountAmount}}%)</span></h3>
+      <div class="total-price-invoice">
+        <h3>Celková suma na zaplatenie a faktúra</h3>
+        <p><strong>Medzisúčet: </strong>0€</p>
+        <p><strong>Celková cena po zľave: </strong>0€ (-{{order?.discountAmount}}%)</p>
+        <p><strong>Faktúra: </strong> <a (click)="getInvoice()" title="Kliknutím stiahnete faktúru objednávky"><img src="../../assets/Images/download-icon.png" alt="download-icon">Prevziať faktúru</a></p>
       </div>
       </div>
     }

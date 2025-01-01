@@ -1,5 +1,6 @@
 ﻿using AspNetCoreAPI.Data;
 using AspNetCoreAPI.DTOs;
+using AspNetCoreAPI.Migrations;
 using AspNetCoreAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -44,6 +45,17 @@ namespace AspNetCoreAPI.Controllers
                 DiscountAmount = orderDto.DiscountAmount,
                 OrderStatus = orderDto.OrderStatus,
                 OrderDate = orderDto.OrderDate,
+                InvoiceNumber = orderDto.InvoiceNumber,
+                VariableSymbol = orderDto.VariableSymbol,
+                InvoiceIssueDate = orderDto.InvoiceIssueDate,
+                InvoiceDueDate = orderDto.InvoiceDueDate,
+                InvoiceDeliveryDate = orderDto.InvoiceDeliveryDate,
+                InvoiceName = orderDto.InvoiceName,
+                InvoiceCompany = orderDto.InvoiceCompany,
+                InvoiceICO = orderDto.InvoiceICO,
+                InvoiceDIC = orderDto.InvoiceDIC,
+                InvoiceEmail = orderDto.InvoiceEmail,
+                InvoicePhoneNumber = orderDto.InvoicePhoneNumber,
             };
 
             try
@@ -84,6 +96,17 @@ namespace AspNetCoreAPI.Controllers
                     DiscountAmount = o.DiscountAmount,
                     OrderStatus = o.OrderStatus,
                     OrderDate = o.OrderDate,
+                    InvoiceNumber = o.InvoiceNumber,
+                    VariableSymbol = o.VariableSymbol,
+                    InvoiceIssueDate = o.InvoiceIssueDate,
+                    InvoiceDueDate = o.InvoiceDueDate,
+                    InvoiceDeliveryDate = o.InvoiceDeliveryDate,
+                    InvoiceName = o.InvoiceName,
+                    InvoiceCompany = o.InvoiceCompany,
+                    InvoiceICO = o.InvoiceICO,
+                    InvoiceDIC = o.InvoiceDIC,
+                    InvoiceEmail = o.InvoiceEmail,
+                    InvoicePhoneNumber = o.InvoicePhoneNumber,
                 }).ToList();
 
                 return Ok(orders);

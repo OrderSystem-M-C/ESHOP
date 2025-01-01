@@ -34,8 +34,11 @@ namespace AspNetCoreAPI.Models
 
         [Required(ErrorMessage = "E-mail je povinný.")]
         [EmailAddress(ErrorMessage = "Zadajte platný e-mail")]
+        [MaxLength(100, ErrorMessage = "E-mailová adresa nemôže byť dlhšia ako 100 znakov.")]
         public string Email { get; set; }
-        [StringLength(50, ErrorMessage = "Zadajte platné telefónne číslo.")]
+        [Required(ErrorMessage = "Telefónne číslo je povinné.")]
+        [Phone(ErrorMessage = "Zadajte platné telefónne číslo.")]
+        [MaxLength(20, ErrorMessage = "Telefónne číslo nemôže byť dlhšie ako 20 znakov.")]
         public string PhoneNumber { get; set; }
 
         [StringLength(250, ErrorMessage = "Poznámka môže mať maximálne 250 znakov.")]
@@ -53,5 +56,48 @@ namespace AspNetCoreAPI.Models
         [Required(ErrorMessage = "Dátum objednávky je povinný.")]
         // public DateTime OrderDate { get; set; } = DateTime.Now; DateTime ziskame datum a ihned sa ulozi ten aktualny
         public string OrderDate { get; set; }
+
+
+        //Faktúra
+
+
+        [Required(ErrorMessage = "Číslo faktúry je povinné.")]
+        public int InvoiceNumber { get; set; } 
+
+        [Required(ErrorMessage = "Variabilný symbol je povinný.")]
+        [MaxLength(50, ErrorMessage = "Variabilný symbol nemôže byť dlhší ako 50 znakov.")]
+        public string VariableSymbol { get; set; } 
+
+        [Required(ErrorMessage = "Dátum vystavenia faktúry je povinný.")]
+        public string InvoiceIssueDate { get; set; } 
+
+        [Required(ErrorMessage = "Dátum splatnosti je povinný.")]
+        public string InvoiceDueDate { get; set; }
+
+        [Required(ErrorMessage = "Dátum dodania je povinný.")]
+        public string InvoiceDeliveryDate { get; set; }
+
+        [Required(ErrorMessage = "Meno a priezvisko je povinné.")]
+        [MaxLength(100, ErrorMessage = "Meno a priezvisko nemôže byť dlhšie ako 100 znakov.")]
+        public string InvoiceName { get; set; } 
+
+        [MaxLength(100, ErrorMessage = "Názov firmy nemôže byť dlhší ako 100 znakov.")]
+        public string InvoiceCompany { get; set; } 
+
+        [MaxLength(20, ErrorMessage = "IČO nemôže byť dlhšie ako 20 znakov.")]
+        public string InvoiceICO { get; set; }
+
+        [MaxLength(20, ErrorMessage = "DIČ nemôže byť dlhšie ako 20 znakov.")]
+        public string InvoiceDIC { get; set; } 
+
+        [Required(ErrorMessage = "E-mailová adresa je povinná.")]
+        [EmailAddress(ErrorMessage = "Zadajte platnú e-mailovú adresu.")]
+        [MaxLength(100, ErrorMessage = "E-mailová adresa nemôže byť dlhšia ako 100 znakov.")]
+        public string InvoiceEmail { get; set; } 
+
+        [Required(ErrorMessage = "Telefónne číslo je povinné.")]
+        [Phone(ErrorMessage = "Zadajte platné telefónne číslo.")]
+        [MaxLength(20, ErrorMessage = "Telefónne číslo nemôže byť dlhšie ako 20 znakov.")]
+        public string InvoicePhoneNumber { get; set; } 
     }
 }

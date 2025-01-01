@@ -73,6 +73,7 @@ h1 {
 }
 .filter-date-field{
   padding: 8px;
+  border-radius: 5px;
 }
 .checkbox-item:hover, .filter-date-field:hover{
   background-color: #fbfbfb;

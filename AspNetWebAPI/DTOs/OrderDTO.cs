@@ -33,5 +33,24 @@ namespace AspNetCoreAPI.DTOs
         public string OrderStatus { get; set; }
         [Required]
         public string OrderDate { get; set; }
+        [Required]
+        public int InvoiceNumber { get; set; }
+        [Required]
+        public string VariableSymbol { get; set; }
+        [Required]
+        public string InvoiceIssueDate { get; set; }
+        [Required]
+        public string InvoiceDueDate { get; set; }
+        [Required]
+        public string InvoiceDeliveryDate { get; set; }
+        [Required]
+        public string InvoiceName { get; set; }
+        public string InvoiceCompany { get; set; }
+        public string InvoiceICO { get; set; }
+        public string InvoiceDIC { get; set; }
+        [Required]
+        public string InvoiceEmail { get; set; }
+        [Required]
+        public string InvoicePhoneNumber { get; set; }
     }
 }
