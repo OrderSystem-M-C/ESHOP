@@ -44,6 +44,7 @@ bootstrapApplication(AppComponent, {
         { path: 'login', component: LoginComponent},
         { path: 'register', component: RegistrationComponent},
         { path: 'order-form', component: OrderFormComponent, canActivate: [authGuard]},
+        { path: 'order-form/:orderId', component: OrderFormComponent, canActivate: [authGuard] },
         { path: 'orders-page', component: OrdersPageComponent, canActivate: [authGuard]},
         { path: 'order-details/:orderId', component: OrderDetailsComponent, canActivate: [authGuard]}
       ]), provideAnimationsAsync()

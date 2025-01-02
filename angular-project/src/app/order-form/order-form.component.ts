@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import * as html2pdf from 'html2pdf.js';
 import { OrderService } from '../services/order.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
@@ -25,11 +25,12 @@ export class OrderFormComponent implements OnInit {
   invoiceDateCreation: string = '';
 
   isLoading: boolean = false;
+  isEditMode: boolean = false;
 
-  constructor(private datePipe: DatePipe, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar){}
+  constructor(private datePipe: DatePipe,private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar){}
 
   orderForm = new FormGroup({
-    name: new FormControl('', Validators.required),
+    customerName: new FormControl('', Validators.required),
     company: new FormControl(''),
     ico: new FormControl(''),
     dic: new FormControl(''),
@@ -59,6 +60,26 @@ export class OrderFormComponent implements OnInit {
     invoiceEmail: new FormControl('', Validators.required),
     invoicePhoneNumber: new FormControl('', Validators.required),
   })
+
+  loadOrder(orderId: number){
+    this.orderService.getOrderDetails(orderId).subscribe((order) => {
+      this.orderForm.patchValue(order);
+
+      this.invoiceForm.patchValue({
+        invoiceNumber: order.invoiceNumber,
+        invoiceVariable: order.variableSymbol,
+        invoiceIssueDate: order.invoiceIssueDate,
+        invoiceDueDate: order.invoiceDueDate,
+        invoiceDeliveryDate: order.invoiceDeliveryDate,
+        invoiceName: order.invoiceName,
+        invoiceCompany: order.invoiceCompany,
+        invoiceICO: order.invoiceICO,
+        invoiceDIC: order.invoiceDIC,
+        invoiceEmail: order.invoiceEmail,
+        invoicePhoneNumber: order.invoicePhoneNumber,
+      });
+    })
+  }
 
   onCompanyChange(event: Event, formType: 'order' | 'invoice'){
     const inputElement = event.target as HTMLInputElement;
@@ -101,7 +122,7 @@ export class OrderFormComponent implements OnInit {
     if(this.orderForm.valid && this.invoiceCreated){
       let order: OrderDTO = {
         orderId: this.orderId,
-        customerName: this.orderForm.value.name,
+        customerName: this.orderForm.value.customerName,
         company: this.orderForm.value.company || '',
         ico: this.orderForm.value.ico || '',
         dic: this.orderForm.value.dic || '',
@@ -176,7 +197,7 @@ export class OrderFormComponent implements OnInit {
     <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
         <div style="flex: 1; padding-right: 20px; border-right: 1px solid #ddd;">
             <h3 style="margin-bottom: 10px; color: #555;">Údaje objednávateľa</h3>
-            <p><strong>Meno a priezvisko:</strong> ${this.orderForm.value.name}</p>
+            <p><strong>Meno a priezvisko:</strong> ${this.orderForm.value.customerName}</p>
             <p><strong>Firma:</strong> ${this.orderForm.value.company}</p>
             <p><strong>IČO (v prípade firmy):</strong> ${this.orderForm.value.ico}</p>
             <p><strong>DIČ (v prípade firmy):</strong> ${this.orderForm.value.dic}</p>
@@ -258,6 +279,12 @@ export class OrderFormComponent implements OnInit {
   ngOnInit(): void {
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
+    
+    const orderId = Number(this.route.snapshot.paramMap.get('orderId'));
+    if(orderId){
+      this.isEditMode = true;
+      this.loadOrder(orderId);
+    }
   }
 }
 export interface OrderDTO {

@@ -7,7 +7,7 @@
         </div>
         <div class="button-container">
           <button class="btn btn-secondary remove-btn" (click)="removeOrder(confirmDialog)"><img src="../../assets/Images/bin-icon.png" class="remove-btn-icon">Vymazať objednávku</button>
-          <button class="btn btn-primary" [routerLink]="['/order-form']">Upraviť objednávku</button>
+          <button class="btn btn-primary" (click)="editOrder()">Upraviť objednávku</button>
         </div>
     </div>
     @if(isLoading){

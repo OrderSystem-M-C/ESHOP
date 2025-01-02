@@ -51,7 +51,7 @@
             <h3>Objednávateľ</h3>
             <div class="field">
                 <label for="name" class="form-label">Meno a priezvisko*</label>
-                <input formControlName="name" type="text" id="name" class="form-control" placeholder="Zadajte meno" [ngClass]="{'is-invalid': orderForm.get('name').invalid && orderForm.get('name').touched}">
+                <input formControlName="customerName" type="text" id="name" class="form-control" placeholder="Zadajte meno" [ngClass]="{'is-invalid': orderForm.get('customerName').invalid && orderForm.get('customerName').touched}">
             </div>
             <div class="field">
                 <label for="company" class="form-label">Firma</label>

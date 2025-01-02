@@ -27,6 +27,10 @@ export class OrderDetailsComponent implements OnInit{
 
   constructor(private dialog: MatDialog, private route: ActivatedRoute, private router: Router, private datePipe: DatePipe, private orderService: OrderService, private snackBar: MatSnackBar){} /* private dialog: MatDialog => na otvaranie dialogovych okien atd */
 
+  editOrder(){
+    this.router.navigate(['order-form', this.orderId]);
+  }
+
   getInvoice(){
     if(this.order){
       const invoiceHTML = `<div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px; max-width: 800px; margin: auto;">
