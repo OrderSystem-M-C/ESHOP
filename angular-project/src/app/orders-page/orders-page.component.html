@@ -19,9 +19,8 @@
   }@else{
     <div class="sorting-container">
       <div class="checkbox-dropdown-container">
-        <label>Filtrovať objednávky podľa stavu</label>
         <div class="checkbox-dropdown">
-          <button type="button" class="btn btn-secondary dropdown-button" (click)="toggleDropdown('status')">Zvoľte stavy objednávok</button>
+          <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('status')">Zvoľte stavy objednávok pre filtráciu</button>
         </div>
         <div class="dropdown-content" [ngClass]="isVisibleCheckbox ? 'is-visible': 'is-not-visible'">
           <div class="checkbox-item" *ngFor="let status of statuses">
@@ -33,9 +32,8 @@
         </div>
       </div>
       <div class="filter-date-container">
-        <label>Filtrovať objednávky podľa dátumu</label>
         <div class="filter-date-dropdown">
-          <button type="button" class="btn btn-secondary filter-date-dropdown-btn" (click)="toggleDropdown('date')">Zvoľte spôsob filtrácie</button>
+          <button type="button" class="btn btn-light filter-date-dropdown-btn" (click)="toggleDropdown('date')">Zvoľte spôsob filtrácie podľa dátumu</button>
         </div>
         <div class="dropdown-content" [ngClass]="isVisibleDateFilter ? 'is-visible': 'is-not-visible'">
           <div class="filter-date-item">

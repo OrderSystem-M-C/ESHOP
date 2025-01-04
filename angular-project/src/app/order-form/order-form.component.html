@@ -1,10 +1,17 @@
 <title>Vytvorenie objednávky</title>
 <div class="order-form-component">
     <form class="order-form" [formGroup]="orderForm" (ngSubmit)="submitOrder()">
+      @if(isEditMode){
         <div class="title-date">
-            <h1>Vytvoriť objednávku č. {{orderId}}</h1>
-            <p>{{currentDate}}</p>
+          <h1>Upraviť objednávku č. {{existingOrderId}}</h1>
+          <p>{{currentDate}}</p>
+      </div>
+      }@else{
+        <div class="title-date">
+          <h1>Vytvoriť objednávku č. {{orderId}}</h1>
+          <p>{{currentDate}}</p>
         </div>
+      }
         <div class="delivery-payment-discount">
             <div class="form-group">
                 <label for="deliveryOptions" class="form-label">Spôsob dopravy*</label>
@@ -35,17 +42,15 @@
             <div class="form-group">
                 <label for="discountAmount" class="form-label">Zľava (%)</label>
                 <div class="discount-input">
-                  <input formControlName="discountAmount" type="number" id="discountAmount" class="form-control" min="0" max="100" placeholder="Zadajte zľavu">
+                  <input formControlName="discountAmount" type="number" id="discountAmount" class="form-control" min="0" max="100" placeholder="Zadajte zľavu" [ngClass]="{'is-invalid': orderForm.get('discountAmount').invalid}">
                   <p>% (-0€)</p>
                 </div>
             </div>
         </div>
-
         <div class="total-price">
             <p>CELKOM</p>
             <p>0€</p>
         </div>
-
         <div class="form-grid">
         <div class="customer-info">
             <h3>Objednávateľ</h3>
@@ -104,7 +109,7 @@
             <h3>Nastavenia faktúry</h3>
             <form [formGroup]="invoiceForm" (ngSubmit)="createInvoice()">
               <div class="field">
-                <label for="invoiceNumber" class="form-label">Číslo faktúry*</label>
+                <label for="invoiceNumber" class="form-label">Číslo faktúry* (automaticky vyplnené z č. objednávky)</label>
                 <input type="number" id="invoiceNumber" class="form-control" value="{{orderId}}" readonly placeholder="Zadajte číslo faktúry" formControlName="invoiceNumber" [ngClass]="{'is-invalid': invoiceForm.get('invoiceNumber').invalid && invoiceForm.get('invoiceNumber').touched}">
             </div>
             <div class="field">
@@ -158,128 +163,163 @@
             </form>
         </div>
     </div>
-
     <div class="order-status">
-        <div class="status-form-grid">
-            <div class="status-container-with-email">
-              <h3>Stav objednávky<br><div class="default-container">
-                <label class="default-status">Bez výberu: 
-                  <input formControlName="orderStatus" type="radio" class="form-check-input" value="nezpracovane-nova-objednavka" checked>
-                  Nezpracované - nová objednávka
-                </label>
-              </div>
-            </h3>
-                <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="vybavit-posta">
-                      Vybaviť - Pošta
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="uhradene-vybavit">
-                      Uhradené - Vybaviť 
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-cakam-na-platbu">
-                      Neuhradené, čakám na platbu
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-udaje-k-platbe-poslat-zakaznikovi-mail">
-                      Neuhradené - Údaje k platbe, poslať zákazníkovi e-mail
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-2xmail-poslany-zakaznikovi">
-                      Neuhradené - 2x poslaný e-mail zákazníkovi
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="vybavit-odlozene-osobny-odber">
-                      Vybaviť - Odložené, osobný odber
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="poslane-neuhradene">
-                      Poslané, neuhradené
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="dobierka-info-k-objednavke-mail">
-                      Dobierka - Info k objednávke (poslať zákazníkovi e-mail)
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="zasielanie-cisla-zasielky-posta-mail">
-                      Zasielanie čísla zásielky (Pošta)
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="oprava">
-                      Oprava
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="objednavka-odoslana-cakam-na-uhradu-dobierkou">
-                      Objednávka odoslaná, čakám na úhradu dobierkou
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="objednavka-vybavena">
-                      Objednávka vybavená
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="storno">
-                      Storno
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input formControlName="orderStatus" type="radio" class="form-check-input" value="rozbite-znicene-vratene">
-                      Rozbité, zničené, vrátené
-                    </label>
-                  </div>
-            </div>
-            <div class="order-summary-container">
-              <h3>Zhrnutie objednávky<br>
-              <span class="order-summary-title-text">Pred vytvorením objednávky skontrolujte zadané údaje</span></h3>
-              <div class="order-summary">
-                <p><strong>Spôsob dopravy:</strong> {{ orderForm.get('deliveryOption').value || 'Nezvolený' }}</p>
-                <p><strong>Spôsob platby:</strong> {{ orderForm.get('paymentOption').value || 'Nezvolený' }}</p>
-                <p><strong>Meno:</strong> {{ orderForm.get('name').value || 'Nezadané' }}</p>
-                <p><strong>Firma:</strong> {{ orderForm.get('company').value || 'Nezadané' }}</p>
-                <p><strong>IČO:</strong> {{ orderForm.get('ico').value || 'Nezadané' }}</p>
-                <p><strong>DIČ:</strong> {{ orderForm.get('dic').value || 'Nezadané' }}</p>
-                <p><strong>IČ DPH:</strong> {{ orderForm.get('icDph').value || 'Nezadané' }}</p>
-                <p><strong>Adresa:</strong> {{ orderForm.get('address').value || 'Nezadané' }}</p>
-                <p><strong>Mesto:</strong> {{ orderForm.get('city').value || 'Nezadané' }}</p>
-                <p><strong>PSČ:</strong> {{ orderForm.get('postalCode').value || 'Nezadané' }}</p>
-                <p><strong>E-mailová adresa:</strong> {{ orderForm.get('email').value || 'Nezadané' }}</p>
-                <p><strong>Telefónne číslo:</strong> {{ orderForm.get('phoneNumber').value || 'Nezadané' }}</p>
-                <p><strong>Stav:</strong> {{ orderForm.get('orderStatus').value || 'Bez výberu' }}</p>
-                <p><strong>Celková cena:</strong> 0€ (-{{orderForm.get('discountAmount').value}}%)</p> <!-- Tento údaj bude dynamicky vypočítaný na základe ďalších polí -->
-              </div>
-            </div>
+       <h3>Stav objednávky<br><div class="default-container">
+          <label class="default-status">Bez výberu objednávky je automaticky nastavený stav ako: 
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="nezpracovane-nova-objednavka" checked>
+            Nezpracované - nová objednávka
+          </label>
         </div>
-    </div>
-    @if(!isLoading){
-      <div class="submit">
-        <button type="submit" class="btn btn-primary">Vytvoriť objednávku</button>
+       </h3>
+      <div class="parent-order-status-container">
+      <div class="order-status-container">
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="vybavit-posta">
+            Vybaviť - Pošta
+          </label>
+        </div>
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="uhradene-vybavit">
+            Uhradené - Vybaviť 
+          </label>
+        </div>
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-cakam-na-platbu">
+            Neuhradené, čakám na platbu
+          </label>
+        </div>
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-udaje-k-platbe-poslat-zakaznikovi-mail">
+            Neuhradené - Údaje k platbe, poslať zákazníkovi e-mail
+          </label>
+        </div>
       </div>
+      <div class="order-status-container">
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-2xmail-poslany-zakaznikovi">
+            Neuhradené - 2x poslaný e-mail zákazníkovi
+          </label>
+        </div>
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="vybavit-odlozene-osobny-odber">
+            Vybaviť - Odložené, osobný odber
+          </label>
+        </div>
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="poslane-neuhradene">
+            Poslané, neuhradené
+          </label>
+        </div>
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="dobierka-info-k-objednavke-mail">
+            Dobierka - Info k objednávke (poslať zákazníkovi e-mail)
+          </label>
+        </div>
+      </div>
+      <div class="order-status-container">
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="zasielanie-cisla-zasielky-posta-mail">
+            Zasielanie čísla zásielky (Pošta)
+          </label>
+        </div>
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="oprava">
+            Oprava
+          </label>
+        </div>
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="objednavka-odoslana-cakam-na-uhradu-dobierkou">
+            Objednávka odoslaná, čakám na úhradu dobierkou
+          </label>
+        </div>
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="objednavka-vybavena">
+            Objednávka vybavená
+          </label>
+        </div>
+      </div>
+      <div class="order-status-container">
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="storno">
+            Storno
+          </label>
+        </div>
+        <div>
+          <label>
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="rozbite-znicene-vratene">
+            Rozbité, zničené, vrátené
+          </label>
+        </div>
+      </div>
+    </div>
+    </div>
+    <!--<div class="order-summary">
+      <div class="order-summary-container">
+        <h3>Zhrnutie objednávky<br>
+        <span class="order-summary-title-text">Pred vytvorením objednávky skontrolujte zadané údaje</span></h3>
+        <div class="order-summary-parent-container">
+          <div class="order-summary-child-container">
+            <p><strong>Meno:</strong> {{ orderForm.get('customerName').value || 'Nezadané' }}</p>
+            <p><strong>Firma:</strong> {{ orderForm.get('company').value || 'Nezadané' }}</p>
+            <p><strong>IČO:</strong> {{ orderForm.get('ico').value || 'Nezadané' }}</p>
+            <p><strong>DIČ:</strong> {{ orderForm.get('dic').value || 'Nezadané' }}</p>
+            <p><strong>IČ DPH:</strong> {{ orderForm.get('icDph').value || 'Nezadané' }}</p>
+            <p><strong>Adresa:</strong> {{ orderForm.get('address').value || 'Nezadané' }}, {{ orderForm.get('city').value || 'Nezadané' }}, {{ orderForm.get('postalCode').value || 'Nezadané' }}</p>
+            <p><strong>E-mailová adresa:</strong> {{ orderForm.get('email').value || 'Nezadané' }}</p>
+            <p><strong>Telefónne číslo:</strong> {{ orderForm.get('phoneNumber').value || 'Nezadané' }}</p> 
+          </div>
+          <div class="order-summary-child-container">
+            <p><strong>Spôsob dopravy:</strong> {{ orderForm.get('deliveryOption').value || 'Nezvolený' }}</p>
+            <p><strong>Spôsob platby:</strong> {{ orderForm.get('paymentOption').value || 'Nezvolený' }}</p>
+            <p><strong>Stav objednávky:</strong> {{ orderForm.get('orderStatus').value || 'Bez výberu' }}</p>
+            <p><strong>Hmotnosť objednávky: </strong>0kg</p>
+            <p><strong>Celkový počet produktov: </strong>0ks</p>
+            <p><strong>Zľava:</strong> {{orderForm.get('discountAmount').value > 0 ? 'Áno (-' + orderForm.get('discountAmount').value + '%)' : 'Nie'}}</p>
+            <p><strong>Poznámka:</strong> {{ orderForm.get('note').value ? orderForm.get('note').value : 'Nezadané' }}</p>
+            <p><strong>Celková cena:</strong> 0€ (-{{orderForm.get('discountAmount').value || 0}}%)</p> 
+          </div>
+          <div class="order-summary-child-container">
+            <p><strong>Číslo faktúry:</strong> {{ invoiceForm.get('invoiceNumber').value || 'Nezadané' }}</p>
+            <p><strong>Variabilný symbol:</strong> {{ invoiceForm.get('invoiceVariable').value || 'Nezadané' }}</p>
+            <p><strong>Typ dokladu:</strong> Faktúra</p>
+            <p><strong>Dátum vystavenia:</strong> {{ invoiceForm.get('invoiceIssueDate').value || 'Nezadané' }}</p>
+            <p><strong>Dátum splatnosti:</strong> {{ invoiceForm.get('invoiceDueDate').value || 'Nezadané' }}</p>
+            <p><strong>Dátum dodania:</strong> {{ invoiceForm.get('invoiceDeliveryDate').value || 'Nezadané' }}</p>
+          </div>
+          <div class="order-summary-child-container">
+            <p><strong>Meno a priezvisko na faktúre:</strong> {{ invoiceForm.get('invoiceName').value || 'Nezadané' }}</p>
+            <p><strong>Firma na faktúre:</strong> {{ invoiceForm.get('invoiceCompany').value || 'Nezadané' }}</p>
+            <p><strong>IČO na faktúre:</strong> {{ invoiceForm.get('invoiceICO').value || 'Nezadané' }}</p>
+            <p><strong>DIČ na faktúre:</strong> {{ invoiceForm.get('invoiceDIC').value || 'Nezadané' }}</p>
+            <p><strong>E-mailová adresa na faktúre:</strong> {{ invoiceForm.get('invoiceEmail').value || 'Nezadané' }}</p>
+            <p><strong>Telefónne číslo na faktúre:</strong> {{ invoiceForm.get('invoicePhoneNumber').value || 'Nezadané' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>-->
+    @if(!isLoading){
+      @if(isEditMode){
+        <div class="submit">
+          <button type="button" class="btn btn-primary" (click)="updateOrder()">Uložiť zmeny</button>
+        </div>
+      }@else{
+        <div class="submit">
+          <button type="submit" class="btn btn-primary" (click)="submitOrder()">Vytvoriť objednávku</button>
+        </div> 
+      }
     }@else{
       <div class="spinner-container">
         <div class="spinner">

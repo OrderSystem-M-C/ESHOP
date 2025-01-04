@@ -35,16 +35,37 @@ textarea {
     text-align: center;
     margin-top: 20px;
 }
-.customer-info, .invoice-settings, .delivery-payment-discount, .order-status{
+.customer-info, .invoice-settings, .delivery-payment-discount, .order-status, .order-summary{
     border: 1px solid #ccc;
     padding: 20px;
     border-radius: 10px;
     background-color: #f9f9f9;
 }
-.order-status{
+.order-status, .order-summary{
+    width: 100%;
     margin-top: 10px;
 }
-.customer-info h3, .invoice-settings h3, .order-status h3 {
+.default-container{
+    width: auto;
+}
+.parent-order-status-container{
+    display: flex;
+    align-items: top;
+    gap: 10px;
+    justify-content: flex-start;
+    flex-direction: row;
+}
+.order-summary-parent-container {
+    display: flex;
+    align-items: top;
+    gap: 20px;
+    justify-content: flex-start;
+    flex-direction: row;
+}
+.order-summary-parent-container{
+    padding-left: 5px;
+}
+.customer-info h3, .invoice-settings h3, .order-status h3, .order-summary h3 {
     text-align: left;
     border-bottom: 1px solid #ddd;
     padding-bottom: 10px;
@@ -98,27 +119,16 @@ textarea {
 .char-count{
     margin-top: 7.5px;
 }
-.status-container-with-email img{
-    height: 20px;
-    width: 20px;
-    overflow: hidden;
-    display: inline-block;
-    margin-bottom: 2px;
-    padding: 0;
-}
-.status-container-with-email label{
+.order-status label{
     display: flex;
     align-items: center;
     justify-content: flex-start;
     gap: 5px;
 }
-.status-container-with-email input{
+.order-status input{
     margin: 0;
 }
-.status-container-with-email{
-    padding-left: 30px;
-}
-.status-container-with-email div:not(.default-container) {
+.order-status div:not(.default-container) {
     margin: 3.5px 0 3.5px 0;
 }
 input[type="radio"]{
@@ -152,4 +162,7 @@ input[type="radio"]{
 }
 .form-control.ng-invalid.ng-touched{
     border-color: red;
+}
+.form-control.ng-valid:not(:placeholder-shown) {
+    border-color: #28a745;
 }

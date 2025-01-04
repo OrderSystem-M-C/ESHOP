@@ -28,4 +28,9 @@ export class OrderService {
     const url = `${this.baseUrl}/order/delete-order/${rowId}`;
     return this.http.delete(url);
   }
+  updateOrder(orderId: number, order: OrderDTO): Observable<any>{
+    const url = `${this.baseUrl}/order/update-order/${orderId}`;
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.put(url, order, {headers, responseType: 'text'}); //znamena ze Angular bude ocakavat textovu spravu a nie JSON takze sa spravne spracuje
+  }
 }

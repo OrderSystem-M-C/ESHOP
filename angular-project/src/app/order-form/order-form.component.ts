@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Form, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import * as html2pdf from 'html2pdf.js';
 import { OrderService } from '../services/order.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,15 +16,17 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 })
 export class OrderFormComponent implements OnInit {
   currentDate: string;
+
   userMessage: string = '';
   charactersCount: number = 0;
 
   orderId = Math.floor(100000 + Math.random() * 900000);
+  existingOrderId: number | null = null;
 
   invoiceCreated: boolean = false;
-  invoiceDateCreation: string = '';
 
   isLoading: boolean = false;
+
   isEditMode: boolean = false;
 
   constructor(private datePipe: DatePipe,private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar){}
@@ -37,13 +39,13 @@ export class OrderFormComponent implements OnInit {
     icDph: new FormControl(''),
     address: new FormControl('', Validators.required),
     city: new FormControl('', Validators.required),
-    postalCode: new FormControl('', Validators.required),
-    email: new FormControl('', Validators.required),
-    phoneNumber: new FormControl('', Validators.required),
+    postalCode: new FormControl('', [Validators.required, Validators.pattern(/^\d+$/)]),
+    email: new FormControl('', [Validators.required, this.emailValidator]),
+    phoneNumber: new FormControl('', [Validators.required, this.phoneValidator]),
     note: new FormControl(''),
     deliveryOption: new FormControl('', Validators.required),
     paymentOption: new FormControl('', Validators.required),
-    discountAmount: new FormControl(0),
+    discountAmount: new FormControl(null, Validators.pattern('^[0-9]*$')),
     orderStatus: new FormControl('nezpracovane-nova-objednavka')
   });
 
@@ -61,9 +63,66 @@ export class OrderFormComponent implements OnInit {
     invoicePhoneNumber: new FormControl('', Validators.required),
   })
 
+  createOrderDTO(): OrderDTO{
+    return {
+      orderId: this.isEditMode ? this.existingOrderId : this.orderId,
+      customerName: this.orderForm.value.customerName,
+      company: this.orderForm.value.company || '',
+      ico: this.orderForm.value.ico || '',
+      dic: this.orderForm.value.dic || '',
+      icDph: this.orderForm.value.icDph || '',
+      address: this.orderForm.value.address,
+      city: this.orderForm.value.city,
+      postalCode: this.orderForm.value.postalCode,
+      email: this.orderForm.value.email,
+      phoneNumber: this.orderForm.value.phoneNumber,
+      note: this.orderForm.value.note || '',
+      deliveryOption: this.orderForm.value.deliveryOption,
+      paymentOption: this.orderForm.value.paymentOption,
+      discountAmount: this.orderForm.value.discountAmount || 0,
+      orderStatus: this.orderForm.value.orderStatus,
+      orderDate: this.currentDate,
+      invoiceNumber: this.invoiceForm.value.invoiceNumber,
+      variableSymbol: this.invoiceForm.value.invoiceVariable,
+      invoiceIssueDate: this.invoiceForm.value.invoiceIssueDate,
+      invoiceDueDate: this.invoiceForm.value.invoiceDueDate,
+      invoiceDeliveryDate: this.invoiceForm.value.invoiceDeliveryDate,
+      invoiceName: this.invoiceForm.value.invoiceName,
+      invoiceCompany: this.invoiceForm.value.invoiceCompany || '',
+      invoiceICO: this.invoiceForm.value.invoiceICO || '',
+      invoiceDIC: this.invoiceForm.value.invoiceDIC || '',
+      invoiceEmail: this.invoiceForm.value.invoiceEmail,
+      invoicePhoneNumber: this.invoiceForm.value.invoicePhoneNumber,
+    }
+  }
+
+  updateOrder(){
+    if(this.orderForm.valid && this.invoiceForm.valid){
+      let order = this.createOrderDTO();
+
+      this.isLoading = this.invoiceCreated = true;
+
+      this.orderService.updateOrder(this.existingOrderId, order).subscribe((response) => {
+        console.log(response);
+
+        this.snackBar.open('Objednávka bola úspešne upravená!', '', {duration: 1000});
+        this.router.navigate(['/orders-page']);
+
+        this.isLoading = false;
+      }, (error) => {
+        console.error("An error occurred while trying to update order", error);
+        this.isLoading = false;
+      });
+    }else if(this.orderForm.invalid || this.invoiceForm.invalid){
+      this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
+      this.validateAllFormFields(this.orderForm);
+      this.validateAllFormFields(this.invoiceForm);
+    }
+  }
+
   loadOrder(orderId: number){
     this.orderService.getOrderDetails(orderId).subscribe((order) => {
-      this.orderForm.patchValue(order);
+      this.orderForm.patchValue(order); //patchValue robi ze vyplni hodnoty objednavky
 
       this.invoiceForm.patchValue({
         invoiceNumber: order.invoiceNumber,
@@ -94,8 +153,8 @@ export class OrderFormComponent implements OnInit {
 
     if(icoControl && dicControl){
       if(companyValue && companyValue.trim().length > 0){
-        icoControl.setValidators([Validators.required]);
-        dicControl.setValidators([Validators.required]);
+        icoControl.setValidators([Validators.required, Validators.pattern(/^\d+$/)]);
+        dicControl.setValidators([Validators.required, Validators.pattern(/^\d+$/)]);
       }else{
         icoControl.clearValidators();
         dicControl.clearValidators();
@@ -119,37 +178,8 @@ export class OrderFormComponent implements OnInit {
   }
   
   submitOrder(){
-    if(this.orderForm.valid && this.invoiceCreated){
-      let order: OrderDTO = {
-        orderId: this.orderId,
-        customerName: this.orderForm.value.customerName,
-        company: this.orderForm.value.company || '',
-        ico: this.orderForm.value.ico || '',
-        dic: this.orderForm.value.dic || '',
-        icDph: this.orderForm.value.icDph || '',
-        address: this.orderForm.value.address,
-        city: this.orderForm.value.city,
-        postalCode: this.orderForm.value.postalCode,
-        email: this.orderForm.value.email,
-        phoneNumber: this.orderForm.value.phoneNumber,
-        note: this.orderForm.value.note || '',
-        deliveryOption: this.orderForm.value.deliveryOption,
-        paymentOption: this.orderForm.value.paymentOption,
-        discountAmount: this.orderForm.value.discountAmount || 0,
-        orderStatus: this.orderForm.value.orderStatus,
-        orderDate: this.currentDate,
-        invoiceNumber: this.invoiceForm.value.invoiceNumber,
-        variableSymbol: this.invoiceForm.value.invoiceVariable,
-        invoiceIssueDate: this.invoiceForm.value.invoiceIssueDate,
-        invoiceDueDate: this.invoiceForm.value.invoiceDueDate,
-        invoiceDeliveryDate: this.invoiceForm.value.invoiceDeliveryDate,
-        invoiceName: this.invoiceForm.value.invoiceName,
-        invoiceCompany: this.invoiceForm.value.invoiceCompany || '',
-        invoiceICO: this.invoiceForm.value.invoiceICO || '',
-        invoiceDIC: this.invoiceForm.value.invoiceDIC || '',
-        invoiceEmail: this.invoiceForm.value.invoiceEmail,
-        invoicePhoneNumber: this.invoiceForm.value.invoicePhoneNumber,
-      };
+    if(this.orderForm.valid && this.invoiceForm.valid){
+      let order = this.createOrderDTO();
 
       this.isLoading = true;
 
@@ -158,22 +188,19 @@ export class OrderFormComponent implements OnInit {
           this.isLoading = false;
           if(!this.invoiceCreated){
             this.createInvoice();
+            this.router.navigate(['/orders-page']);
           }else{
             this.snackBar.open('Objednávka bola úspešne vytvorená!', '', {duration: 1000});
             this.router.navigate(['/orders-page']);
           }
         }
       }, (error) => {
-        console.error("An error occured while trying to create order", error)
+        console.error("An error occurred while trying to create order", error)
       });
-    }else if(this.orderForm.invalid){
+    }else if(this.orderForm.invalid || this.invoiceForm.invalid){
       this.validateAllFormFields(this.orderForm);
       this.validateAllFormFields(this.invoiceForm);
       this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
-    }
-    else if(!this.invoiceCreated){
-      this.validateAllFormFields(this.invoiceForm);
-      this.snackBar.open('Nezabudnite na vytvorenie faktúry!', '', {duration: 1000});
     }
   }
 
@@ -184,6 +211,21 @@ export class OrderFormComponent implements OnInit {
         control.markAsTouched(); 
       }
     })
+  }
+
+  emailValidator(control: FormControl) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+    if (control.value && !emailRegex.test(control.value)) {
+      return { invalidEmail: true };
+    }
+    return null;
+  }
+  phoneValidator(control: FormControl){
+    const phoneRegex = /^(0(?:2[0-9]{2}|[9][0-9]{2}))\s?([0-9]{3})\s?([0-9]{3})$|^(0[1-9][0-9]{8})$/;
+    if(control.value && !phoneRegex.test(control.value)){
+      return { invalidPhone: true };
+    }
+    return null
   }
 
   createInvoice(){
@@ -280,10 +322,12 @@ export class OrderFormComponent implements OnInit {
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
     
-    const orderId = Number(this.route.snapshot.paramMap.get('orderId'));
-    if(orderId){
+    this.existingOrderId = Number(this.route.snapshot.paramMap.get('orderId'));
+    if(this.existingOrderId){
       this.isEditMode = true;
-      this.loadOrder(orderId);
+      this.loadOrder(this.existingOrderId);
+    }else{
+      this.isEditMode = false;
     }
   }
 }

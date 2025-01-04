@@ -1,10 +1,7 @@
 ﻿using AspNetCoreAPI.Data;
 using AspNetCoreAPI.DTOs;
-using AspNetCoreAPI.Migrations;
 using AspNetCoreAPI.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCoreAPI.Controllers
 {
@@ -148,12 +145,65 @@ namespace AspNetCoreAPI.Controllers
                 _context.Orders.Remove(order);
                 _context.SaveChanges();
 
-                return Ok(new {message = $"Successfully deleted order with id {Id}" });
+                return Ok(new {message = $"Successfully deleted order with id {Id}." });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { error = ex.Message}); 
             }    
+        }
+        [HttpPut("update-order/{orderId}")]
+        public IActionResult UpdateOrder(int orderId, [FromBody] OrderDTO orderDto)
+        {
+            if (orderId != orderDto.OrderId)
+            {
+                return BadRequest("Order ID does not match.");
+            }
+
+            var order = _context.Orders.FirstOrDefault(o => orderId == o.OrderId);
+
+            if (order == null)
+            {
+                return NotFound("Order was not found.");
+            }
+
+            try
+            {
+                order.CustomerName = orderDto.CustomerName;
+                order.Company = orderDto.Company;
+                order.ICO = orderDto.ICO;
+                order.DIC = orderDto.DIC;
+                order.ICDPH = orderDto.ICDPH;
+                order.Address = orderDto.Address;
+                order.City = orderDto.City;
+                order.PostalCode = orderDto.PostalCode;
+                order.Email = orderDto.Email;
+                order.PhoneNumber = orderDto.PhoneNumber;
+                order.Note = orderDto.Note;
+                order.DeliveryOption = orderDto.DeliveryOption;
+                order.PaymentOption = orderDto.PaymentOption;
+                order.DiscountAmount = orderDto.DiscountAmount;
+                order.OrderStatus = orderDto.OrderStatus;
+                order.OrderDate = orderDto.OrderDate;
+                order.InvoiceNumber = orderDto.InvoiceNumber;
+                order.VariableSymbol = orderDto.VariableSymbol;
+                order.InvoiceIssueDate = orderDto.InvoiceIssueDate;
+                order.InvoiceDueDate = orderDto.InvoiceDueDate;
+                order.InvoiceDeliveryDate = orderDto.InvoiceDeliveryDate;
+                order.InvoiceName = orderDto.InvoiceName;
+                order.InvoiceCompany = orderDto.InvoiceCompany;
+                order.InvoiceICO = orderDto.InvoiceICO;
+                order.InvoiceDIC = orderDto.InvoiceDIC;
+                order.InvoiceEmail = orderDto.InvoiceEmail;
+                order.InvoicePhoneNumber = orderDto.InvoicePhoneNumber;
+
+                _context.SaveChanges();
+                return Ok("Order updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new {error = ex.Message});
+            }
         }
     }
 }
