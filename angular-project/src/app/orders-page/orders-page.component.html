@@ -6,7 +6,7 @@
       <p>{{currentDate}}</p>
     </div>
     <div class="button-container">
-      <button class="btn btn-secondary">Moje produkty</button>
+      <button class="btn btn-secondary" [routerLink]="['/products-page']">Moje produkty</button>
       <button class="btn btn-primary" [routerLink]="['/order-form']">Vytvoriť objednávku</button>
     </div>
   </div>
@@ -70,7 +70,7 @@
       </table>
     }@else if(filteredOrders.length === 0 && ordersData.length > 0){
       <div class="no-orders-container">
-        <h3>Nenašli sa žiadne objednávky</h3>
+        <h3>Neboli nájdené žiadne objednávky</h3>
       </div>
     }
     @else{

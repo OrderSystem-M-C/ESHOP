@@ -8,7 +8,7 @@ namespace AspNetCoreAPI.Models
     {
         [Key]
         public int Id { get; set; }
-        [Required(ErrorMessage = "OrderId je povinné")]
+        [Required(ErrorMessage = "OrderId je povinné.")]
         public int OrderId { get; set; }
 
         [Required(ErrorMessage = "Meno zákazníka je povinné.")]
@@ -33,7 +33,7 @@ namespace AspNetCoreAPI.Models
         public string PostalCode { get; set; }
 
         [Required(ErrorMessage = "E-mail je povinný.")]
-        [EmailAddress(ErrorMessage = "Zadajte platný e-mail")]
+        [EmailAddress(ErrorMessage = "Zadajte platný e-mail.")]
         [MaxLength(100, ErrorMessage = "E-mailová adresa nemôže byť dlhšia ako 100 znakov.")]
         public string Email { get; set; }
         [Required(ErrorMessage = "Telefónne číslo je povinné.")]

@@ -29,7 +29,7 @@ textarea {
     min-height: 100px;
 }
 .create-invoice-btn{
-    margin-top: 15px;
+    margin-top: 2.5px;
 }
 .submit{
     text-align: center;
@@ -40,30 +40,6 @@ textarea {
     padding: 20px;
     border-radius: 10px;
     background-color: #f9f9f9;
-}
-.order-status, .order-summary{
-    width: 100%;
-    margin-top: 10px;
-}
-.default-container{
-    width: auto;
-}
-.parent-order-status-container{
-    display: flex;
-    align-items: top;
-    gap: 10px;
-    justify-content: flex-start;
-    flex-direction: row;
-}
-.order-summary-parent-container {
-    display: flex;
-    align-items: top;
-    gap: 20px;
-    justify-content: flex-start;
-    flex-direction: row;
-}
-.order-summary-parent-container{
-    padding-left: 5px;
 }
 .customer-info h3, .invoice-settings h3, .order-status h3, .order-summary h3 {
     text-align: left;
@@ -119,25 +95,29 @@ textarea {
 .char-count{
     margin-top: 7.5px;
 }
+.order-status, .order-summary{
+    width: 100%;
+    margin-top: 10px;
+}
+.parent-order-status-container{
+    display: flex;
+    align-items: top;
+    gap: 10px;
+    justify-content: flex-start;
+    flex-direction: row;
+}
 .order-status label{
     display: flex;
     align-items: center;
     justify-content: flex-start;
     gap: 5px;
 }
-.order-status input{
-    margin: 0;
-}
 .order-status div:not(.default-container) {
     margin: 3.5px 0 3.5px 0;
 }
 input[type="radio"]{
     cursor: pointer;
-}
-.status-form-grid{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    margin: 10px 0 10px 0;
+    border: 1px solid #ccc;
 }
 .default-status, .order-summary-title-text{
     font-weight: normal;
@@ -150,11 +130,29 @@ input[type="radio"]{
 .default-status input{
     margin: 0;
 }
+.order-summary-parent-container{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-left: 2px;
+}
+.order-summary-child-container{
+    flex: 1 1 calc(25% - 20px); /* Zaberie približne 25% šírky s medzerou */
+    min-width: 200px;
+    box-sizing: border-box;
+    border-radius: 5px;
+}
 .order-summary p{
     margin: 3.5px 0 3.5px 0;
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
 }
 .order-summary p strong{
     color: #333;
+}
+.spinner-container{
+    height: 100px !important;
 }
 /*Pre neplatné polia*/
 .form-control.is-invalid {
@@ -163,6 +161,7 @@ input[type="radio"]{
 .form-control.ng-invalid.ng-touched{
     border-color: red;
 }
+/*Pre platné polia*/
 .form-control.ng-valid:not(:placeholder-shown) {
     border-color: #28a745;
 }

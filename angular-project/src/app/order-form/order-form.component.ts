@@ -36,7 +36,16 @@ export class OrderFormComponent implements OnInit {
     company: new FormControl(''),
     ico: new FormControl(''),
     dic: new FormControl(''),
-    icDph: new FormControl(''),
+    icDph: new FormControl('', [
+      control => {
+        const value = control.value;
+
+        if(!value){
+          return null;
+        }
+        return /^[1-9]\d*$/.test(value) ? null : { invalidIcDph: true };
+      }
+    ]),
     address: new FormControl('', Validators.required),
     city: new FormControl('', Validators.required),
     postalCode: new FormControl('', [Validators.required, Validators.pattern(/^\d+$/)]),
@@ -59,8 +68,8 @@ export class OrderFormComponent implements OnInit {
     invoiceCompany: new FormControl(''),
     invoiceICO: new FormControl(''),
     invoiceDIC: new FormControl(''),
-    invoiceEmail: new FormControl('', Validators.required),
-    invoicePhoneNumber: new FormControl('', Validators.required),
+    invoiceEmail: new FormControl('', [Validators.required, this.emailValidator]),
+    invoicePhoneNumber: new FormControl('', [Validators.required, this.phoneValidator]),
   })
 
   createOrderDTO(): OrderDTO{
@@ -98,7 +107,10 @@ export class OrderFormComponent implements OnInit {
 
   updateOrder(){
     if(this.orderForm.valid && this.invoiceForm.valid){
-      let order = this.createOrderDTO();
+      if(this.orderForm.pristine){
+        this.snackBar.open('Nebola vykonaná žiadna zmena v objednávke!', '', {duration: 1000});
+      }else{
+        let order = this.createOrderDTO();
 
       this.isLoading = this.invoiceCreated = true;
 
@@ -113,6 +125,7 @@ export class OrderFormComponent implements OnInit {
         console.error("An error occurred while trying to update order", error);
         this.isLoading = false;
       });
+      }
     }else if(this.orderForm.invalid || this.invoiceForm.invalid){
       this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
       this.validateAllFormFields(this.orderForm);

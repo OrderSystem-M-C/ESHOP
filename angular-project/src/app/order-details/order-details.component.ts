@@ -127,9 +127,11 @@ export class OrderDetailsComponent implements OnInit{
     this.dialogRef.afterClosed().subscribe((result) => {
       if(result){
         this.orderService.deleteOrder(this.order.id).subscribe((response: any) => {
+          this.isLoading = false;
           this.router.navigate(['/orders-page']);
           this.snackBar.open('Objednávka bola úspešne odstránená!' ,'', {duration: 1000});
         }, (error) =>{
+          this.isLoading = false
           console.error(error);
         })
       }else{

@@ -1,0 +1,47 @@
+<title>Produkty</title>
+<div class="products-page-component">
+  <div class="title">
+    <div class="title-container-1">
+      <h1>Prehľad produktov</h1>
+      <p>{{currentDate}}</p>
+    </div>
+    <div class="button-container">
+      <button class="btn btn-primary" (click)="createProduct(createProductDialog)">Pridať produkt</button>
+    </div>
+  </div>
+</div>
+<ng-template #createProductDialog>
+  <form class="product-form" [formGroup]="productForm">
+    <div class="title-date">
+        <h1>Vytvoriť nový produkt</h1>
+        <p>{{currentDate}}</p>
+    </div>
+    <div class="product-info">
+        <div class="field">
+            <label for="product-name" class="form-label">Názov produktu*</label>
+            <input type="text" formControlName="productName" id="product-name" class="form-control" placeholder="Zadajte názov produktu" [ngClass]="{'is-invalid': productForm.get('productName').invalid && productForm.get('productName').touched}">
+        </div>
+        <div class="field">
+            <label for="product-description" class="form-label">Popis produktu</label>
+            <input type="text" formControlName="productDescription" id="product-description" class="form-control" placeholder="Zadajte popis produktu" [ngClass]="{'is-invalid': productForm.get('productDescription').invalid}">
+        </div>
+        <div class="field">
+            <label for="product-price" class="form-label">Cena produktu za kus*</label>
+            <div class="product-price">
+              <input type="number" formControlName="productPrice" id="product-price" class="form-control" placeholder="Zadajte cenu produktu" [ngClass]="{'is-invalid': productForm.get('productPrice').invalid && productForm.get('productPrice').touched}">
+              <p>€</p>
+            </div>
+        </div>
+        <div class="field">
+            <label for="product-weight" class="form-label">Hmotnosť produktu*</label>
+            <div class="product-weight">
+              <input type="text" formControlName="productWeight" id="product-weight" class="form-control" placeholder="Zadajte hmotnosť produktu" [ngClass]="{'is-invalid': productForm.get('productWeight').invalid && productForm.get('productWeight').touched}">
+              <p>kg</p>
+            </div>
+        </div>
+        <div class="submit">
+          <button type="submit" class="btn btn-primary" (click)="dialogRef.close(true)">Vytvoriť produkt</button>
+        </div> 
+    </div>
+</form>
+</ng-template>

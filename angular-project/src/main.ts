@@ -14,6 +14,7 @@ import { OrdersPageComponent } from './app/orders-page/orders-page.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { authGuard } from './app/api-authorization/auth.guard';
 import { OrderDetailsComponent } from './app/order-details/order-details.component';
+import { ProductsPageComponent } from './app/products-page/products-page.component';
 
 export function getBaseUrl() {
   return 'https://localhost:7186/api';
@@ -46,7 +47,8 @@ bootstrapApplication(AppComponent, {
         { path: 'order-form', component: OrderFormComponent, canActivate: [authGuard]},
         { path: 'order-form/:orderId', component: OrderFormComponent, canActivate: [authGuard] },
         { path: 'orders-page', component: OrdersPageComponent, canActivate: [authGuard]},
-        { path: 'order-details/:orderId', component: OrderDetailsComponent, canActivate: [authGuard]}
+        { path: 'order-details/:orderId', component: OrderDetailsComponent, canActivate: [authGuard]},
+        { path: 'products-page', component: ProductsPageComponent, canActivate: [authGuard]},
       ]), provideAnimationsAsync()
     ]
 })

@@ -72,7 +72,7 @@
             </div>
             <div class="field">
                 <label for="icDph" class="form-label">IČ DPH (ak má firma)</label>
-                <input formControlName="icDph" type="text" id="icDph" class="form-control" placeholder="Zadajte IČ DPH">
+                <input formControlName="icDph" type="text" id="icDph" class="form-control" placeholder="Zadajte IČ DPH" [ngClass]="{'is-invalid': orderForm.get('icDph').invalid}">
             </div>
             <div class="field">
                 <label for="address" class="form-label">Adresa*</label>
@@ -157,7 +157,6 @@
               <input type="text" id="invoicePhoneNumber" class="form-control" placeholder="Zadajte telefónne číslo na faktúre" formControlName="invoicePhoneNumber" [ngClass]="{'is-invalid': invoiceForm.get('invoicePhoneNumber').invalid && invoiceForm.get('invoicePhoneNumber').touched}">
             </div>
             <div class="field">
-              <label>Pred vytvorením faktúry overte, či zadané údaje sú správne</label><br>
               <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn" (click)="createInvoice()">Vytvoriť faktúru</button>
             </div>
             </form>
@@ -188,7 +187,7 @@
         <div>
           <label>
             <input formControlName="orderStatus" type="radio" class="form-check-input" value="neuhradene-cakam-na-platbu">
-            Neuhradené, čakám na platbu
+            Neuhradené - čakám na platbu
           </label>
         </div>
         <div>
@@ -239,14 +238,14 @@
         </div>
         <div>
           <label>
-            <input formControlName="orderStatus" type="radio" class="form-check-input" value="objednavka-odoslana-cakam-na-uhradu-dobierkou">
-            Objednávka odoslaná, čakám na úhradu dobierkou
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="objednavka-vybavena">
+            Objednávka vybavená
           </label>
         </div>
         <div>
           <label>
-            <input formControlName="orderStatus" type="radio" class="form-check-input" value="objednavka-vybavena">
-            Objednávka vybavená
+            <input formControlName="orderStatus" type="radio" class="form-check-input" value="objednavka-odoslana-cakam-na-uhradu-dobierkou">
+            Objednávka odoslaná, čakám na úhradu dobierkou
           </label>
         </div>
       </div>
@@ -268,10 +267,9 @@
     </div>
     <!--<div class="order-summary">
       <div class="order-summary-container">
-        <h3>Zhrnutie objednávky<br>
-        <span class="order-summary-title-text">Pred vytvorením objednávky skontrolujte zadané údaje</span></h3>
         <div class="order-summary-parent-container">
           <div class="order-summary-child-container">
+            <h3>Objednávateľ</h3>
             <p><strong>Meno:</strong> {{ orderForm.get('customerName').value || 'Nezadané' }}</p>
             <p><strong>Firma:</strong> {{ orderForm.get('company').value || 'Nezadané' }}</p>
             <p><strong>IČO:</strong> {{ orderForm.get('ico').value || 'Nezadané' }}</p>
@@ -282,6 +280,7 @@
             <p><strong>Telefónne číslo:</strong> {{ orderForm.get('phoneNumber').value || 'Nezadané' }}</p> 
           </div>
           <div class="order-summary-child-container">
+            <h3>Ďaľšie podrobnosti</h3>
             <p><strong>Spôsob dopravy:</strong> {{ orderForm.get('deliveryOption').value || 'Nezvolený' }}</p>
             <p><strong>Spôsob platby:</strong> {{ orderForm.get('paymentOption').value || 'Nezvolený' }}</p>
             <p><strong>Stav objednávky:</strong> {{ orderForm.get('orderStatus').value || 'Bez výberu' }}</p>
@@ -292,6 +291,7 @@
             <p><strong>Celková cena:</strong> 0€ (-{{orderForm.get('discountAmount').value || 0}}%)</p> 
           </div>
           <div class="order-summary-child-container">
+            <h3>Dátumy a čísla faktúry</h3>
             <p><strong>Číslo faktúry:</strong> {{ invoiceForm.get('invoiceNumber').value || 'Nezadané' }}</p>
             <p><strong>Variabilný symbol:</strong> {{ invoiceForm.get('invoiceVariable').value || 'Nezadané' }}</p>
             <p><strong>Typ dokladu:</strong> Faktúra</p>
@@ -300,6 +300,7 @@
             <p><strong>Dátum dodania:</strong> {{ invoiceForm.get('invoiceDeliveryDate').value || 'Nezadané' }}</p>
           </div>
           <div class="order-summary-child-container">
+            <h3>Fakturačné údaje</h3>
             <p><strong>Meno a priezvisko na faktúre:</strong> {{ invoiceForm.get('invoiceName').value || 'Nezadané' }}</p>
             <p><strong>Firma na faktúre:</strong> {{ invoiceForm.get('invoiceCompany').value || 'Nezadané' }}</p>
             <p><strong>IČO na faktúre:</strong> {{ invoiceForm.get('invoiceICO').value || 'Nezadané' }}</p>
