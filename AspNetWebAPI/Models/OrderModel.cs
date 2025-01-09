@@ -53,9 +53,8 @@ namespace AspNetCoreAPI.Models
 
         [Required(ErrorMessage = "Stav objednávky je povinný.")]
         public string OrderStatus { get; set; }
-        [Required(ErrorMessage = "Dátum objednávky je povinný.")]
         // public DateTime OrderDate { get; set; } = DateTime.Now; DateTime ziskame datum a ihned sa ulozi ten aktualny
-        public string OrderDate { get; set; }
+        public string? OrderDate { get; set; }
 
 
         //Faktúra

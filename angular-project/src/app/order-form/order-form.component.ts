@@ -90,7 +90,7 @@ export class OrderFormComponent implements OnInit {
       paymentOption: this.orderForm.value.paymentOption,
       discountAmount: this.orderForm.value.discountAmount || 0,
       orderStatus: this.orderForm.value.orderStatus,
-      orderDate: this.currentDate,
+      ...(this.isEditMode ? {} : {orderDate: this.currentDate}),
       invoiceNumber: this.invoiceForm.value.invoiceNumber,
       variableSymbol: this.invoiceForm.value.invoiceVariable,
       invoiceIssueDate: this.invoiceForm.value.invoiceIssueDate,

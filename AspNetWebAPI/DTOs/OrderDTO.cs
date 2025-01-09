@@ -31,8 +31,7 @@ namespace AspNetCoreAPI.DTOs
         public int DiscountAmount { get; set; }
         [Required]
         public string OrderStatus { get; set; }
-        [Required]
-        public string OrderDate { get; set; }
+        public string? OrderDate { get; set; }
         [Required]
         public int InvoiceNumber { get; set; }
         [Required]
