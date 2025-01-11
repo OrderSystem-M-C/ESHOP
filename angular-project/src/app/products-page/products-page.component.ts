@@ -19,8 +19,14 @@ export class ProductsPageComponent implements OnInit {
   dialogRef!: MatDialogRef<any>;
 
   public productsData: ProductDTO[] = [];
+  filteredProducts: ProductDTO[] = [];
   
   isLoading: boolean = true;
+  isLoadingForm: boolean = false;
+  creationSuccessful: boolean = false;
+
+  isVisibleAlphabetical: boolean = false;
+  isVisiblePrice: boolean = false;
 
   constructor(private datePipe: DatePipe, private dialog: MatDialog, private snackBar: MatSnackBar, private productService: ProductService){}
 
@@ -31,6 +37,27 @@ export class ProductsPageComponent implements OnInit {
     productWeight: new FormControl('', [Validators.required, Validators.pattern(/^\d+$/)])
   })
 
+  toggleDropdown(dropdown: 'alphabetical' | 'price'){
+    if(dropdown === 'alphabetical'){
+      this.isVisibleAlphabetical = !this.isVisibleAlphabetical;
+    }else{
+      this.isVisiblePrice = !this.isVisiblePrice;
+    }
+  }
+
+  sortProducts(criteria: 'alphabeticalAsc' | 'alphabeticalDesc' | 'priceAsc' | 'priceDesc'): void{
+    if(criteria === 'alphabeticalAsc'){
+      this.filteredProducts.sort((a, b) => a.productName.localeCompare(b.productName));
+    }else if(criteria === 'alphabeticalDesc'){
+      this.filteredProducts.sort((a, b) => b.productName.localeCompare(a.productName));
+    }else if(criteria === 'priceAsc'){
+      this.filteredProducts.sort((a, b) => b.productPrice - a.productPrice);
+    }else if(criteria === 'priceDesc'){
+      this.filteredProducts.sort((a, b) => a.productPrice - b.productPrice);
+    }
+    this.isVisibleAlphabetical = this.isVisiblePrice = false;
+  }
+
   createProduct(){
     if(this.productForm.valid){
       let product: ProductDTO = {
@@ -40,9 +67,12 @@ export class ProductsPageComponent implements OnInit {
         productWeight: Number(this.productForm.value.productWeight)
       }
 
+      this.isLoadingForm = true;
+
       this.productService.createProduct(product).subscribe((response) => {
         console.log(response);
         this.snackBar.open('Produkt bol úspešne vytvorený.', '', { duration: 1000 });
+        this.creationSuccessful = true;
         this.productForm.reset();
 
         this.productService.getProducts().subscribe((result) => {
@@ -50,6 +80,8 @@ export class ProductsPageComponent implements OnInit {
         }, (error) => {
           console.error("An error have occurred while trying to get products data.", error);
         })
+
+        this.isLoadingForm = false;
 
         this.dialogRef.close();
       }, (error) => {
@@ -61,13 +93,14 @@ export class ProductsPageComponent implements OnInit {
     }
   }
 
-  openDialog(createProductDialog: TemplateRef<any>){ 
+  openDialog(createProductDialog: TemplateRef<any>){
+    this.creationSuccessful = false; 
     this.dialogRef = this.dialog.open(createProductDialog);  
   
     this.dialogRef.afterClosed().subscribe((result) => {
       if(result){
         this.createProduct();
-      }else{
+      }else if(!this.creationSuccessful){
         this.productForm.reset();
         this.snackBar.open('Vytváranie produktu bolo zrušené.', '', { duration: 1000 });
       }
@@ -75,12 +108,14 @@ export class ProductsPageComponent implements OnInit {
   }
 
   removeProduct(productId: number){
+    this.isLoading = true;
     this.productService.removeProduct(productId).subscribe((response) => {
       console.log(response);
       const index = this.productsData.findIndex(p => p.productId === productId);
       if(index != -1){
         this.productsData.splice(index, 1);
         this.snackBar.open('Produkt bol úspešne vymazaný!', '', { duration: 1000 });
+        this.isLoading = false;
       }
     }, (error) => {
       console.error("An error have occurred while trying to remove product.");
@@ -101,7 +136,8 @@ export class ProductsPageComponent implements OnInit {
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
 
     this.productService.getProducts().subscribe((result) => {
-      this.productsData = result
+      this.productsData = result;
+      this.filteredProducts = [...this.productsData]; 
       this.isLoading = false;
     }, (error) => {
       console.error("An error have occurred while trying to get products data", error);

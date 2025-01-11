@@ -16,6 +16,38 @@
       Načítava sa
     </div>
   }@else{
+    <div class="sorting-container">
+      <div class="alphabetical-dropdown-container">
+        <div class="alphabetical-dropdown">
+          <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('alphabetical')">Zvoľte filtráciu podľa abecedy</button>
+        </div>
+        <div class="dropdown-content" [ngClass]="isVisibleAlphabetical ? 'is-visible': 'is-not-visible'">
+          <div class="alphabetical-field">
+            <div class="alphabetical-item" (click)="sortProducts('alphabeticalAsc')">
+              <span>Názov: A → Z</span>
+            </div>
+            <div class="alphabetical-item" (click)="sortProducts('alphabeticalDesc')">
+              <span>Názov: Z → A</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="price-dropdown-container">
+        <div class="price-dropdown">
+          <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('price')">Zvoľte filtráciu podľa veľkosti ceny</button>
+        </div>
+        <div class="dropdown-content" [ngClass]="isVisiblePrice ? 'is-visible': 'is-not-visible'">
+          <div class="price-field">
+            <div class="price-item" (click)="sortProducts('priceAsc')">
+              <span>Najdrahšie</span>
+            </div>
+            <div class="price-item" (click)="sortProducts('priceDesc')">
+              <span>Najlacnejšie</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="producs">
       @if(productsData.length > 0){
         <table class="products-table">
@@ -29,7 +61,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let product of productsData" class="product-row">
+            <tr *ngFor="let product of filteredProducts" class="product-row">
               <td>{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
               <td>{{ product.productPrice }} €</td>
@@ -75,9 +107,17 @@
               <p>kg</p>
             </div>
         </div>
-        <div class="submit">
-          <button type="submit" class="btn btn-primary" (click)="createProduct()">Vytvoriť produkt</button>
-        </div> 
+        @if(!isLoadingForm){
+          <div class="submit">
+            <button type="submit" class="btn btn-primary" (click)="createProduct()">Vytvoriť produkt</button>
+          </div> 
+        }@else{
+          <div class="spinner-container" style="height: 100px;">
+            <div class="spinner">
+            </div>
+            Načítava sa
+          </div>
+        }
     </div>
 </form>
 </ng-template>

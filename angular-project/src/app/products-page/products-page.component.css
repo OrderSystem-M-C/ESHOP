@@ -76,7 +76,7 @@ h1 {
 }
 .products-table th,
 .products-table td {
-  padding: 15px;
+  padding: 12.5px;
   text-align: left;
   border: 1px solid #ccc;
 }
@@ -87,6 +87,10 @@ h1 {
 }
 .products-table td {
   background-color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100px;
 }
 .products-table tr:nth-child(even) {
   background-color: #f9f9f9;
@@ -109,6 +113,51 @@ h1 {
   width: 20px;
   margin: 0 auto;
   display: block;
+}
+.sorting-container{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 10px;
+}
+.alphabetical-dropdown-container, .price-dropdown-container{
+  max-width: 350px;
+  position: relative;
+  margin-bottom: 15px;
+}
+.dropdown-button {
+  background-color: #f2f2f2;
+  border: 1px solid #333;
+}
+.dropdown-content{
+  background-color: #f2f2f2;
+  padding: 10px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow-y: auto;
+  z-index: 10;
+}
+.alphabetical-field, .price-field{
+  padding: 4px 0;
+  border-radius: 5px;
+}
+.alphabetical-item, .price-item{
+  padding: 8px;
+  border-radius: 5px;
+}
+.alphabetical-item:hover, .price-item:hover{
+  background-color: #fbfbfb;
+  cursor: pointer;
+}
+.is-visible{
+  display: block;
+}
+.is-not-visible{
+  display: none;
 }
 /*Pre neplatné polia*/
 .form-control.is-invalid {
