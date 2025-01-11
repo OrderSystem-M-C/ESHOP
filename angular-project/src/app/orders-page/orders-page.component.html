@@ -36,11 +36,11 @@
           <button type="button" class="btn btn-light filter-date-dropdown-btn" (click)="toggleDropdown('date')">Zvoľte spôsob filtrácie podľa dátumu</button>
         </div>
         <div class="dropdown-content" [ngClass]="isVisibleDateFilter ? 'is-visible': 'is-not-visible'">
-          <div class="filter-date-item">
-            <div class="filter-date-field" (click)="sortByDate('newest')">
+          <div class="filter-date-field">
+            <div class="filter-date-item" (click)="sortByDate('newest')">
               <span>Najnovšie</span>
             </div>
-            <div class="filter-date-field" (click)="sortByDate('oldest')">
+            <div class="filter-date-item" (click)="sortByDate('oldest')">
               <span>Najstaršie</span>
             </div>
           </div>

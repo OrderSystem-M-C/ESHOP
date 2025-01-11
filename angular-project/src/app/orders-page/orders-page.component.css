@@ -68,15 +68,15 @@ h1 {
   overflow-y: auto;
   z-index: 10;
 }
-.checkbox-item, .filter-date-item{
+.checkbox-item, .filter-date-field{
   padding: 4px 0;
   border-radius: 5px;
 }
-.filter-date-field{
+.filter-date-item{
   padding: 8px;
   border-radius: 5px;
 }
-.checkbox-item:hover, .filter-date-field:hover{
+.checkbox-item:hover, .filter-date-item:hover{
   background-color: #fbfbfb;
   cursor: pointer;
 }

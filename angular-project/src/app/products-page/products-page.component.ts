@@ -77,6 +77,7 @@ export class ProductsPageComponent implements OnInit {
 
         this.productService.getProducts().subscribe((result) => {
           this.productsData = result
+          this.filteredProducts = [...this.productsData];
         }, (error) => {
           console.error("An error have occurred while trying to get products data.", error);
         })
@@ -110,12 +111,28 @@ export class ProductsPageComponent implements OnInit {
   removeProduct(productId: number){
     this.isLoading = true;
     this.productService.removeProduct(productId).subscribe((response) => {
-      console.log(response);
-      const index = this.productsData.findIndex(p => p.productId === productId);
-      if(index != -1){
-        this.productsData.splice(index, 1);
-        this.snackBar.open('Produkt bol úspešne vymazaný!', '', { duration: 1000 });
-        this.isLoading = false;
+      if(response){
+        const index = this.productsData.findIndex(p => p.productId === productId);
+        if(index != -1){
+          const index_1 = this.productsData.findIndex(p => p.productId === productId);
+
+          if(index_1 != -1){
+            this.productsData.splice(index_1, 1);
+          }else{
+            console.error("An error have occurred while trying to splice the productsData array.")
+          }
+
+          const index_2 = this.filteredProducts.findIndex(p => p.productId === productId);
+
+          if(index_2 != -1){
+            this.filteredProducts.splice(index_2, 1);
+          }else{
+            console.error("An error have occurred while trying to splice the filteredProducts array.")
+          }
+
+          this.snackBar.open('Produkt bol úspešne vymazaný!', '', { duration: 1000 });
+          this.isLoading = false;
+        }
       }
     }, (error) => {
       console.error("An error have occurred while trying to remove product.");
@@ -150,4 +167,5 @@ export interface ProductDTO {
   productDescription?: string,
   productPrice: number,
   productWeight: number,
+  productSelected?: boolean;
 }

@@ -62,10 +62,10 @@
           </thead>
           <tbody>
             <tr *ngFor="let product of filteredProducts" class="product-row">
-              <td>{{ product.productId }}</td>
+              <td style="width: 130px;text-align: center;">{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
-              <td>{{ product.productPrice }} €</td>
-              <td>{{ product.productWeight }} kg</td>
+              <td style="width: 160px;">{{ product.productPrice }} €</td>
+              <td style="width: 160px;">{{ product.productWeight }} kg</td>
               <td class="remove-column" title="Vymazať produkt" (click)="removeProduct(product.productId)"><img src="../../assets/Images/bin-icon.png" class="remove-icon"></td>
             </tr>
           </tbody>
