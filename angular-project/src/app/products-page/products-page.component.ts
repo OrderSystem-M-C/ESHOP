@@ -16,7 +16,7 @@ import { ProductService } from '../services/product.service';
 })
 export class ProductsPageComponent implements OnInit {
   currentDate: string = '';
-  dialogRef!: MatDialogRef<any>;
+  dialogRef!: MatDialogRef<any>; // ! tu znamena ze premenna bude urcite inicializovana predtym ako sa na nu pristupi to znamena ze v TS nebude hadzat chybu aj ked dialogRef nebola inicializovana v konstruktore, TS si mysli ze v nejakom bode kod zabezpeci aby dialogRef malo hodnotu pred pouzitim
 
   public productsData: ProductDTO[] = [];
   filteredProducts: ProductDTO[] = [];

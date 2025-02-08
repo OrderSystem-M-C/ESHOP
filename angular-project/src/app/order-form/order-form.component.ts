@@ -1,10 +1,13 @@
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
 import { Form, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import * as html2pdf from 'html2pdf.js';
 import { OrderService } from '../services/order.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ProductDTO } from '../products-page/products-page.component';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ProductService } from '../services/product.service';
 
 @Component({
   selector: 'app-order-form',
@@ -29,7 +32,13 @@ export class OrderFormComponent implements OnInit {
 
   isEditMode: boolean = false;
 
-  constructor(private datePipe: DatePipe,private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar){}
+  dialogRef!: MatDialogRef<any>;
+  dialogClosed: boolean = true;
+
+  public productsData: ProductDTO[] = [];
+  selectedProducts: ProductDTO[] = [];
+
+  constructor(private datePipe: DatePipe, private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar, private dialog: MatDialog, private productService: ProductService){}
 
   orderForm = new FormGroup({
     customerName: new FormControl('', Validators.required),
@@ -103,6 +112,35 @@ export class OrderFormComponent implements OnInit {
       invoiceEmail: this.invoiceForm.value.invoiceEmail,
       invoicePhoneNumber: this.invoiceForm.value.invoicePhoneNumber,
     }
+  }
+
+  openDialog(selectProductsDialog: TemplateRef<any>){
+    this.dialogClosed = false;
+    this.isLoading = true;
+    this.dialogRef = this.dialog.open(selectProductsDialog); 
+    
+    this.productService.getProducts().subscribe((result) => {
+      this.productsData = result;
+      this.isLoading = false;
+    }, (error) => {
+      console.error('An error occurred while trying to get products data.', error);
+      this.isLoading = false;
+    })
+
+    this.dialogRef.afterClosed().subscribe(() => {
+      this.dialogClosed = true;
+    })
+  }
+  toggleProductSelection(product: ProductDTO){
+    const index = this.selectedProducts.findIndex(p => p.productId === product.productId);
+    if(index != -1){
+      this.selectedProducts.splice(index, 1);
+    }else{
+      this.selectedProducts.push(product);
+    }
+  }
+  closeDialog(){
+    this.dialogRef.close();
   }
 
   updateOrder(){
@@ -335,7 +373,8 @@ export class OrderFormComponent implements OnInit {
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
     
-    this.existingOrderId = Number(this.route.snapshot.paramMap.get('orderId'));
+    this.existingOrderId = Number(this.route.snapshot.paramMap.get('orderId')) ?? null;
+
     if(this.existingOrderId){
       this.isEditMode = true;
       this.loadOrder(this.existingOrderId);

@@ -12,7 +12,22 @@
           <p>{{currentDate}}</p>
         </div>
       }
-        <div class="delivery-payment-discount">
+        <div class="products-delivery-payment-discount">
+          <h3>Produkty, spôsob dopravy a platby</h3>
+          <div class="form-group">
+            <div class="product-display">
+              @if(selectedProducts.length > 0 && dialogClosed){
+                <ng-container *ngFor="let product of selectedProducts">
+                  {{product.productName}}<br>
+                </ng-container>
+              }@else{
+                <div class="no-products-selected">
+                  <p>Nemáte vybraté žiadne produkty</p>
+                  <button class="btn btn-primary" (click)="openDialog(selectProductsDialog)">Vybrať produkty</button>
+                </div>
+              }
+            </div>
+          </div>
             <div class="form-group">
                 <label for="deliveryOptions" class="form-label">Spôsob dopravy*</label>
                 <div class="delivery-options-wrapper">
@@ -330,3 +345,20 @@
     }
     </form>
 </div>
+<ng-template #selectProductsDialog>
+  <div class="products-information">
+    <div class="title-submit">
+      <h3>Vaše produkty</h3>
+      <button class="btn btn-primary" (click)="closeDialog()">Potvrdiť</button>
+    </div>
+    <table class="products-table">
+      <tbody>
+        <tr *ngFor="let product of productsData" class="product-row">
+          <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="form-check-input" (change)="toggleProductSelection(product)" [checked]="selectedProducts.includes(product)"></td>
+          <td>{{ product.productName }}</td>
+          <td style="width: 100px; text-align: center;">{{ product.productPrice }} €</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</ng-template>

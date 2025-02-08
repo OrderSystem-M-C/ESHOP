@@ -53,19 +53,19 @@
         <table class="products-table">
           <thead>
             <tr>
-              <th>Číslo produktu</th>
+              <th style="text-align: center;">Číslo produktu</th>
               <th>Názov produktu</th>
-              <th>Cena produktu</th>
-              <th>Hmotnosť produktu</th>
+              <th style="text-align: center;">Cena produktu</th>
+              <th style="text-align: center;">Hmotnosť produktu</th>
               <th>Vymazať</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let product of filteredProducts" class="product-row">
-              <td style="width: 130px;text-align: center;">{{ product.productId }}</td>
+              <td style="width: 130px; text-align: center;">{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
-              <td style="width: 160px;">{{ product.productPrice }} €</td>
-              <td style="width: 160px;">{{ product.productWeight }} kg</td>
+              <td style="width: 200px; text-align: center;">{{ product.productPrice }} €</td>
+              <td style="width: 200px; text-align: center;">{{ product.productWeight }} kg</td>
               <td class="remove-column" title="Vymazať produkt" (click)="removeProduct(product.productId)"><img src="../../assets/Images/bin-icon.png" class="remove-icon"></td>
             </tr>
           </tbody>
@@ -103,7 +103,7 @@
         <div class="field">
             <label for="product-weight" class="form-label">Hmotnosť produktu*</label>
             <div class="product-weight">
-              <input type="text" formControlName="productWeight" id="product-weight" class="form-control" placeholder="Zadajte hmotnosť produktu" [ngClass]="{'is-invalid': productForm.get('productWeight').invalid && productForm.get('productWeight').touched}">
+              <input type="number" formControlName="productWeight" id="product-weight" class="form-control" placeholder="Zadajte hmotnosť produktu" [ngClass]="{'is-invalid': productForm.get('productWeight').invalid && productForm.get('productWeight').touched}">
               <p>kg</p>
             </div>
         </div>
