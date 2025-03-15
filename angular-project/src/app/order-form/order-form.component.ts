@@ -35,8 +35,11 @@ export class OrderFormComponent implements OnInit {
   dialogRef!: MatDialogRef<any>;
   dialogClosed: boolean = true;
 
-  public productsData: ProductDTO[] = [];
+  productsData: ProductDTO[] = [];
+  sortedProducts: ProductDTO[] = [];
   selectedProducts: ProductDTO[] = [];
+
+  searchText: string = ''; 
 
   constructor(private datePipe: DatePipe, private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar, private dialog: MatDialog, private productService: ProductService){}
 
@@ -114,13 +117,29 @@ export class OrderFormComponent implements OnInit {
     }
   }
 
+  searchProducts() {
+    if (!this.searchText || this.searchText.trim() === '') {
+      this.sortedProducts = this.productsData;
+    } else {
+      this.sortedProducts = this.productsData.filter(product =>
+        product.productName.toLowerCase().includes(this.searchText.toLowerCase())
+      );
+    }
+  }
+
   openDialog(selectProductsDialog: TemplateRef<any>){
     this.dialogClosed = false;
     this.isLoading = true;
-    this.dialogRef = this.dialog.open(selectProductsDialog); 
+
+    this.dialogRef = this.dialog.open(selectProductsDialog);
     
     this.productService.getProducts().subscribe((result) => {
-      this.productsData = result;
+      this.productsData = result.map(product => ({
+        ...product,
+        productSelected: this.selectedProducts.some(p => p.productId === product.productId) 
+      }));
+  
+      this.sortedProducts = this.productsData;
       this.isLoading = false;
     }, (error) => {
       console.error('An error occurred while trying to get products data.', error);
@@ -129,6 +148,7 @@ export class OrderFormComponent implements OnInit {
 
     this.dialogRef.afterClosed().subscribe(() => {
       this.dialogClosed = true;
+      this.searchText = '';
     })
   }
   toggleProductSelection(product: ProductDTO){
@@ -141,6 +161,13 @@ export class OrderFormComponent implements OnInit {
   }
   closeDialog(){
     this.dialogRef.close();
+  }
+
+  removeProduct(productId: number): void{
+    const index = this.selectedProducts.findIndex(p => p.productId === productId);
+    if(index !== -1){
+      this.selectedProducts.splice(index, 1);
+    }
   }
 
   updateOrder(){
@@ -248,10 +275,11 @@ export class OrderFormComponent implements OnInit {
       }, (error) => {
         console.error("An error occurred while trying to create order", error)
       });
-    }else if(this.orderForm.invalid || this.invoiceForm.invalid){
+    }else {
       this.validateAllFormFields(this.orderForm);
       this.validateAllFormFields(this.invoiceForm);
       this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
+      console.log('hi')
     }
   }
 

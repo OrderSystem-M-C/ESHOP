@@ -70,12 +70,12 @@
       </table>
     }@else if(filteredOrders.length === 0 && ordersData.length > 0){
       <div class="no-orders-container">
-        <h3>Neboli nájdené žiadne objednávky</h3>
+        <h3>Neboli nájdené žiadne objednávky.</h3>
       </div>
     }
     @else{
       <div class="no-orders-container">
-        <h3>Nemáte žiadne objednávky, kliknutím <span class="order-link" [routerLink]="['/order-form']">sem</span> si vytvorte objednávku</h3>
+        <h3>Nemáte žiadne objednávky, kliknutím <span class="order-link" [routerLink]="['/order-form']">sem</span> si vytvorte objednávku.</h3>
       </div>
     }
   }
