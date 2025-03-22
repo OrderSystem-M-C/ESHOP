@@ -56,6 +56,10 @@ textarea {
   padding: 10.5px;
   text-align: left;
   background-color: white;
+  border-bottom: 1px solid #ccc;
+}
+.selected-products-table tr:last-child td {
+  border-bottom: none;
 }
 .remove-product {
   width: 40px !important;
@@ -70,7 +74,17 @@ textarea {
   cursor: pointer;
 }
 .edit-products-button button {
-  margin-top: 2px;
+  margin-top: 2.5px;
+}
+.dialog-button-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.no-products-found {
+  font-weight: normal;
+  margin-top: 35px;
 }
 .customer-info,
 .invoice-settings,

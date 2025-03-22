@@ -56,9 +56,7 @@ namespace AspNetCoreAPI.Models
         // public DateTime OrderDate { get; set; } = DateTime.Now; DateTime ziskame datum a ihned sa ulozi ten aktualny
         public string? OrderDate { get; set; }
 
-
         //Faktúra
-
 
         [Required(ErrorMessage = "Číslo faktúry je povinné.")]
         public int InvoiceNumber { get; set; } 
@@ -97,6 +95,7 @@ namespace AspNetCoreAPI.Models
         [Required(ErrorMessage = "Telefónne číslo je povinné.")]
         [Phone(ErrorMessage = "Zadajte platné telefónne číslo.")]
         [MaxLength(20, ErrorMessage = "Telefónne číslo nemôže byť dlhšie ako 20 znakov.")]
-        public string InvoicePhoneNumber { get; set; } 
+        public string InvoicePhoneNumber { get; set; }
+        public ICollection<OrderProductModel> OrderProducts { get; set; }
     }
 }

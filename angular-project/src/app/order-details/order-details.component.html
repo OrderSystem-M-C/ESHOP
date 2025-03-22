@@ -42,22 +42,21 @@
         </div>
         <div class="products-information">
           <h3>Objednané produkty</h3>
-          <table class="products-table">
+          <table class="selected-products-table">
             <thead>
                 <tr>
                     <th>Názov produktu</th>
                     <th>Množstvo</th>
-                    <th>Cena za kus</th>
+                    <th>Cena/ks</th>
                     <th>Celkom</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Repeat for each item -->
-                <tr class="product-row">
-                    <td>nazov-produktu</td>
-                    <td>mnozstvo-produktu</td>
-                    <td>cena-produktu</td>
-                    <td>celkova-cena</td>
+                <tr class="product-row" *ngFor="let product of selectedProducts">
+                    <td>{{product.productName}}</td>
+                    <td>0€</td>
+                    <td>{{product.productPrice}}</td>
+                    <td>{{product.productPrice}} €</td>
                 </tr>
             </tbody>
         </table>

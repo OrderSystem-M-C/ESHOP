@@ -4,6 +4,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { OrderDTO } from '../order-form/order-form.component';
 import { RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
+import { ProductDTO } from '../products-page/products-page.component';
 
 @Component({
   selector: 'app-orders-page',

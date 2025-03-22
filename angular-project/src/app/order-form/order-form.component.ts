@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { Form, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Form, FormControl, FormGroup, FormsModule, ReactiveFormsModule, UntypedFormBuilder, Validators } from '@angular/forms';
 import * as html2pdf from 'html2pdf.js';
 import { OrderService } from '../services/order.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -40,6 +40,8 @@ export class OrderFormComponent implements OnInit {
   selectedProducts: ProductDTO[] = [];
 
   searchText: string = ''; 
+
+  isEditingProducts: boolean = false;
 
   constructor(private datePipe: DatePipe, private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar, private dialog: MatDialog, private productService: ProductService){}
 
@@ -122,16 +124,19 @@ export class OrderFormComponent implements OnInit {
       this.sortedProducts = this.productsData;
     } else {
       this.sortedProducts = this.productsData.filter(product =>
-        product.productName.toLowerCase().includes(this.searchText.toLowerCase())
+        product.productName.toLowerCase().includes(this.searchText.toLowerCase()) ||
+        product.productId.toString().includes(this.searchText)
       );
     }
   }
 
-  openDialog(selectProductsDialog: TemplateRef<any>){
+  openDialog(selectProductsDialog: TemplateRef<any>, edit: boolean | null){
     this.dialogClosed = false;
     this.isLoading = true;
 
-    this.dialogRef = this.dialog.open(selectProductsDialog);
+    this.dialogRef = this.dialog.open(selectProductsDialog, {
+      disableClose: true
+    });
     
     this.productService.getProducts().subscribe((result) => {
       this.productsData = result.map(product => ({
@@ -146,9 +151,16 @@ export class OrderFormComponent implements OnInit {
       this.isLoading = false;
     })
 
-    this.dialogRef.afterClosed().subscribe(() => {
-      this.dialogClosed = true;
-      this.searchText = '';
+    this.isEditingProducts = edit;
+    
+    this.dialogRef.afterClosed().subscribe((result) => {
+      if(result === true){
+        this.snackBar.open('Výber produktov bol úspešne zmenený!', '', { duration: 1000 });
+      }else if(result === false){
+        this.snackBar.open('Produkty boli úspešne pridané!', '', { duration: 1000 });
+      }else{
+        this.snackBar.open('Výber produktov bol zrušený!', '', { duration: 1000 });
+      }
     })
   }
   toggleProductSelection(product: ProductDTO){
@@ -159,6 +171,9 @@ export class OrderFormComponent implements OnInit {
       this.selectedProducts.push(product);
     }
   }
+  confirmSelection() {
+    this.dialogRef.close(this.isEditingProducts);
+  }
   closeDialog(){
     this.dialogRef.close();
   }
@@ -167,6 +182,7 @@ export class OrderFormComponent implements OnInit {
     const index = this.selectedProducts.findIndex(p => p.productId === productId);
     if(index !== -1){
       this.selectedProducts.splice(index, 1);
+      this.snackBar.open('Produkt bol odstránený!', '', { duration: 1000 });
     }
   }
 
@@ -263,6 +279,7 @@ export class OrderFormComponent implements OnInit {
 
       this.orderService.createOrder(order).subscribe((response: OrderDTO) => {
         if(response){
+          this.orderService.addProductsToOrder(order.orderId, this.selectedProducts).subscribe();
           this.isLoading = false;
           if(!this.invoiceCreated){
             this.createInvoice();

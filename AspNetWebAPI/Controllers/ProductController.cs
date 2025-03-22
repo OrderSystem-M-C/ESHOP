@@ -2,6 +2,7 @@
 using AspNetCoreAPI.DTOs;
 using AspNetCoreAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCoreAPI.Controllers
 {
@@ -85,5 +86,58 @@ namespace AspNetCoreAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-    }
+        [HttpPost("add-products")]
+        public async Task<IActionResult> AddProductsToOrder([FromBody] OrderProductsDTO orderProductsDTO)
+        {
+            if (orderProductsDTO == null || orderProductsDTO.Products == null)
+            {
+                return BadRequest("Data transfer object was not found.");
+            }
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderProductsDTO.OrderId);
+            if(order == null)
+            {
+                return NotFound("Order not found.");
+            }
+            var products = await _context.Products
+                .Where(p => orderProductsDTO.Products.Select(p => p.ProductId).Contains(p.ProductId)).ToListAsync();
+            if(products.Count != orderProductsDTO.Products.Count)
+            {
+                return NotFound("One or more products not found.");
+            }
+            var orderProducts = products.Select(product => new OrderProductModel
+            {
+                OrderId = orderProductsDTO.OrderId,
+                ProductId = product.ProductId,
+                Product = product,
+                Order = order
+            }).ToList();
+            await _context.OrderProducts.AddRangeAsync(orderProducts);
+            await _context.SaveChangesAsync();
+
+            return Ok("Products successfully added to the order.");
+        }
+        [HttpGet("get-products/{orderId}")]
+        public async Task<IActionResult> GetOrderProducts(int orderId)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderProducts)
+                .ThenInclude(op => op.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if (order == null)
+            {
+                return NotFound("Order not found.");
+            }
+            var orderProducts = order.OrderProducts
+                .Select(op => new ProductDTO
+                {
+                    ProductId = op.ProductId,
+                    ProductName = op.Product.ProductName,
+                    ProductDescription = op.Product.ProductDescription,
+                    ProductPrice = op.Product.ProductPrice,
+                    ProductWeight = op.Product.ProductWeight
+                }).ToList();
+
+            return Ok(orderProducts);
+        }
+    }  
 }

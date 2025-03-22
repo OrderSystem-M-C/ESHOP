@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { OrderDTO } from '../order-form/order-form.component';
 import { Observable } from 'rxjs';
+import { ProductDTO } from '../products-page/products-page.component';
 
 @Injectable({
   providedIn: 'root'
@@ -32,5 +33,17 @@ export class OrderService {
     const url = `${this.baseUrl}/order/update-order/${orderId}`;
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.put(url, order, {headers, responseType: 'text'}); //znamena ze Angular bude ocakavat textovu spravu a nie JSON takze sa spravne spracuje
+  }
+  addProductsToOrder(orderId: number, products: ProductDTO[]){
+    const url = `${this.baseUrl}/product/add-products`;
+    const body = {
+      orderId, 
+      products
+    }
+    return this.http.post(url, body);
+  }
+  getOrderProducts(orderId: number){
+    const url = `${this.baseUrl}/product/get-products/${orderId}`;
+    return this.http.get<ProductDTO[]>(url);
   }
 }

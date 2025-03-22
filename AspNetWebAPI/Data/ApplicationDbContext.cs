@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace AspNetCoreAPI.Data
 {
@@ -13,7 +14,7 @@ namespace AspNetCoreAPI.Data
         }
 
         public DbSet<OrderModel> Orders { get; set; }
-        public DbSet<OrderProductsModel> OrderProducts { get; set; }
+        public DbSet<OrderProductModel> OrderProducts { get; set; }
         public DbSet<ProductModel> Products { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -22,6 +23,19 @@ namespace AspNetCoreAPI.Data
                 .HasKey(o => o.Id);
 
             base.OnModelCreating(builder);
+
+            builder.Entity<OrderProductModel>()
+            .HasKey(op => new { op.OrderId, op.ProductId });
+
+            builder.Entity<OrderProductModel>()
+                .HasOne(op => op.Order)
+                .WithMany(o => o.OrderProducts)
+                .HasForeignKey(op => op.OrderId);
+
+            builder.Entity<OrderProductModel>()
+                .HasOne(op => op.Product)
+                .WithMany(p => p.OrderProducts)
+                .HasForeignKey(op => op.ProductId);
         }
     }
 }

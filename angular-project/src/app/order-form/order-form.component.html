@@ -1,6 +1,6 @@
 <title>Vytvorenie objednávky</title>
 <div class="order-form-component">
-    <form class="order-form" [formGroup]="orderForm" (ngSubmit)="submitOrder()">
+    <form class="order-form" [formGroup]="orderForm">
       @if(isEditMode){
         <div class="title-date">
           <h1>Upraviť objednávku č. {{existingOrderId}}</h1>
@@ -28,13 +28,13 @@
                     </table>
                   </div>
                   <div class="edit-products-button">
-                    <button class="btn btn-primary" (click)="openDialog(selectProductsDialog)">Upraviť produkty</button>
+                    <button class="btn btn-primary" (click)="openDialog(selectProductsDialog, true)">Upraviť produkty</button>
                   </div>
                 </div>
               }@else{
                 <div class="no-products-selected">
                   <p>Nemáte vybraté žiadne produkty</p>
-                  <button class="btn btn-primary" (click)="openDialog(selectProductsDialog)">Vybrať produkty</button>
+                  <button class="btn btn-primary" (click)="openDialog(selectProductsDialog, false)">Vybrať produkty</button>
                 </div>
               }
             </div>
@@ -367,16 +367,20 @@
     }@else{
       <div class="title-submit">
         <h2>Vaše produkty</h2>
-        <button class="btn btn-primary" (click)="closeDialog()">Potvrdiť</button>
+        <div class="dialog-button-container">
+          <button class="btn btn-primary" (click)="confirmSelection()">Potvrdiť</button>
+          <button class="btn btn-secondary" (click)="closeDialog()">Zavrieť okno</button>
+        </div>
       </div>
       <input class="search-bar form-control" [(ngModel)]="searchText" type="search" placeholder="Kliknite sem pre vyhľadávanie" (ngModelChange)="searchProducts()">
       @if(sortedProducts.length === 0){
-        <h3>Neboli nájdené žiadne produkty!</h3>
+        <h3 class="no-products-found">Neboli nájdené žiadne produkty!</h3>
       }@else{
         <table class="products-table">
           <tbody>
             <tr *ngFor="let product of sortedProducts" class="product-row">
               <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="form-check-input" [(ngModel)]="product.productSelected" (change)="toggleProductSelection(product)" [checked]="selectedProducts.includes(product)" ></td>
+              <td style="text-align: center;">{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
               <td style="width: 100px; text-align: center;">{{ product.productPrice }} €</td>
             </tr>

@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, TemplateRef  } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { OrderService } from '../services/order.service';
@@ -7,11 +7,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import * as html2pdf from 'html2pdf.js';
+import { ProductDTO } from '../products-page/products-page.component';
 
 @Component({
   selector: 'app-order-details',
   standalone: true,
-  imports: [DatePipe, RouterLink, MatDialogModule],
+  imports: [DatePipe, RouterLink, MatDialogModule, CommonModule],
   providers: [DatePipe],
   templateUrl: './order-details.component.html',
   styleUrl: './order-details.component.css'
@@ -24,6 +25,8 @@ export class OrderDetailsComponent implements OnInit{
   dialogRef!: MatDialogRef<any>; //akoby pristupujeme k otvorenemu dialogovemu oknu aby sme mohli s nim komunikovať => získať samotný výsledok
 
   isLoading: boolean = true;
+
+  selectedProducts: ProductDTO[] = [];
 
   constructor(private dialog: MatDialog, private route: ActivatedRoute, private router: Router, private datePipe: DatePipe, private orderService: OrderService, private snackBar: MatSnackBar){} /* private dialog: MatDialog => na otvaranie dialogovych okien atd */
 
@@ -149,7 +152,14 @@ export class OrderDetailsComponent implements OnInit{
 
     this.orderService.getOrderDetails(this.orderId).subscribe((result) => {
       this.order = result;
-      this.isLoading = false;
+      if(this.order){
+        this.orderService.getOrderProducts(this.order.orderId).subscribe((result) => {
+          this.selectedProducts = result;
+          this.isLoading = false;
+        }, (error) => {
+          console.error("An error occurred while trying to get products.", error);
+        })
+      }
     }, (error) =>{
       console.error("An error occurred while trying to get order details", error);
     })
