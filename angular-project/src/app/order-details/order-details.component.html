@@ -54,17 +54,19 @@
             <tbody>
                 <tr class="product-row" *ngFor="let product of selectedProducts">
                     <td>{{product.productName}}</td>
-                    <td>0€</td>
+                    <td>{{product.productAmount}} ks</td>
                     <td>{{product.productPrice}}</td>
-                    <td>{{product.productPrice}} €</td>
+                    <td>{{product.productPrice}}€</td>
                 </tr>
             </tbody>
         </table>
         </div>
       <div class="total-price-invoice">
         <h3>Celková suma na zaplatenie a faktúra</h3>
-        <p><strong>Medzisúčet: </strong>0€</p>
-        <p><strong>Celková cena po zľave: </strong>0€ (-{{order?.discountAmount}}%)</p>
+        <p><strong>Medzisúčet: </strong>{{order.totalPrice}}€</p>
+        <p><strong>Celková cena po zľave: </strong>
+          {{order.totalPrice - (order.totalPrice * order?.discountAmount / 100)}}€ (-{{order?.discountAmount}}%)
+        </p>
         <p><strong>Faktúra: </strong> <a (click)="getInvoice()" title="Kliknutím stiahnete faktúru objednávky"><img src="../../assets/Images/download-icon.png" alt="download-icon">Prevziať faktúru</a></p>
       </div>
       </div>

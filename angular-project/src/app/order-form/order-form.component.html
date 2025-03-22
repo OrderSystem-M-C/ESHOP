@@ -23,6 +23,10 @@
                     <table class="selected-products-table">
                       <tr *ngFor="let product of selectedProducts" class="product-row">
                         <td>{{product.productName}}</td>
+                        <td class="product-amount-control-column">
+                          <input type="number" [(ngModel)]="product.productAmount" [ngModelOptions]="{standalone: true}" (change)="updateAmount(product.productId, product.productAmount)" value="1" min="1" class="form-control product-amount-control">
+                        </td>
+                        <td>{{product.productAmount * product.productPrice}}€</td>
                         <td class="remove-product" (click)="removeProduct(product.productId)"><img src="https://cdn-icons-png.flaticon.com/512/75/75519.png"></td>
                       </tr>
                     </table>
@@ -75,7 +79,7 @@
         </div>
         <div class="total-price">
             <p>CELKOM</p>
-            <p>0€</p>
+            <p>{{ totalPrice }}€</p>
         </div>
         <div class="form-grid">
         <div class="customer-info">
@@ -382,7 +386,7 @@
               <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="form-check-input" [(ngModel)]="product.productSelected" (change)="toggleProductSelection(product)" [checked]="selectedProducts.includes(product)" ></td>
               <td style="text-align: center;">{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
-              <td style="width: 100px; text-align: center;">{{ product.productPrice }} €</td>
+              <td style="width: 100px; text-align: center;">{{ product.productPrice }}€</td>
             </tr>
           </tbody>
         </table>

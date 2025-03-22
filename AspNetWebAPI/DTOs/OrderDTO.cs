@@ -33,6 +33,8 @@ namespace AspNetCoreAPI.DTOs
         public string OrderStatus { get; set; }
         public string? OrderDate { get; set; }
         [Required]
+        public decimal TotalPrice { get; set; }
+        [Required]
         public int InvoiceNumber { get; set; }
         [Required]
         public string VariableSymbol { get; set; }

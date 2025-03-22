@@ -55,6 +55,9 @@ namespace AspNetCoreAPI.Models
         public string OrderStatus { get; set; }
         // public DateTime OrderDate { get; set; } = DateTime.Now; DateTime ziskame datum a ihned sa ulozi ten aktualny
         public string? OrderDate { get; set; }
+        [Required(ErrorMessage = "Celková cena je povinná.")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Celková cena musí byť väčšia ako 0.")]
+        public decimal TotalPrice { get; set; }
 
         //Faktúra
 

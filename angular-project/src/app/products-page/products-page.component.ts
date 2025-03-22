@@ -168,4 +168,5 @@ export interface ProductDTO {
   productPrice: number,
   productWeight: number,
   productSelected?: boolean;
+  productAmount?: number;
 }

@@ -12,13 +12,13 @@ namespace AspNetCoreAPI.Controllers
     {
         protected readonly ApplicationDbContext _context;
 
-        public ProductController(ApplicationDbContext context) 
+        public ProductController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         [HttpPut("create-product")]
-        public IActionResult CreateProduct([FromBody] ProductDTO productDTO)
+        public async Task<IActionResult> CreateProduct([FromBody] ProductDTO productDTO)
         {
             if (productDTO == null)
             {
@@ -34,8 +34,8 @@ namespace AspNetCoreAPI.Controllers
 
             try
             {
-                _context.Products.Add(product);
-                _context.SaveChanges();
+                await _context.Products.AddAsync(product);
+                await _context.SaveChangesAsync();
                 return CreatedAtAction(nameof(CreateProduct), product);
             }
             catch (Exception ex)
@@ -44,19 +44,19 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpGet("get-products")]
-        public ActionResult<IEnumerable<ProductDTO[]>> getOrders()
+        public async Task<ActionResult<IEnumerable<ProductDTO[]>>> getOrders()
         {
             try
             {
-                var products = _context.Products.Select(p => new ProductDTO
-                {
-                    ProductId = p.ProductId,
-                    ProductName = p.ProductName,
-                    ProductDescription = p.ProductDescription,
-                    ProductPrice = p.ProductPrice,
-                    ProductWeight = p.ProductWeight,
-                }).ToList();
-
+                var products = await _context.Products
+                    .Select(p => new ProductDTO
+                    {
+                        ProductId = p.ProductId,
+                        ProductName = p.ProductName,
+                        ProductDescription = p.ProductDescription,
+                        ProductPrice = p.ProductPrice,
+                        ProductWeight = p.ProductWeight,
+                    }).ToListAsync();
                 return Ok(products);
             }
             catch (Exception ex)
@@ -65,20 +65,17 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpDelete("remove-product/{productId}")]
-        public IActionResult DeleteProduct(int productId)
+        public async Task<IActionResult> DeleteProduct(int productId)
         {
             try
             {
-                var product = _context.Products.FirstOrDefault(p => p.ProductId == productId);
-
+                var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == productId);
                 if (product == null)
                 {
                     return NotFound(new { message = $"Product with ID {productId} not found." });
                 }
-
                 _context.Products.Remove(product);
-                _context.SaveChanges();
-
+                await _context.SaveChangesAsync();
                 return Ok(new { message = $"Successfully deleted product with id {productId}." });
             }
             catch (Exception ex)
@@ -94,27 +91,29 @@ namespace AspNetCoreAPI.Controllers
                 return BadRequest("Data transfer object was not found.");
             }
             var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderProductsDTO.OrderId);
-            if(order == null)
+            if (order == null)
             {
-                return NotFound("Order not found.");
+                return NotFound("Order was not found.");
             }
             var products = await _context.Products
                 .Where(p => orderProductsDTO.Products.Select(p => p.ProductId).Contains(p.ProductId)).ToListAsync();
-            if(products.Count != orderProductsDTO.Products.Count)
+            if (products.Count != orderProductsDTO.Products.Count)
             {
-                return NotFound("One or more products not found.");
+                return NotFound("One or more products were not found.");
             }
             var orderProducts = products.Select(product => new OrderProductModel
             {
                 OrderId = orderProductsDTO.OrderId,
                 ProductId = product.ProductId,
                 Product = product,
-                Order = order
+                Order = order,
+                Quantity = orderProductsDTO.Products
+                .FirstOrDefault(p => p.ProductId == product.ProductId)?.ProductAmount ?? 0
             }).ToList();
             await _context.OrderProducts.AddRangeAsync(orderProducts);
             await _context.SaveChangesAsync();
 
-            return Ok("Products successfully added to the order.");
+            return Ok("Products have been successfully added to the order.");
         }
         [HttpGet("get-products/{orderId}")]
         public async Task<IActionResult> GetOrderProducts(int orderId)
@@ -125,7 +124,7 @@ namespace AspNetCoreAPI.Controllers
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
             if (order == null)
             {
-                return NotFound("Order not found.");
+                return NotFound("Order was not found.");
             }
             var orderProducts = order.OrderProducts
                 .Select(op => new ProductDTO
@@ -134,10 +133,11 @@ namespace AspNetCoreAPI.Controllers
                     ProductName = op.Product.ProductName,
                     ProductDescription = op.Product.ProductDescription,
                     ProductPrice = op.Product.ProductPrice,
-                    ProductWeight = op.Product.ProductWeight
+                    ProductWeight = op.Product.ProductWeight,
+                    ProductAmount = op.Quantity
                 }).ToList();
 
             return Ok(orderProducts);
         }
-    }  
+    }
 }
