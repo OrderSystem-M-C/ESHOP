@@ -47,6 +47,15 @@
         </div>
       </div>
     </div>
+    <div class="search-bar">
+      <input type="search" class="form-control" placeholder="Kliknite sem pre vyhľadávanie objednávok" [(ngModel)]="searchText" (input)="searchOrders()">
+      <select class="form-control" [(ngModel)]="searchOption" (change)="searchOrders()">
+        <option selected value="auto">Automatické vyhľadávanie</option>
+        <option value="customerName">Vyhľadávanie podľa mena a priezviska</option>
+        <option value="orderId">Vyhľadávanie podľa čísla objednávky</option>
+        <option value="email">Vyhľadávanie podľa e-mailovej adresy</option>
+      </select>
+    </div>
       @if(filteredOrders.length > 0){
       <table class="orders-table">
         <thead>

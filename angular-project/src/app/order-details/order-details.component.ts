@@ -36,76 +36,129 @@ export class OrderDetailsComponent implements OnInit{
 
   getInvoice(){
     if(this.order){
-      const invoiceHTML = `<div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px; max-width: 800px; margin: auto;">
-    <div style="text-align: center; margin-bottom: 20px;">
-        <h1 style="margin: 0; color: #333;">Faktúra</h1>
-        <p style="margin: 0; font-size: 14px; color: #666;">Číslo faktúry: ${this.order.invoiceNumber}</p>
-        <p style="margin: 0; font-size: 14px; color: #666;">Dátum vystavenia: ${this.order.invoiceIssueDate}</p>
-    </div>
-    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-        <div style="flex: 1; padding-right: 20px; border-right: 1px solid #ddd;">
-            <h3 style="margin-bottom: 10px; color: #555;">Údaje objednávateľa</h3>
-            <p><strong>Meno a priezvisko:</strong> ${this.order.customerName}</p>
-            <p><strong>Firma:</strong> ${this.order.company}</p>
-            <p><strong>IČO (v prípade firmy):</strong> ${this.order.ico}</p>
-            <p><strong>DIČ (v prípade firmy):</strong> ${this.order.dic}</p>
-            <p><strong>IČ DPH (v prípade firmy):</strong> ${this.order.icDph}</p>
-            <p><strong>Adresa:</strong> ${this.order.address}</p>
-            <p><strong>Mesto:</strong> ${this.order.city}</p>
-            <p><strong>PSČ:</strong> ${this.order.postalCode}</p>
-            <p><strong>E-mail:</strong> ${this.order.email}</p>
-            <p><strong>Telefónne číslo:</strong> ${this.order.phoneNumber}</p>
-        </div>
-        <div style="flex: 1; padding-left: 20px;">
-            <h3 style="margin-bottom: 10px; color: #555;">Fakturačné údaje</h3>
-            <p><strong>Číslo faktúry:</strong> ${this.order.invoiceNumber}</p>
-            <p><strong>Variabilný symbol:</strong> ${this.order.variableSymbol}</p>
-            <p><strong>Typ dokladu:</strong> Faktúra</p>
-            <p><strong>Dátum splatnosti:</strong> ${this.order.invoiceDueDate}</p>
-            <p><strong>Dátum dodania:</strong> ${this.order.invoiceDeliveryDate}</p>
-            <p><strong>Meno a priezvisko:</strong> ${this.order.invoiceName}</p>
-            <p><strong>Firma:</strong> ${this.order.invoiceCompany}</p>
-            <p><strong>IČO (v prípade firmy):</strong> ${this.order.invoiceICO}</p>
-            <p><strong>DIČ (v prípade firmy):</strong> ${this.order.invoiceDIC}</p>
-            <p><strong>E-mail:</strong> ${this.order.invoiceEmail}</p>
-            <p><strong>Telefónne číslo:</strong> ${this.order.invoicePhoneNumber}</p>
-        </div>
-    </div>
-    <div style="margin-bottom: 20px;">
-        <h3 style="margin-bottom: 10px; color: #555;">Položky na faktúre</h3>
-        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-            <thead>
-                <tr style="background-color: #f8f8f8; border-bottom: 2px solid #ddd;">
-                    <th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Položka</th>
-                    <th style="text-align: center; padding: 8px; border: 1px solid #ddd;">Množstvo</th>
-                    <th style="text-align: right; padding: 8px; border: 1px solid #ddd;">Cena za kus</th>
-                    <th style="text-align: right; padding: 8px; border: 1px solid #ddd;">Celkom</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Repeat for each item -->
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #ddd;">{{ polozkaNazov }}</td>
-                    <td style="text-align: center; padding: 8px; border: 1px solid #ddd;">{{ polozkaMnozstvo }}</td>
-                    <td style="text-align: right; padding: 8px; border: 1px solid #ddd;">{{ polozkaCena }}</td>
-                    <td style="text-align: right; padding: 8px; border: 1px solid #ddd;">{{ polozkaCelkom }}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <div style="margin-bottom: 20px;">
-        <p><strong>Dátum objednávky:</strong> ${this.order.orderDate}</p>
-        <p><strong>Spôsob doručenia:</strong> ${this.order.deliveryOption}</p>
-        <p><strong>Spôsob platby:</strong> ${this.order.paymentOption}</p>
-    </div>
-    <div style="text-align: right; margin-bottom: 20px;">
-        <p><strong>Medzisúčet:</strong> 0€</p>
-        <p><strong>Zľava (-${this.order.discountAmount}%):</strong></p>
-        <h2 style="margin: 0; color: #333;">Celková suma: 0€</h2>
-    </div>
-    <div style="border-top: 1px solid #ddd; padding-top: 10px; color: #666; font-size: 12px;">
-        <p><strong>Poznámka: ${this.order.note}</strong></p>
-    </div>
+      const invoiceHTML = `<div style="width: 100%; box-sizing: border-box; padding: 20px">
+  <div class="title-element" style="font-family: Arial, Helvetica, sans-serif; text-align: center;">
+    <h2>Číslo objednávky: <strong>${this.orderId}</strong></h2>
+  </div>
+  <div class="first-table">
+    <table style="width: 100%; border: 1px solid #ccc; border-collapse: collapse; text-align: center;">
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Dátum</th>
+        <td style="padding: 8px;">${this.currentDate}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Celkový počet produktov</th>
+        <td style="padding: 8px;">${this.selectedProducts.reduce((sum, product) => sum + product.productAmount, 0)} ks</td>
+      </tr>
+    </table>
+  </div>
+  <div class="second-table" style="margin-top: 10px">
+    <h3>Objednané produkty</h3>
+    <table style="width: 100%; border: 1px solid #ccc; border-collapse: collapse; text-align: center;">
+      <tr style="background-color: #0d6efd; color: white;">
+        <th style="padding: 8px;">Názov produktu</th>
+        <th style="padding: 8px;">Cena/ks</th>
+        <th style="padding: 8px;">Ks</th>
+        <th style="padding: 8px;">Celkom</th>
+      </tr>
+      ${this.selectedProducts.map(product => 
+        `<tr>
+          <td style="padding: 8px;">${product.productName}</td>
+          <td style="padding: 8px;">${(product.productPrice - ((product.productPrice / 100)) * this.order.discountAmount).toFixed(2)}€ (-${this.order.discountAmount}%)</td>
+          <td style="padding: 8px;">${product.productAmount}x</td>
+          <td style="padding: 8px;">${(product.productAmount * (product.productPrice - ((product.productPrice / 100) * this.order.discountAmount))).toFixed(2)}€</td>
+        </tr>`
+      ).join('')}
+      <tr>
+        <td style="font-weight: bold; padding: 8px;">CELKOM:</td>
+        <td style="padding: 8px;"></td>
+        <td style="padding: 8px;"></td>
+        <td style="font-weight: bold; padding: 8px">
+          ${this.order.discountAmount ? ((this.order.totalPrice - (this.order.totalPrice * this.order?.discountAmount / 100)).toFixed(2) + '€ (-' + this.order.discountAmount + '%)') : (this.order.totalPrice.toFixed(2) + '€')}
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="third-table" style="margin-top: 10px">
+    <h3>Objednávateľ</h3>
+    <table style="width: 100%; border-collapse: collapse; border: 1px solid #ccc;">
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Meno</th>
+        <td style="padding: 8px;">${this.order.customerName}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Spoločnosť</th>
+        <td style="padding: 8px;">${this.order.company || 'Nie je zadané'}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">IČO</th>
+        <td style="padding: 8px;">${this.order.ico || 'Nie je zadané'}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">DIČ</th>
+        <td style="padding: 8px;">${this.order.dic || 'Nie je zadané'}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">IČ DPH</th>
+        <td style="padding: 8px;">${this.order.icDph || 'Nie je zadané'}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Adresa</th>
+        <td style="padding: 8px;">${this.order.address}, ${this.order.postalCode}, ${this.order.city}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">E-mail</th>
+        <td style="padding: 8px;">${this.order.email}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Tel.č.</th>
+        <td style="padding: 8px;">${this.order.phoneNumber}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Fakturačné údaje -->
+  <div class="invoice-table" style="margin-top: 10px;">
+    <h3>Fakturačné údaje</h3>
+    <table style="width: 100%; border-collapse: collapse; border: 1px solid #ccc;">
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Názov faktúry</th>
+        <td style="padding: 8px;">${this.order.invoiceName}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Spoločnosť</th>
+        <td style="padding: 8px;">${this.order.invoiceCompany || 'Nie je zadané'}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">IČO</th>
+        <td style="padding: 8px;">${this.order.invoiceICO || 'Nie je zadané'}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">DIČ</th>
+        <td style="padding: 8px;">${this.order.invoiceDIC || 'Nie je zadané'}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">E-mail</th>
+        <td style="padding: 8px;">${this.order.invoiceEmail}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Tel.č.</th>
+        <td style="padding: 8px;">${this.order.invoicePhoneNumber}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Dátum vystavenia faktúry</th>
+        <td style="padding: 8px;">${this.order.invoiceIssueDate}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Dátum splatnosti</th>
+        <td style="padding: 8px;">${this.order.invoiceDueDate}</td>
+      </tr>
+      <tr>
+        <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Dátum doručenia faktúry</th>
+        <td style="padding: 8px;">${this.order.invoiceDeliveryDate}</td>
+      </tr>
+    </table>
+  </div>
 </div>`
 
 
@@ -141,6 +194,9 @@ export class OrderDetailsComponent implements OnInit{
         this.snackBar.open('Vymazanie objednávky bolo zrušené.', '', { duration: 1000 });
       }
     })
+  }
+  calculateTotalAmount(): number {
+    return this.selectedProducts.reduce((sum, product) => sum + product.productAmount, 0);
   }
 
   ngOnInit(): void {

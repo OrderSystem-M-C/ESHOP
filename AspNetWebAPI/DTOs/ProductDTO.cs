@@ -4,6 +4,7 @@ namespace AspNetCoreAPI.DTOs
 {
     public class ProductDTO
     {
+        [Required]
         public int ProductId { get; set; }
         [Required]
         public string ProductName { get; set; }

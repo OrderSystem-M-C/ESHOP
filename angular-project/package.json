@@ -23,6 +23,7 @@
     "@auth0/angular-jwt": "^5.2.0",
     "bootstrap": "^5.3.3",
     "canvg": "^4.0.2",
+    "chart.js": "^4.4.8",
     "firebase-tools": "^13.2.1",
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.10.2",

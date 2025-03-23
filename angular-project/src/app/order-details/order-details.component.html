@@ -35,8 +35,8 @@
           <p><strong>Spôsob platby:</strong> {{ order?.paymentOption }}</p>
           <p><strong>Stav objednávky:</strong> {{ order?.orderStatus }}</p>
           <p><strong>Dátum objednávky:</strong> {{ order?.orderDate }}</p>
-          <p><strong>Hmotnosť objednávky: </strong>0kg</p>
-          <p><strong>Celkový počet produktov: </strong>0ks</p>
+          <p><strong>Hmotnosť objednávky: </strong>0 kg</p>
+          <p><strong>Celkový počet produktov: </strong>{{calculateTotalAmount()}} ks</p>
           <p><strong>Zľava:</strong> {{order?.discountAmount > 0 ? 'Áno (-' + order?.discountAmount + '%)' : 'Nie'}}</p>
           <p><strong>Poznámka:</strong> {{ order?.note ? order.note : 'Nezadané' }}</p>
         </div>
@@ -54,11 +54,18 @@
             <tbody>
                 <tr class="product-row" *ngFor="let product of selectedProducts">
                     <td>{{product.productName}}</td>
-                    <td>{{product.productAmount}} ks</td>
-                    <td>{{product.productPrice}}</td>
                     <td>{{product.productPrice}}€</td>
+                    <td>{{product.productAmount}} ks</td>
+                    <td>{{product.productPrice * product.productAmount}}€</td>
                 </tr>
             </tbody>
+            <tfoot>
+              <tr>
+                  <td colspan="2"><strong>Celkovo</strong></td>
+                  <td><strong>{{calculateTotalAmount()}} ks</strong></td>
+                  <td><strong>{{order.totalPrice}}€</strong></td>
+              </tr>
+          </tfoot>
         </table>
         </div>
       <div class="total-price-invoice">

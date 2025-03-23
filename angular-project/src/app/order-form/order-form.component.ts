@@ -313,7 +313,9 @@ export class OrderFormComponent implements OnInit {
         console.error("An error occurred while trying to create order", error)
       });
     }else if(this.selectedProducts.length === 0) {
-      this.snackBar.open('Neboli zvolené žiadne produkty!', '', {duration: 2000});
+      const element = document.getElementById('selected-products-id');
+      element.scrollIntoView({behavior: 'smooth', block: 'start'});
+      this.snackBar.open('Nemáte zvolené produkty pre túto objednávku!', '', {duration: 2500}); 
     }else if(this.orderForm.invalid || this.invoiceForm.invalid){
       this.validateAllFormFields(this.orderForm);
       this.validateAllFormFields(this.invoiceForm);
@@ -384,8 +386,8 @@ export class OrderFormComponent implements OnInit {
         <td style="font-weight: bold; padding: 8px;">CELKOM:</td>
         <td style="padding: 8px;"></td>
         <td style="padding: 8px;"></td>
-        <td style="font-weight: bold; padding: 8px">
-          ${this.orderForm.value.discountAmount ? ((this.totalPrice / 2).toFixed(2) + '€ (-' + this.orderForm.value.discountAmount + '%)') : (this.totalPrice.toFixed(2) + '€')}
+         <td style="font-weight: bold; padding: 8px">
+          ${this.orderForm.value.discountAmount ? ((this.totalPrice - (this.totalPrice * this.orderForm?.value.discountAmount / 100)).toFixed(2) + '€ (-' + this.orderForm.value.discountAmount + '%)') : (this.totalPrice.toFixed(2) + '€')}
         </td>
       </tr>
     </table>
@@ -472,7 +474,6 @@ export class OrderFormComponent implements OnInit {
   </div>
 </div>
 `
-
       const options = {
         margin: 5,
         filename: `Faktúra_č${this.orderId}.pdf`,

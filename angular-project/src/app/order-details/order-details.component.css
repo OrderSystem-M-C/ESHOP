@@ -31,56 +31,61 @@ h1 {
   flex-direction: row;
   gap: 10px;
 }
-.remove-btn{
+.remove-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
   flex-direction: row;
 }
-.remove-btn-icon{
+.remove-btn-icon {
   height: 20px;
   width: 20px;
 }
-.details-container{
+.details-container {
   border-radius: 10px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
-.details-container h3{
+.details-container h3 {
   font-weight: 600;
   color: #333;
   margin-bottom: 10px;
   border-bottom: 1px solid #ddd;
   padding-bottom: 5px;
 }
-.customer-info, .other-information, .products-information, .total-price-invoice{
+.customer-info,
+.other-information,
+.products-information,
+.total-price-invoice {
   border: 1px solid #ccc;
   padding: 20px;
   border-radius: 10px;
   background-color: #f9f9f9;
 }
-.total-price-invoice a{
+.total-price-invoice a {
   text-decoration: underline;
   cursor: pointer;
 }
-.total-price-invoicea:hover{
-  color:#333;
+.total-price-invoicea:hover {
+  color: #333;
 }
-.total-price-invoice img{
+.total-price-invoice img {
   height: 25px;
   width: 25px;
   margin-bottom: 2.5px;
 }
 .selected-products-table {
-    width: 100%;
+  width: 100%;
+  text-wrap: nowrap;
+  border: 1px solid #ccc;
 }
 .table-container {
-    border-radius: 5px;
-    overflow: hidden;
-    width: 600px;
-    border: 1px solid #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+  width: 600px;
+  border: 1px solid #ccc;
 }
 .selected-products-table th {
   padding: 10.5px;
@@ -93,31 +98,34 @@ h1 {
   padding: 10.5px;
   text-align: left;
   background-color: white;
-  border-bottom: 1px solid #ccc;
+  border: 1px solid #ccc;
 }
 .selected-products-table tr:last-child td {
   border-bottom: none;
 }
-.product-row:hover td{
+.selected-products-table tr td:not(:first-child){
+  text-align: center;
+}
+.product-row:hover td {
   background-color: #fbfbfb;
   cursor: pointer;
 }
-.confirm-dialog{
+.confirm-dialog {
   padding: 20px;
   width: 400px;
 }
-.dialog h2{
-  margin-bottom: 5px;
+.confirm-dialog h2 {
+  margin-bottom: 3px;
 }
-.dialog-buttons{
+.dialog-buttons {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
 }
-.dialog-buttons button{
+.dialog-buttons button {
   padding: 5px 12.5px;
 }
-.spinner-container{
+.spinner-container {
   height: 100px;
 }
