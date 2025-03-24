@@ -141,9 +141,47 @@ h1 {
 .no-orders-container{
   width: 100%;
   text-align: center;
-  margin-top: 50px;
+  margin-top: 40px;
 }
 .order-link{
   text-decoration: underline;
   cursor: pointer;
+}
+.charts-revenue-section {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.canvas-chart{
+  width: 100%;
+  height: 100%;
+  max-width: 350px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+canvas {
+  width: 100% !important; 
+  max-width: 250px;  
+  height: auto !important;  
+}
+.total-revenue {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+.total-revenue p {
+  margin: 4px 0 0 0;
+}
+h2 {
+  text-align: left;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  font-weight: bold;
 }

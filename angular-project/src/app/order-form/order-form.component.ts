@@ -31,6 +31,7 @@ export class OrderFormComponent implements OnInit {
   isLoading: boolean = false;
 
   isEditMode: boolean = false;
+  isLoading_edit: boolean = false;
 
   dialogRef!: MatDialogRef<any>;
   dialogClosed: boolean = true;
@@ -216,10 +217,11 @@ export class OrderFormComponent implements OnInit {
         this.isLoading = this.invoiceCreated = true;
 
         this.orderService.updateOrder(this.existingOrderId, order).subscribe((response) => {
-        this.snackBar.open('Objednávka bola úspešne upravená!', '', {duration: 1000});
-        this.router.navigate(['/orders-page']);
-
-        this.isLoading = false;
+          this.orderService.updateOrderProducts(order.orderId, this.selectedProducts).subscribe(() => {
+            this.snackBar.open('Objednávka bola úspešne upravená!', '', {duration: 1000});
+            this.router.navigate(['/orders-page']);
+            this.isLoading = false;
+          });
       }, (error) => {
         console.error("An error occurred while trying to update order", error);
         this.isLoading = false;
@@ -235,6 +237,7 @@ export class OrderFormComponent implements OnInit {
   }
 
   loadOrder(orderId: number){
+    this.isLoading_edit = true;
     this.orderService.getOrderDetails(orderId).subscribe((order) => {
       this.orderForm.patchValue(order); //patchValue robi ze vyplni hodnoty objednavky
 
@@ -250,6 +253,11 @@ export class OrderFormComponent implements OnInit {
         invoiceDIC: order.invoiceDIC,
         invoiceEmail: order.invoiceEmail,
         invoicePhoneNumber: order.invoicePhoneNumber,
+      });
+
+      this.orderService.getOrderProducts(orderId).subscribe((result) => {
+        this.selectedProducts = result;
+        this.isLoading_edit = false;
       });
     })
   }

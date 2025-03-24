@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { OrderService } from '../services/order.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { OrderDTO } from '../order-form/order-form.component';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Chart } from 'chart.js/auto';
 
 @Component({
   selector: 'app-orders-page',
@@ -46,6 +47,20 @@ export class OrdersPageComponent implements OnInit{
   searchText: string = '';
   searchOption: string = 'auto';
 
+  totalRevenue: number = 0;
+
+  revenue_chartInstance: any;
+  revenue_ctx: any;
+  @ViewChild('revenueChart') revenueChart!: { nativeElement: any };
+
+  orders_chartInstance: any;
+  orders_ctx: any;
+  @ViewChild('ordersDate') ordersDate!: { nativeElement: any };
+
+  pie_chartInstance: any;
+  pie_ctx: any;
+  @ViewChild('ordersStatusChart') ordersStatusChart!: { nativeElement: any };
+
   constructor(private orderService: OrderService, private datePipe: DatePipe){}
 
   toggleDropdown(dropdown: 'status' | 'date'){
@@ -54,6 +69,125 @@ export class OrdersPageComponent implements OnInit{
     }else{
       this.isVisibleDateFilter = !this.isVisibleDateFilter;
     }
+  }
+
+  createChart(chart: 'status' | 'orders' | 'revenue'): void {
+    if(chart === 'status'){
+      this.pie_chartInstance = this.ordersStatusChart.nativeElement;
+      this.pie_ctx = this.pie_chartInstance.getContext('2d');
+  
+      const statusCounts: { [key: string]: number } = {};
+      this.ordersData.forEach(order => {
+        statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;
+      });
+
+      const labels = Object.keys(statusCounts);
+      const data = Object.values(statusCounts);
+
+      const backgroundColors = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#66FF66',
+        '#FF6666', '#3399FF', '#FF3399', '#99FF33', '#FF6633', '#33FF99', '#6633FF'
+      ];
+  
+      this.pie_chartInstance = new Chart(this.pie_ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Stavy objednávok',
+              data: data,
+              backgroundColor: backgroundColors.slice(0, labels.length),
+              hoverOffset: 8
+            }
+          ]
+        },
+      });
+    }else if(chart === 'orders'){
+      this.orders_chartInstance = this.ordersDate.nativeElement;
+      this.orders_ctx = this.orders_chartInstance.getContext('2d');
+      const ordersByDate = this.groupOrdersByDate(this.ordersData);
+
+      const dates = Object.keys(ordersByDate);
+      const orderCounts = Object.values(ordersByDate);
+
+      this.orders_chartInstance = new Chart(this.orders_ctx, {
+        type: 'bar',
+        data: {
+          labels: dates,
+          datasets: [{
+            label: 'Počet objednávok',
+            data: orderCounts, 
+            backgroundColor: '#0d6efd',
+            borderColor: '#1e88e5',
+            borderWidth: 1
+          }]
+        },
+      })
+    }else if(chart === 'revenue') {
+      this.revenue_chartInstance= this.revenueChart.nativeElement;
+      this.revenue_ctx = this.revenue_chartInstance.getContext('2d');
+      const ordersRevenue = this.groupOrdersByDateRevenue(this.ordersData);
+
+      const labels = Object.keys(ordersRevenue);
+      const data = Object.values(ordersRevenue).map(o => o.totalRevenue);
+
+      this.revenue_chartInstance = new Chart(this.revenue_ctx, {
+        type: 'line',
+        data: {
+          labels: [0, ...labels],
+          datasets: [{
+            label: 'Denná tržba (€)',
+            data: [0, ...data], 
+            backgroundColor: '#0d6efd',
+            borderColor: '#1e88e5',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Dátum'
+              }
+            },
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      })
+    }
+  }
+
+  groupOrdersByDate(orders: OrderDTO[]) {
+    return orders.reduce((acc, order) => {
+      const [datePart] = order.orderDate.split(' ');
+      const [day, month, year] = datePart.split('.').map(Number);
+      const formattedDate = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
+
+      if(!acc[formattedDate]){
+        acc[formattedDate] = 0;
+      }
+      acc[formattedDate] += 1;
+
+      return acc;
+    }, {});
+  }
+  groupOrdersByDateRevenue(orders: OrderDTO[]): { [date: string]: { totalRevenue: number } } {
+    return orders.reduce((acc, order) => {
+      const [datePart] = order.orderDate.split(' ');
+      const [day, month, year] = datePart.split('.').map(Number);
+      const formattedDate = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
+
+      if(!acc[formattedDate]){
+        acc[formattedDate] = { totalRevenue: 0 };
+      }
+      acc[formattedDate].totalRevenue += parseFloat(order.totalPrice.toFixed(2));
+
+      return acc;
+    }, {} as { [date: string]: { totalRevenue: number } });
   }
 
   sortByDate(order: 'newest' | 'oldest'): void {
@@ -166,6 +300,12 @@ export class OrdersPageComponent implements OnInit{
       this.ordersData = result;
       this.filteredOrders = this.ordersData;
       this.isLoading = false;
+      this.createChart('status');
+      this.createChart('orders');
+      this.createChart('revenue');
+      this.totalRevenue = parseFloat(
+        (this.ordersData.reduce((total, order) => total + (order.totalPrice) || 0, 0)).toFixed(2)
+      )
     }, (error) =>{
       console.error("An error have occurred while trying to get data of orders", error);
     });

@@ -48,8 +48,17 @@
         </div>
       </div>
     </div>
+    <div class="search-bar">
+      <input type="search" class="form-control" placeholder="Kliknite sem pre vyhľadávanie objednávok" [(ngModel)]="searchText" (input)="searchOrders()">
+      <select class="form-control" [(ngModel)]="searchOption" (change)="searchOrders()">
+        <option selected value="auto">Automatické vyhľadávanie</option>
+        <option value="productId">Vyhľadávanie podľa čísla produktu</option>
+        <option value="productName">Vyhľadávanie podľa názvu produktu</option>
+        <option value="productPrice">Vyhľadávanie podľa ceny produktu</option>
+      </select>
+    </div>
     <div class="producs">
-      @if(productsData.length > 0){
+      @if(filteredProducts.length > 0){
         <table class="products-table">
           <thead>
             <tr>
@@ -70,6 +79,10 @@
             </tr>
           </tbody>
         </table>
+      }@else if(filteredProducts.length === 0){
+        <div class="no-products-found-container">
+          <h3>Neboli nájdené žiadne produkty.</h3>
+        </div>
       }@else{
         <div class="no-products-container">
           <h3>Nemáte vytvorené žiadne produkty.</h3>

@@ -46,4 +46,12 @@ export class OrderService {
     const url = `${this.baseUrl}/product/get-products/${orderId}`;
     return this.http.get<ProductDTO[]>(url);
   }
+  updateOrderProducts(orderId: number, products: ProductDTO[]){
+    const url = `${this.baseUrl}/product/update-products`;
+    const body = {
+      orderId, 
+      products
+    }
+    return this.http.put(url, body);
+  }
 }

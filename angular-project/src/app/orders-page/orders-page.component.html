@@ -10,6 +10,21 @@
       <button class="btn btn-primary" [routerLink]="['/order-form']">Vytvoriť objednávku</button>
     </div>
   </div>
+  <h2>Štatistiky</h2>
+  <div class="charts-revenue-section">
+    <div class="canvas-chart">
+      <canvas #ordersStatusChart></canvas>
+    </div>
+    <div class="canvas-chart">
+      <canvas #ordersDate></canvas>
+    </div>
+    <div class="canvas-chart">
+      <canvas #revenueChart></canvas>
+    </div>
+    <div class="total-revenue">
+      <h1>Celkový príjem:</h1><p style="font-weight: normal;"> {{totalRevenue}}€</p>
+    </div>
+  </div>
   @if(isLoading){
     <div class="spinner-container">
         <div class="spinner">
@@ -17,6 +32,7 @@
         Načítava sa
     </div>
   }@else{
+    <h2>Objednávky</h2>
     <div class="sorting-container">
       <div class="checkbox-dropdown-container">
         <div class="checkbox-dropdown">

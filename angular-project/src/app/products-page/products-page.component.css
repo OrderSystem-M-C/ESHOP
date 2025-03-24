@@ -121,6 +121,20 @@ h1 {
   width: 100%;
   gap: 10px;
 }
+.search-bar{
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: flex-start;
+  margin-bottom: 14px;
+  gap: 10px;
+}
+.search-bar input {
+  flex: 0.65;
+}
+.search-bar select {
+  flex: 0.35;
+}
 .alphabetical-dropdown-container, .price-dropdown-container{
   max-width: 350px;
   position: relative;
@@ -153,6 +167,11 @@ h1 {
   background-color: #fbfbfb;
   cursor: pointer;
 }
+.no-products-found-container {
+  width: 100%;
+  text-align: center;
+  margin-top: 40px;
+}
 .is-visible{
   display: block;
 }
@@ -167,6 +186,6 @@ h1 {
   border-color: red;
 }
 /*Pre platné polia*/
-.form-control.ng-valid:not(:placeholder-shown) {
+.form-control.ng-valid:not(:placeholder-shown):not([type="search"]):not(select) {
   border-color: #28a745;
 }

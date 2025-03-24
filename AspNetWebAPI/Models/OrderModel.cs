@@ -59,8 +59,6 @@ namespace AspNetCoreAPI.Models
         [Range(0.01, double.MaxValue, ErrorMessage = "Celková cena musí byť väčšia ako 0.")]
         public decimal TotalPrice { get; set; }
 
-        //Faktúra
-
         [Required(ErrorMessage = "Číslo faktúry je povinné.")]
         public int InvoiceNumber { get; set; } 
 

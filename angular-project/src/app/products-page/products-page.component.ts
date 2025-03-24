@@ -28,6 +28,9 @@ export class ProductsPageComponent implements OnInit {
   isVisibleAlphabetical: boolean = false;
   isVisiblePrice: boolean = false;
 
+  searchText: string = '';
+  searchOption: string = 'auto';
+
   constructor(private datePipe: DatePipe, private dialog: MatDialog, private snackBar: MatSnackBar, private productService: ProductService){}
 
   productForm = new FormGroup({
@@ -43,6 +46,30 @@ export class ProductsPageComponent implements OnInit {
     }else{
       this.isVisiblePrice = !this.isVisiblePrice;
     }
+  }
+
+  searchOrders(): void {
+    if(!this.searchText){
+      this.filteredProducts = this.productsData;
+    }
+    this.filteredProducts = this.productsData.filter(product => {
+      switch(this.searchOption){
+        case 'productId':
+          return  product.productId.toString().startsWith(this.searchText);
+        case 'productName':
+          return product.productName.toLowerCase().includes(this.searchText.toLowerCase());
+        case 'productPrice':
+          return product.productPrice.toString().startsWith(this.searchText);
+        case 'auto':
+          return (
+            product.productId.toString().startsWith(this.searchText) ||
+            product.productName.toLowerCase().includes(this.searchText.toLowerCase()) ||
+            product.productPrice.toString().startsWith(this.searchText)
+          )
+        default:
+          return false
+      }
+    })
   }
 
   sortProducts(criteria: 'alphabeticalAsc' | 'alphabeticalDesc' | 'priceAsc' | 'priceDesc'): void{

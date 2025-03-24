@@ -12,6 +12,13 @@
           <p>{{currentDate}}</p>
         </div>
       }
+      @if(isLoading_edit){
+        <div class="spinner-container">
+          <div class="spinner">
+          </div>
+          Načítava sa
+        </div>
+      }@else{
         <div class="products-delivery-payment-discount">
           <h3>Výber produktov, spôsobu dopravy a platby</h3>
           <div class="form-group">
@@ -292,6 +299,7 @@
         Načítava sa
       </div>
     }
+      }
     </form>
 </div>
 <ng-template #selectProductsDialog>

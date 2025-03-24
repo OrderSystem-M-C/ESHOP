@@ -106,7 +106,7 @@ h1 {
 .selected-products-table tr td:not(:first-child){
   text-align: center;
 }
-.product-row:hover td {
+.product-row:hover td, .total-row:hover td {
   background-color: #fbfbfb;
   cursor: pointer;
 }
