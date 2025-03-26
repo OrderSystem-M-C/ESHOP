@@ -19,6 +19,9 @@ h1 {
   flex-direction: row;
   text-align: left;
 }
+.title-charts h2{
+  margin: 0;
+}
 .title-container-1 {
   display: flex;
   justify-content: flex-start;
@@ -154,7 +157,8 @@ h1 {
   justify-content: flex-start;
   flex-direction: row;
   flex-wrap: wrap;
-  margin-top: 20px;
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
 .canvas-chart{
   width: 100%;
@@ -166,7 +170,7 @@ h1 {
 }
 canvas {
   width: 100% !important; 
-  max-width: 250px;  
+  max-width: 350px;  
   height: auto !important;  
 }
 .total-revenue {
@@ -176,12 +180,11 @@ canvas {
   justify-content: center;
   align-items: center;
 }
-.total-revenue p {
+.total-revenue h2 {
   margin: 4px 0 0 0;
+  font-weight: normal;
 }
-h2 {
+.title-charts h2, .title-orders h2 {
   text-align: left;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
   font-weight: bold;
 }

@@ -123,6 +123,23 @@ export class OrdersPageComponent implements OnInit{
             borderWidth: 1
           }]
         },
+        options: {
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Dátum'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Počet objednávok'
+              }
+            }
+          }
+        }
       })
     }else if(chart === 'revenue') {
       this.revenue_chartInstance= this.revenueChart.nativeElement;
@@ -153,7 +170,11 @@ export class OrdersPageComponent implements OnInit{
               }
             },
             y: {
-              beginAtZero: true
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Tržba v €'
+              }
             }
           }
         }

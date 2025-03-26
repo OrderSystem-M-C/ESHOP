@@ -10,7 +10,9 @@
       <button class="btn btn-primary" [routerLink]="['/order-form']">Vytvoriť objednávku</button>
     </div>
   </div>
-  <h2>Štatistiky</h2>
+  <div class="title-charts">
+    <h2>Štatistiky</h2>
+  </div>
   <div class="charts-revenue-section">
     <div class="canvas-chart">
       <canvas #ordersStatusChart></canvas>
@@ -22,7 +24,7 @@
       <canvas #revenueChart></canvas>
     </div>
     <div class="total-revenue">
-      <h1>Celkový príjem:</h1><p style="font-weight: normal;"> {{totalRevenue}}€</p>
+      <h1>Celkový príjem:</h1><h2> {{totalRevenue}}€</h2>
     </div>
   </div>
   @if(isLoading){
@@ -32,7 +34,9 @@
         Načítava sa
     </div>
   }@else{
-    <h2>Objednávky</h2>
+    <div class="title-orders">
+      <h2>Objednávky</h2>
+    </div>
     <div class="sorting-container">
       <div class="checkbox-dropdown-container">
         <div class="checkbox-dropdown">

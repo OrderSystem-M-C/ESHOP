@@ -142,66 +142,47 @@ namespace AspNetCoreAPI.Controllers
         [HttpPut("update-products")]
         public async Task<IActionResult> UpdateOrderProducts([FromBody] UpdateOrderProductsRequestDTO request)
         {
-            if (request == null || request.Products == null || request.Products.Count == 0)
+            if (request == null || request.Products == null)
             {
-                return BadRequest("Data transfer object or products list is missing.");
+                return BadRequest("Data transfer object was not found.");
             }
-
             var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == request.OrderId);
-            if (order == null)
-            {
-                return NotFound("Order not found.");
-            }
-
-            // Získanie produktov z objednávky
             var orderProducts = await _context.OrderProducts
                 .Where(op => op.OrderId == request.OrderId)
                 .ToListAsync();
-
-            // Odstránenie produktov, ktoré nie sú v zozname produktov v požiadavke
+            if (order == null || orderProducts == null)
+            {
+                return NotFound("Order or products were not found.");
+            }
             var productsToRemove = orderProducts
                 .Where(op => !request.Products.Any(p => p.ProductId == op.ProductId))
                 .ToList();
-
-            if (productsToRemove.Any())
-            {
-                _context.OrderProducts.RemoveRange(productsToRemove);
-            }
-
-            // Získanie existujúcich produktov z požiadavky a aktualizácia ich množstva alebo pridanie nových
-            var newOrderProducts = new List<OrderProductModel>();
-
+            _context.OrderProducts.RemoveRange(productsToRemove);
             foreach (var updatedProduct in request.Products)
             {
-                var existingOrderProduct = orderProducts.FirstOrDefault(op => op.ProductId == updatedProduct.ProductId);
-
-                if (existingOrderProduct != null)
+                var orderProduct = await _context.OrderProducts
+                    .FirstOrDefaultAsync(op => op.OrderId == request.OrderId && op.ProductId == updatedProduct.ProductId);
+                if (orderProduct != null)
                 {
-                    // Aktualizácia existujúceho produktu
-                    existingOrderProduct.Quantity = updatedProduct.ProductAmount;
+                    orderProduct.Quantity = updatedProduct.ProductAmount;
                 }
                 else
                 {
-                    // Pridanie nového produktu do objednávky
                     var newOrderProduct = new OrderProductModel
                     {
                         OrderId = request.OrderId,
                         ProductId = updatedProduct.ProductId,
                         Quantity = updatedProduct.ProductAmount
                     };
-                    newOrderProducts.Add(newOrderProduct);
+                    await _context.OrderProducts.AddAsync(newOrderProduct);
                 }
             }
-
-            if (newOrderProducts.Any())
-            {
-                // Pridanie nových produktov
-                await _context.OrderProducts.AddRangeAsync(newOrderProducts);
-            }
-
-            // Uloženie zmien do databázy
+            var updatedOrderProducts = await _context.OrderProducts
+                .Where(op => op.OrderId == request.OrderId)
+                .Include(op => op.Product)
+                .ToListAsync(); 
+            order.TotalPrice = updatedOrderProducts.Sum(op => op.Product.ProductPrice * op.Quantity);
             await _context.SaveChangesAsync();
-
             return Ok("Order products have been successfully updated.");
         }
     }

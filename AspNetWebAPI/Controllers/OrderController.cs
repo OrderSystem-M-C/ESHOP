@@ -198,7 +198,7 @@ namespace AspNetCoreAPI.Controllers
                 order.InvoicePhoneNumber = orderDto.InvoicePhoneNumber;
 
                 _context.SaveChanges();
-                return Ok("Order updated successfully.");
+                return Ok(order.Id);
             }
             catch (Exception ex)
             {

@@ -307,7 +307,7 @@ export class OrderFormComponent implements OnInit {
 
       this.orderService.createOrder(order).subscribe((response: OrderDTO) => {
         if(response){
-          this.orderService.addProductsToOrder(order.orderId, this.selectedProducts).subscribe();
+          this.orderService.addProductsToOrder(this.orderId, this.selectedProducts).subscribe();
           this.isLoading = false;
           if(!this.invoiceCreated){
             this.createInvoice();
