@@ -146,7 +146,7 @@ namespace AspNetCoreAPI.Controllers
             {
                 return BadRequest("Data transfer object was not found.");
             }
-            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == request.OrderId);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == request.OrderId);
             var orderProducts = await _context.OrderProducts
                 .Where(op => op.OrderId == request.OrderId)
                 .ToListAsync();

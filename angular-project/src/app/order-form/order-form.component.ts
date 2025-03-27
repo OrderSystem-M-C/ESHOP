@@ -213,11 +213,12 @@ export class OrderFormComponent implements OnInit {
         this.snackBar.open('Nebola vykonaná žiadna zmena v objednávke!', '', {duration: 1000});
       }else{
         let order = this.createOrderDTO();
-
         this.isLoading = this.invoiceCreated = true;
 
         this.orderService.updateOrder(this.existingOrderId, order).subscribe((response) => {
-          this.orderService.updateOrderProducts(order.orderId, this.selectedProducts).subscribe(() => {
+          const response_obj = response
+          console.log(response_obj);
+          this.orderService.updateOrderProducts(response_obj.id, this.selectedProducts).subscribe(() => {
             this.snackBar.open('Objednávka bola úspešne upravená!', '', {duration: 1000});
             this.router.navigate(['/orders-page']);
             this.isLoading = false;
@@ -240,6 +241,8 @@ export class OrderFormComponent implements OnInit {
     this.isLoading_edit = true;
     this.orderService.getOrderDetails(orderId).subscribe((order) => {
       this.orderForm.patchValue(order); //patchValue robi ze vyplni hodnoty objednavky
+
+      this.totalPrice = order.totalPrice;
 
       this.invoiceForm.patchValue({
         invoiceNumber: order.invoiceNumber,
@@ -543,4 +546,7 @@ export interface OrderDTO {
   invoiceDIC?: string;
   invoiceEmail: string;
   invoicePhoneNumber: string;
+}
+interface OrderResponse {
+  id: number;
 }

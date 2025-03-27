@@ -32,7 +32,7 @@ export class OrderService {
   updateOrder(orderId: number, order: OrderDTO): Observable<any>{
     const url = `${this.baseUrl}/order/update-order/${orderId}`;
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.put(url, order, {headers, responseType: 'text'}); //znamena ze Angular bude ocakavat textovu spravu a nie JSON takze sa spravne spracuje
+    return this.http.put(url, order, {headers, responseType: 'json'}); //znamena ze Angular bude ocakavat textovu spravu a nie JSON takze sa spravne spracuje
   }
   addProductsToOrder(orderId: number, products: ProductDTO[]){
     const url = `${this.baseUrl}/product/add-products`;

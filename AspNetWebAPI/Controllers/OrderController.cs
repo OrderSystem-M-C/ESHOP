@@ -2,6 +2,7 @@
 using AspNetCoreAPI.DTOs;
 using AspNetCoreAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCoreAPI.Controllers
 {
@@ -154,20 +155,17 @@ namespace AspNetCoreAPI.Controllers
             }    
         }
         [HttpPut("update-order/{orderId}")]
-        public IActionResult UpdateOrder(int orderId, [FromBody] OrderDTO orderDto)
+        public async Task<IActionResult> UpdateOrder(int orderId, [FromBody] OrderDTO orderDto)
         {
             if (orderId != orderDto.OrderId)
             {
-                return BadRequest("Order ID does not match.");
+                return BadRequest("Order Id does not match.");
             }
-
-            var order = _context.Orders.FirstOrDefault(o => orderId == o.OrderId);
-
+            var order = await _context.Orders.FirstOrDefaultAsync(o => orderId == o.OrderId);
             if (order == null)
             {
                 return NotFound("Order was not found.");
             }
-
             try
             {
                 order.CustomerName = orderDto.CustomerName;
@@ -197,8 +195,8 @@ namespace AspNetCoreAPI.Controllers
                 order.InvoiceEmail = orderDto.InvoiceEmail;
                 order.InvoicePhoneNumber = orderDto.InvoicePhoneNumber;
 
-                _context.SaveChanges();
-                return Ok(order.Id);
+                await _context.SaveChangesAsync();
+                return Ok(new { id = order.Id });
             }
             catch (Exception ex)
             {
