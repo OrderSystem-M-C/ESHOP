@@ -8,6 +8,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ProductDTO } from '../products-page/products-page.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ProductService } from '../services/product.service';
+import { HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-order-form',
@@ -39,6 +40,7 @@ export class OrderFormComponent implements OnInit {
   productsData: ProductDTO[] = [];
   sortedProducts: ProductDTO[] = [];
   selectedProducts: ProductDTO[] = [];
+  newSelectedProducts: ProductDTO[] = [];
 
   searchText: string = ''; 
 
@@ -166,6 +168,10 @@ export class OrderFormComponent implements OnInit {
       }else{
         this.snackBar.open('Výber produktov bol zrušený!', '', { duration: 1000 });
       }
+
+      if (this.isEditingProducts) {
+        this.newSelectedProducts = JSON.parse(JSON.stringify(this.selectedProducts)); //aby sa predišlo problémom s referenciami, vytvorí sa tzv. hlboká kópia (deep copy), lebo keď v JavaScripte priradím premennú typu objekt alebo pole, neukladá sa jeho skutočná hodnota, ale iba referencia na ten objekt v pamäti a tak dostaneme samostatnú kópiu.
+      }
     })
   }
   toggleProductSelection(product: ProductDTO){
@@ -177,12 +183,31 @@ export class OrderFormComponent implements OnInit {
       this.selectedProducts.push(product);
       this.totalPrice += product.productPrice;
     }
+
+    if(this.isEditMode){
+      const newIndex = this.newSelectedProducts.findIndex(p => p.productId === product.productId);
+      if(newIndex !== -1){
+        this.newSelectedProducts.splice(newIndex, 1);
+      }else{
+        this.newSelectedProducts.push(product);
+      }
+    }
   }
   confirmSelection() {
     this.dialogRef.close(this.isEditingProducts);
   }
   closeDialog(){
     this.dialogRef.close();
+  }
+
+  checkChanges(originalProducts: ProductDTO[], newProducts: ProductDTO[]): boolean {
+    if(originalProducts.length !== newProducts.length){
+      return true;
+    }
+    const originalSet = new Set(originalProducts);
+    const newSet = new Set(newProducts);
+    return [...originalSet].some(productId => !newSet.has(productId)) || 
+           [...newSet].some(productId => !originalSet.has(productId))
   }
 
   removeProduct(productId: number): void{
@@ -192,6 +217,12 @@ export class OrderFormComponent implements OnInit {
       this.selectedProducts.splice(index, 1);
       this.snackBar.open('Produkt bol odstránený!', '', { duration: 1000 });
     }
+    if(this.isEditMode){
+      const newIndex = this.newSelectedProducts.findIndex(p => p.productId === productId);
+      if (newIndex !== -1) {
+        this.newSelectedProducts.splice(newIndex, 1);
+      }
+    }
   }
 
   updateAmount(productId: number, productAmount: number) {
@@ -200,16 +231,24 @@ export class OrderFormComponent implements OnInit {
       product.productAmount = productAmount;
       this.recalculateTotalPrice();
     }
+    if (this.isEditingProducts) {
+      const newProduct = this.newSelectedProducts.find(p => p.productId === productId);
+      if (newProduct) {
+        newProduct.productAmount = productAmount;
+      }
+    }
   }
   recalculateTotalPrice(){
-    this.totalPrice = this.selectedProducts.reduce((acc, product) => {
+    const products = this.isEditingProducts ? this.newSelectedProducts : this.selectedProducts;
+    this.totalPrice = products.reduce((acc, product) => {
       return acc + (product.productPrice * product.productAmount);
     }, 0)
   }
 
   updateOrder(){
+    const arrayChanged = this.checkChanges(this.selectedProducts, this.newSelectedProducts);
     if(this.orderForm.valid && this.invoiceForm.valid){
-      if(this.orderForm.pristine){
+      if(this.orderForm.pristine && !arrayChanged){
         this.snackBar.open('Nebola vykonaná žiadna zmena v objednávke!', '', {duration: 1000});
       }else{
         let order = this.createOrderDTO();
@@ -217,12 +256,15 @@ export class OrderFormComponent implements OnInit {
 
         this.orderService.updateOrder(this.existingOrderId, order).subscribe((response) => {
           const response_obj = response
-          console.log(response_obj);
-          this.orderService.updateOrderProducts(response_obj.id, this.selectedProducts).subscribe(() => {
-            this.snackBar.open('Objednávka bola úspešne upravená!', '', {duration: 1000});
-            this.router.navigate(['/orders-page']);
-            this.isLoading = false;
-          });
+          if(arrayChanged){
+            this.orderService.updateOrderProducts(response_obj.id, this.selectedProducts).subscribe((response: HttpResponse<boolean>) => {
+              if(response.status === 200 || response.status === 204){
+                this.snackBar.open('Objednávka bola úspešne upravená!', '', {duration: 2000});
+                this.router.navigate(['/orders-page']);
+                this.isLoading = false;
+              }
+            });
+          }
       }, (error) => {
         console.error("An error occurred while trying to update order", error);
         this.isLoading = false;

@@ -177,13 +177,15 @@ namespace AspNetCoreAPI.Controllers
                     await _context.OrderProducts.AddAsync(newOrderProduct);
                 }
             }
-            var updatedOrderProducts = await _context.OrderProducts
-                .Where(op => op.OrderId == request.OrderId)
-                .Include(op => op.Product)
-                .ToListAsync(); 
-            order.TotalPrice = updatedOrderProducts.Sum(op => op.Product.ProductPrice * op.Quantity);
+            //var updatedOrderProducts = await _context.OrderProducts
+            //    .Where(op => op.OrderId == request.OrderId)
+            //    .Include(op => op.Product)
+            //    .ToListAsync(); 
+            //order.TotalPrice = updatedOrderProducts
+            //    .Where(op => op.Product != null)
+            //    .Sum(op => op.Product.ProductPrice * op.Quantity);
             await _context.SaveChangesAsync();
-            return Ok("Order products have been successfully updated.");
+            return Ok(true); //vraciame boolean aby sme povedali frontendu ze produkty boli zmenené
         }
     }
 }

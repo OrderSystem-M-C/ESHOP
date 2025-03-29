@@ -183,6 +183,7 @@ namespace AspNetCoreAPI.Controllers
                 order.PaymentOption = orderDto.PaymentOption;
                 order.DiscountAmount = orderDto.DiscountAmount;
                 order.OrderStatus = orderDto.OrderStatus;
+                order.TotalPrice = orderDto.TotalPrice;
                 order.InvoiceNumber = orderDto.InvoiceNumber;
                 order.VariableSymbol = orderDto.VariableSymbol;
                 order.InvoiceIssueDate = orderDto.InvoiceIssueDate;

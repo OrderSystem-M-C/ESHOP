@@ -52,6 +52,6 @@ export class OrderService {
       orderId, 
       products
     }
-    return this.http.put(url, body);
+    return this.http.put(url, body, { observe: 'response' });
   }
 }
