@@ -134,16 +134,21 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpDelete("delete-order/{id}")]
-        public IActionResult DeleteOrder(int Id)
+        public async Task<IActionResult> DeleteOrder(int Id)
         {
             try
             {
-                var order = _context.Orders.FirstOrDefault(o => o.Id == Id);
+                var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == Id);
                 if (order == null)
                 {
                     return NotFound(new {message = $"Order with ID {Id} not found." });
                 }
-
+                var orderProducts = await _context.OrderProducts.Where(op => op.OrderId == order.Id).ToListAsync();
+                if(orderProducts == null)
+                {
+                    return NotFound(new {message = $"Order with ID {Id} does not have any products." });
+                }
+                _context.OrderProducts.RemoveRange(orderProducts);
                 _context.Orders.Remove(order);
                 _context.SaveChanges();
 

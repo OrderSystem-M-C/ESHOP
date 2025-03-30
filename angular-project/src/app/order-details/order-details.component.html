@@ -63,7 +63,7 @@
               <tr class="total-row">
                   <td colspan="2"><strong>Celkovo</strong></td>
                   <td><strong>{{calculateTotalAmount()}} ks</strong></td>
-                  <td><strong>{{order.totalPrice}}€</strong></td>
+                  <td><strong>{{this.order.discountAmount ? ((this.order.totalPrice - (this.order.totalPrice * this.order?.discountAmount / 100)).toFixed(2) + '€ (-' + this.order.discountAmount + '%)') : (this.order.totalPrice.toFixed(2) + '€')}}</strong></td>
               </tr>
           </tfoot>
         </table>
@@ -75,6 +75,9 @@
           {{order.totalPrice - (order.totalPrice * order?.discountAmount / 100)}}€ (-{{order?.discountAmount}}%)
         </p>
         <p><strong>Faktúra: </strong> <a (click)="getInvoice()" title="Kliknutím stiahnete faktúru objednávky"><img src="../../assets/Images/download-icon.png" alt="download-icon">Prevziať faktúru</a></p>
+        <p><strong>Dátum vystavenia faktúry: </strong>{{order.invoiceIssueDate}}</p>
+        <p><strong>Dátum splatnosti: </strong>{{order.invoiceDueDate}}</p>
+        <p><strong>Dátum dodania: </strong>{{order.invoiceDeliveryDate}}</p>
       </div>
       </div>
     }

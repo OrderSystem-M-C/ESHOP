@@ -24,7 +24,7 @@
       <canvas #revenueChart></canvas>
     </div>
     <div class="total-revenue">
-      <h1>Celkový príjem:</h1><h2> {{totalRevenue}}€</h2>
+      <h1>Celkový príjem:</h1><h1 class="total-revenue-part"> {{totalRevenue}}€</h1>
     </div>
   </div>
   @if(isLoading){
@@ -74,6 +74,7 @@
         <option value="customerName">Vyhľadávanie podľa mena a priezviska</option>
         <option value="orderId">Vyhľadávanie podľa čísla objednávky</option>
         <option value="email">Vyhľadávanie podľa e-mailovej adresy</option>
+        <option value="note">Vyhľadávanie podľa poznámky</option>
       </select>
     </div>
       @if(filteredOrders.length > 0){

@@ -18,22 +18,23 @@ export class OrdersPageComponent implements OnInit{
   public ordersData: OrderDTO[] = [];
   filteredOrders = [...this.ordersData];
   statuses: string[] = [
-    'nezpracovane-nova-objednavka',
-    'vybavit-posta',
-    'uhradene-vybavit',
-    'neuhradene-cakam-na-platbu',
-    'neuhradene-udaje-k-platbe-poslat-zakaznikovi-mail',
-    'neuhradene-2xmail-poslany-zakaznikovi',
-    'vybavit-odlozene-osobny-odber',
-    'poslane-neuhradene',
-    'dobierka-info-k-objednavke-mail',
-    'zasielanie-cisla-zasielky-posta-mail',
-    'oprava',
-    'objednavka-odoslana-cakam-na-uhradu-dobierkou',
-    'objednavka-vybavena',
-    'storno',
-    'rozbite-znicene-vratene'
+    'Nezpracované - nová objednávka',
+    'Vybaviť - Pošta',
+    'Zasielanie čísla zásielky',
+    'Uhradené - Vybaviť',
+    'Vybaviť - Odložené, osobný odber',
+    'Neuhradené - čakám na platbu',
+    'Neuhradené - 2x poslaný e-mail',
+    'Poslané, neuhradené',
+    'Neuhradené - Údaje k platbe, poslať e-mail',
+    'Dobierka - Info k objednávke (poslať e-mail)',
+    'Objednávka vybavená',
+    'Objednávka odoslaná, čakám na úhradu dobierkou',
+    'Storno',
+    'Oprava',
+    'Rozbité, zničené, vrátené'
   ];
+  
   selectedStatuses: string[] = [];
 
   currentDate: string;
@@ -136,6 +137,10 @@ export class OrdersPageComponent implements OnInit{
               title: {
                 display: true,
                 text: 'Počet objednávok'
+              },
+              ticks: {
+                stepSize: 1,
+                precision: 0
               }
             }
           }
@@ -268,11 +273,14 @@ export class OrdersPageComponent implements OnInit{
           return order.orderId.toString().startsWith(this.searchText)
         case 'email':
           return  order.email.toLowerCase().includes(this.searchText.toLowerCase())
+        case 'note':
+          return order.note.toLowerCase().includes(this.searchText.toLowerCase())
         case 'auto':
           return (
             order.customerName.toLowerCase().includes(this.searchText.toLowerCase()) ||
             order.orderId.toString().startsWith(this.searchText) ||
-            order.email.toLowerCase().includes(this.searchText.toLowerCase())
+            order.email.toLowerCase().includes(this.searchText.toLowerCase()) ||
+            order.note.toLowerCase().includes(this.searchText.toLowerCase())
           )
         default:
           return false

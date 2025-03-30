@@ -182,6 +182,7 @@ export class OrderDetailsComponent implements OnInit{
 
     this.dialogRef.afterClosed().subscribe((result) => {
       if(result){
+        this.isLoading = true;
         this.orderService.deleteOrder(this.order.id).subscribe((response: any) => {
           this.isLoading = false;
           this.router.navigate(['/orders-page']);
@@ -198,6 +199,9 @@ export class OrderDetailsComponent implements OnInit{
   calculateTotalAmount(): number {
     return this.selectedProducts.reduce((sum, product) => sum + product.productAmount, 0);
   }
+  formatDate(dateString: string): string {
+    return dateString ? dateString.split('-').reverse().join('.') : '';
+  }
 
   ngOnInit(): void {
     const orderIdParam = this.route.snapshot.paramMap.get('orderId');
@@ -210,7 +214,11 @@ export class OrderDetailsComponent implements OnInit{
       this.order = result;
       if(this.order){
         this.orderService.getOrderProducts(this.order.orderId).subscribe((result) => {
+          this.order.invoiceIssueDate = this.formatDate(this.order.invoiceIssueDate);
+          this.order.invoiceDueDate = this.formatDate(this.order.invoiceDueDate);
+          this.order.invoiceDeliveryDate = this.formatDate(this.order.invoiceDeliveryDate);
           this.selectedProducts = result;
+          
           this.isLoading = false;
         }, (error) => {
           console.error("An error occurred while trying to get products.", error);

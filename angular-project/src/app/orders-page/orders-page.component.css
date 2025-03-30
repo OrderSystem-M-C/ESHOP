@@ -180,8 +180,7 @@ canvas {
   justify-content: center;
   align-items: center;
 }
-.total-revenue h2 {
-  margin: 3px 0 0 0;
+.total-revenue-part {
   font-weight: normal;
 }
 .title-charts h2, .title-orders h2 {
