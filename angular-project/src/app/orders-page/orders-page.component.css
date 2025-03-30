@@ -120,11 +120,13 @@ h1 {
   border-collapse: collapse;
   margin: 0 auto;
 }
-.orders-table th,
+.orders-table th {
+  padding: 12px;
+}
 .orders-table td {
-  padding: 12.5px;
+  padding: 12px;
   text-align: left;
-  border: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
 }
 .orders-table th {
   background-color: #0d6efd;

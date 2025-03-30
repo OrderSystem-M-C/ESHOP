@@ -406,9 +406,9 @@ export class OrderFormComponent implements OnInit {
     const formattedInvoiceIssueDate = this.invoiceForm.value.invoiceIssueDate.split('-').reverse().join('.');
     if(this.invoiceForm.valid){
       const invoiceHTML = `
-<div style="width: 100%; margin: 20px auto; box-sizing: border-box; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333;">
-  <div style="background-color: #f8f9fa; padding: 15px; text-align: center; border-bottom: 1px solid #e0e0e0;">
-    <h2 style="margin-top: 10px;">Číslo objednávky: <strong>${this.isEditMode ? this.existingOrderId : this.orderId}</strong></h2>
+<div style="width: 100%; margin: 10px auto; box-sizing: border-box; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333;">
+  <div style="background-color: #f8f9fa; padding: 10px; text-align: center; border-bottom: 1px solid #e0e0e0;">
+    <h2 style="margin-top: 14px;">Číslo objednávky: <strong>${this.isEditMode ? this.existingOrderId : this.orderId}</strong></h2>
   </div>
   <div style="padding: 20px;">
     <div style="margin-bottom: 20px;">
@@ -425,6 +425,10 @@ export class OrderFormComponent implements OnInit {
           <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white;">Celkový počet produktov</th>
           <td style="padding: 10px;">${this.selectedProducts.reduce((sum, product) => sum + product.productAmount, 0)} ks</td>
         </tr>
+        <tr>
+          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white;">Celková hmotnosť</th>
+          <td style="padding: 10px;">${this.selectedProducts.reduce((sum, product) => sum + product.productWeight * product.productAmount, 0)} kg</td>
+        </tr>
       </table>
     </div>
 
@@ -435,8 +439,10 @@ export class OrderFormComponent implements OnInit {
           <tr>
             <th style="padding: 10px; text-align: left;">Názov produktu</th>
             <th style="padding: 10px; text-align: center;">Cena/ks</th>
-            <th style="padding: 10px; text-align: center;">Ks</th>
-            <th style="padding: 10px; text-align: center;">Celkom</th>
+            <th style="padding: 10px; text-align: center;">Hmotnosť</th>
+            <th style="padding: 10px; text-align: center;">Množstvo</th>
+            <th style="padding: 10px; text-align: center;">Celkom (€)</th>
+            <th style="padding: 10px; text-align: center;">Celkom (kg)</th>
           </tr>
         </thead>
         <tbody>
@@ -444,16 +450,22 @@ export class OrderFormComponent implements OnInit {
             <tr>
               <td style="padding: 10px; text-align: left; border-bottom: 1px solid #f0f0f0;">${product.productName}</td>
               <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productPrice}€</td>
+              <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productWeight} kg</td>
               <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productAmount} ks</td>
               <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${(product.productAmount * (product.productPrice - ((product.productPrice / 100) * discountAmount))).toFixed(2)}€</td>
+              <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productWeight * product.productAmount} kg</td>
             </tr>
           `).join('')}
           <tr>
             <td style="padding: 10px; font-weight: bold; text-align: left;">CELKOM:</td>
             <td style="padding: 10px;"></td>
             <td style="padding: 10px;"></td>
-            <td style="padding: 10px; font-weight: bold; text-align: right;">
+            <td style="padding: 10px;"></td>
+            <td style="padding: 10px; font-weight: bold; text-align: center;">
               ${discountAmount ? ((this.totalPrice - (this.totalPrice * discountAmount / 100)).toFixed(2) + '€ <span style="color: #6c757d;">(-' + discountAmount + '%)</span>') : (this.totalPrice.toFixed(2) + '€ <span style="color: #6c757d;">(-' + discountAmount + '%)</span>')}
+            </td>
+            <td style="padding: 10px; font-weight: bold; text-align: center;">
+              ${this.selectedProducts.reduce((sum, product) => sum + product.productWeight * product.productAmount, 0)} kg
             </td>
           </tr>
         </tbody>
@@ -520,6 +532,7 @@ export class OrderFormComponent implements OnInit {
       if(invoiceHTML){
         html2pdf().set(options).from(invoiceHTML).save();
         this.invoiceCreated = true;
+        this.snackBar.open('Faktúra bola úspešne stiahnutá!', '', {duration: 2000});
       }
     }else{
       this.validateAllFormFields(this.invoiceForm);
