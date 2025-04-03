@@ -147,3 +147,18 @@ h1 {
 .spinner-container {
   height: 100px;
 }
+.return-home {
+  width: 100%;
+  justify-content: center;
+  display: flex;
+  padding: 10px 0 0 0;
+}
+.return-home button{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.return-home img {
+  margin-bottom: 2px;
+}

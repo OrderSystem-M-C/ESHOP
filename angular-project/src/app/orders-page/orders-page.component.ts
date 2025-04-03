@@ -218,6 +218,7 @@ export class OrdersPageComponent implements OnInit{
 
   sortByDate(order: 'newest' | 'oldest'): void {
    this.dateSortOrder = order;
+   this.isVisibleDateFilter = false;
    this.applyFilters();
   }
   

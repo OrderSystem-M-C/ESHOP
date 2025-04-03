@@ -74,11 +74,13 @@ h1 {
   margin: 0 auto;
   table-layout: auto;
 }
-.products-table th,
+.products-table th {
+  padding: 12px;
+}
 .products-table td {
-  padding: 12.5px;
+  padding: 12px;
   text-align: left;
-  border: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
 }
 .products-table th {
   background-color: #0d6efd;
