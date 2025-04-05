@@ -326,7 +326,6 @@ export class OrdersPageComponent implements OnInit{
 
   ngOnInit(): void {
     this.orderService.getOrders().subscribe((result) =>{
-      console.log("Objednávky načítané:", result);
       this.ordersData = result;
       this.filteredOrders = this.ordersData;
       this.isLoading = false;
