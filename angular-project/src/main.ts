@@ -15,6 +15,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { authGuard } from './app/api-authorization/auth.guard';
 import { OrderDetailsComponent } from './app/order-details/order-details.component';
 import { ProductsPageComponent } from './app/products-page/products-page.component';
+import { loggedInGuard } from './app/api-authorization/logged-in.guard';
 
 export function getBaseUrl() {
   return 'https://localhost:7186/api';
@@ -42,8 +43,8 @@ bootstrapApplication(AppComponent, {
       provideHttpClient(withInterceptors([errorHandlerInterceptor, jwtInterceptor])),
       provideRouter([
         { path: '', component: LoginComponent},
-        { path: 'login', component: LoginComponent},
-        { path: 'register', component: RegistrationComponent},
+        { path: 'login', component: LoginComponent, canActivate: [loggedInGuard]},
+        { path: 'register', component: RegistrationComponent, canActivate: [loggedInGuard]},
         { path: 'order-form', component: OrderFormComponent, canActivate: [authGuard]},
         { path: 'order-form/:orderId', component: OrderFormComponent, canActivate: [authGuard] },
         { path: 'orders-page', component: OrdersPageComponent, canActivate: [authGuard]},

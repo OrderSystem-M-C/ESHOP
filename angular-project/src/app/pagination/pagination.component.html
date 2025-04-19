@@ -1,1 +1,7 @@
-<p>pagination works!</p>
+<ul class="pagination flex-wrap ml-3">
+    <span class="arrow-left" [ngClass]="{'not-visible': currentPage === 1}" (click)="changePages('left')"><img src="https://cdn-icons-png.flaticon.com/512/32/32213.png" alt="arrow"></span>
+    <li *ngFor="let page of pages" [ngClass]="{'page-item': true, active: currentPage === page}" (click)="changePage.emit(page)">
+        <span class="page-link">{{ page }}</span>
+    </li>
+    <span class="arrow-right" [ngClass]="{'not-visible': currentPage === pages.length}" (click)="changePages('right')"><img src="https://cdn-icons-png.flaticon.com/512/32/32213.png" alt="arrow"></span>
+</ul>

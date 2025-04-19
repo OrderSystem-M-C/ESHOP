@@ -53,7 +53,7 @@ namespace AspNetCoreAPI.Registration
             var user = await _userManager.FindByNameAsync(userLoginDto.Email);
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, userLoginDto.Password))
-                return Unauthorized(new UserLoginResponseDto { ErrorMessage = "Invalid Authentication" });
+                return Unauthorized(new UserLoginResponseDto { ErrorMessage = "Invalid Authentication", IsAuthSuccessful = false });
 
             var signingCredentials = _jwtHandler.GetSigningCredentials();
             var claims = _jwtHandler.GetClaims(user);

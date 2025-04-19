@@ -14,7 +14,7 @@ export class OrderService {
   createOrder(order: OrderDTO){
     const url = `${this.baseUrl}/order/create-order`;
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.put(url, order, {headers});
+    return this.http.post(url, order, {headers});
   }
   getOrders(): Observable<OrderDTO[]>{
     const url = `${this.baseUrl}/order/get-orders`;

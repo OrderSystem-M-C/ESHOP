@@ -17,8 +17,8 @@ namespace AspNetCoreAPI.Controllers
             _context = context;
         }
 
-        [HttpPut("create-order")]
-        public IActionResult CreateOrder([FromBody] OrderDTO orderDto)
+        [HttpPost("create-order")]
+        public async Task<IActionResult> CreateOrder([FromBody] OrderDTO orderDto)
         {
             if (orderDto == null)
             {
@@ -59,8 +59,8 @@ namespace AspNetCoreAPI.Controllers
 
             try
             {
-                _context.Orders.Add(order);
-                _context.SaveChanges();
+                await _context.Orders.AddAsync(order);
+                await _context.SaveChangesAsync();
                 //Odpoved s vytvoreným objektom (201 Created) druhy parameter je location header akoby kde je to ID(proste moze ziskat podrobnosti o tejto objednavke na zaklade ID) prvy je nazov akcie ktora bude zodpovedat ziskaniu detailov objednavky 
                 return CreatedAtAction(nameof(CreateOrder), new { id = order.OrderId }, order); 
             }
@@ -70,11 +70,12 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpGet("get-orders")]
-        public ActionResult<IEnumerable<OrderDTO[]>> getOrders()
+        public async Task<ActionResult<IEnumerable<OrderDTO[]>>> getOrders()
         {
             try
             {
-                var orders = _context.Orders.Select(o => new OrderDTO
+                var orders = await _context.Orders
+                    .Select(o => new OrderDTO
                 {
                     Id = o.Id,
                     OrderId = o.OrderId,
@@ -106,7 +107,7 @@ namespace AspNetCoreAPI.Controllers
                     InvoiceDIC = o.InvoiceDIC,
                     InvoiceEmail = o.InvoiceEmail,
                     InvoicePhoneNumber = o.InvoicePhoneNumber,
-                }).ToList();
+                }).ToListAsync();
 
                 return Ok(orders);
             }
@@ -116,11 +117,11 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpGet("get-order-details/{orderId}")]
-        public ActionResult<OrderDTO> GetOrderDetails(int orderId)
+        public async Task<ActionResult<OrderDTO>> GetOrderDetails([FromRoute] int orderId)
         {
             try
             {
-                var order = _context.Orders.FirstOrDefault(o => o.OrderId == orderId);
+                var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
                 if(order == null)
                 {
                     return NotFound(new { message = $"Details for order with orderId {orderId} were not found." });
@@ -143,14 +144,16 @@ namespace AspNetCoreAPI.Controllers
                 {
                     return NotFound(new {message = $"Order with ID {Id} not found." });
                 }
-                var orderProducts = await _context.OrderProducts.Where(op => op.OrderId == order.Id).ToListAsync();
+                var orderProducts = await _context.OrderProducts
+                    .Where(op => op.OrderId == order.Id)
+                    .ToListAsync();
                 if(orderProducts == null)
                 {
                     return NotFound(new {message = $"Order with ID {Id} does not have any products." });
                 }
                 _context.OrderProducts.RemoveRange(orderProducts);
                 _context.Orders.Remove(order);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
                 return Ok(new {message = $"Successfully deleted order with id {Id}." });
             }

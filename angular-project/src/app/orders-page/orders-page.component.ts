@@ -5,11 +5,12 @@ import { OrderDTO } from '../order-form/order-form.component';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Chart } from 'chart.js/auto';
+import { PaginationComponent } from '../pagination/pagination.component';
 
 @Component({
   selector: 'app-orders-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, CommonModule, FormsModule],
+  imports: [CommonModule, RouterLink, DatePipe, CommonModule, FormsModule, PaginationComponent],
   providers: [DatePipe],
   templateUrl: './orders-page.component.html',
   styleUrl: './orders-page.component.css'
@@ -62,7 +63,21 @@ export class OrdersPageComponent implements OnInit{
   pie_ctx: any;
   @ViewChild('ordersStatusChart') ordersStatusChart!: { nativeElement: any };
 
+  currentPage: number = 1;
+  totalItems: number = 0;
+  limitItems: number = 2;
+
   constructor(private orderService: OrderService, private datePipe: DatePipe){}
+
+  onPageChange(page: number) {
+    this.currentPage = page;
+    this.updateCurrentOrders();
+  }
+  updateCurrentOrders() {
+    const startIndex = (this.currentPage - 1) * this.limitItems;
+    const endIndex = startIndex + this.limitItems;
+    this.filteredOrders = this.ordersData.slice(startIndex, endIndex);
+  }
 
   toggleDropdown(dropdown: 'status' | 'date'){
     if(dropdown === 'status'){
@@ -335,6 +350,8 @@ export class OrdersPageComponent implements OnInit{
       this.totalRevenue = parseFloat(
         (this.ordersData.reduce((total, order) => total + (order.totalPrice) || 0, 0)).toFixed(2)
       )
+      this.totalItems = this.ordersData.length;
+      this.updateCurrentOrders();
     }, (error) =>{
       console.error("An error have occurred while trying to get data of orders", error);
     });

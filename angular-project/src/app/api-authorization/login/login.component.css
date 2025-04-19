@@ -20,20 +20,29 @@
   border: none;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  width: 225px;
+  padding: 25px 25px 17px 25px;
+  width: 300px;
 }
 .login-form input {
-  padding: 10px 5px;
   border-radius: 5px;
-  max-width: 300px;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  transition: border-color 0.2s ease;
+  flex: 1;
 }
 .login-form h1{
   text-align: center;
   font-weight: bold;
+  margin-bottom: 10px;
+}
+.user-icon {
+  height: 45px;
+  width: 45px;
+  margin-bottom: 7px;
 }
 .field{
-  margin-top: 5px;
+  margin-bottom: 7px;
+  width: 100%;
 }
 .submit {
   width: 100%;
@@ -54,4 +63,10 @@
 }
 .isLogging{
   display: block;
+}
+.form-control.is-invalid {
+  border-color: red !important;
+}
+.form-control.ng-invalid.ng-touched {
+  border-color: red !important;
 }

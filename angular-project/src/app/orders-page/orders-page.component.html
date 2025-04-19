@@ -98,6 +98,7 @@
           </tr>
         </tbody>
       </table>
+      <app-pagination [currentPage]="this.currentPage" [limitItems]="this.limitItems" [totalItems]="this.totalItems" (changePage)="onPageChange($event)"></app-pagination>
     }@else if(filteredOrders.length === 0 && ordersData.length > 0){
       <div class="no-orders-container">
         <h3>Neboli nájdené žiadne objednávky.</h3>

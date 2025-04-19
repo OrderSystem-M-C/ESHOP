@@ -6,6 +6,8 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { AuthenticationService } from '../authentication.service';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { duration } from 'html2canvas/dist/types/css/property-descriptors/duration';
 
 @Component({
   selector: 'app-login',
@@ -14,14 +16,16 @@ import { Router } from '@angular/router';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   authService = inject(AuthenticationService);
   private router = inject(Router);
 
   isLogging: boolean = false;
 
+  constructor(private snackBar: MatSnackBar){}
+
   loginForm: FormGroup = new FormGroup({
-    email: new FormControl('', [Validators.required]),
+    email: new FormControl('', [Validators.required, Validators.email, this.emailValidator]),
     password: new FormControl('', Validators.required)
   });
 
@@ -30,17 +34,37 @@ export class LoginComponent implements OnInit {
       this.isLogging = true;
       this.authService.loginUser({...this.loginForm.value}).subscribe({
         next: (response) => {
-          this.authService.storeUserCredentials(response.token, response.username);
-          this.router.navigate(['/orders-page']);
+          if(response.isAuthSuccessful){
+            this.authService.storeUserCredentials(response.token, response.username);
+            this.router.navigate(['/orders-page']);
+          }
         },
-        error: (err) => console.log("Oops, something went wrong", err)
+        error: (err) => {
+          console.error(err?.errorMessage || err);
+          this.snackBar.open("E-mailová adresa alebo heslo nie sú správne!", "", { duration: 3000, panelClass: ['custom-snackbar'] });
+          this.loginForm.reset();
+          this.validateAllFormFields(this.loginForm);
+          this.isLogging = false;
+        }
       });
+    }else{
+      this.snackBar.open("Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!", "", { duration: 3000, panelClass: ['custom-snackbar'] });
+      this.validateAllFormFields(this.loginForm);
     }
   }
-
-  ngOnInit(): void {
-    if(this.authService.isAuthenticated()){
-      this.router.navigate(['/orders-page']);
+  validateAllFormFields(formGroup: FormGroup){
+    Object.keys(formGroup.controls).forEach(field => {
+      const control = formGroup.get(field);
+      if(control?.invalid){
+        control.markAsTouched(); 
+      }
+    })
+  }
+  emailValidator(control: FormControl) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+    if (control.value && !emailRegex.test(control.value)) {
+      return { invalidEmail: true };
     }
+    return null;
   }
 }

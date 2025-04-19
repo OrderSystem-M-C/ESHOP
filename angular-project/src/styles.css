@@ -10,6 +10,9 @@ body {
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;;
 }
+input::placeholder {
+  font-size: 15px;
+}
 .spinner-container {
   display: flex;
   justify-content: center;
@@ -37,4 +40,12 @@ body {
   100% {
     transform: rotate(360deg);
   }
+}
+.custom-snackbar {
+  background-color: #323232 !important;
+  color: #fff !important;
+}
+
+.custom-snackbar .mat-simple-snackbar-action {
+  color: #ff4081 !important; 
 }

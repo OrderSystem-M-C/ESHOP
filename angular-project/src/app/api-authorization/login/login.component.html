@@ -1,14 +1,15 @@
 <title>Prihlásenie</title>
 <div class="login-component">
   <form class="login-form" [formGroup]="loginForm">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Default_pfp.svg/2048px-Default_pfp.svg.png" class="user-icon">
     <h1>Prihlásiť sa</h1>
     <div class="field">
-      <label>E-mailová adresa</label><br>
-      <input type="email" placeholder="Enter your email" formControlName="email">
+      <label class="form-label">E-mailová adresa*</label><br>
+      <input class="form-control" type="email" placeholder="Enter your email" formControlName="email" [ngClass]="{'is-invalid': loginForm.get('email')?.invalid && loginForm.get('email')?.touched}">
     </div>
     <div class="field">
-      <label>Heslo</label><br>
-      <input type="password" placeholder="Enter your password" formControlName="password">
+      <label class="form-label">Heslo*</label><br>
+      <input class="form-control" type="password" placeholder="Enter your password" formControlName="password" [ngClass]="{'is-invalid': loginForm.get('password')?.invalid && loginForm.get('password')?.touched}">
     </div>
     <div [ngClass]="isLogging ? 'isLogging' : 'notLogging'" class="information">
       <p>Prihlasuje sa, prosím čakajte...</p>

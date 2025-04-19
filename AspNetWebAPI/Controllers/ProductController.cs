@@ -17,7 +17,7 @@ namespace AspNetCoreAPI.Controllers
             _context = context;
         }
 
-        [HttpPut("create-product")]
+        [HttpPost("create-product")]
         public async Task<IActionResult> CreateProduct([FromBody] ProductDTO productDTO)
         {
             if (productDTO == null)
@@ -65,7 +65,7 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpDelete("remove-product/{productId}")]
-        public async Task<IActionResult> DeleteProduct(int productId)
+        public async Task<IActionResult> DeleteProduct([FromRoute] int productId)
         {
             try
             {
@@ -185,7 +185,7 @@ namespace AspNetCoreAPI.Controllers
             //    .Where(op => op.Product != null)
             //    .Sum(op => op.Product.ProductPrice * op.Quantity);
             await _context.SaveChangesAsync();
-            return Ok(true); //vraciame boolean aby sme povedali frontendu ze produkty boli zmenené
+            return Ok(true); 
         }
     }
 }
