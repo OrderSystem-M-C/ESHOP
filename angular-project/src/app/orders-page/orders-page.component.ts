@@ -1,24 +1,50 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Injectable, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { OrderService } from '../services/order.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { OrderDTO } from '../order-form/order-form.component';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Chart } from 'chart.js/auto';
-import { PaginationComponent } from '../pagination/pagination.component';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { Subject } from 'rxjs';
 
+@Injectable()
+export class CustomPaginatorIntl implements MatPaginatorIntl, OnDestroy {
+  changes = new Subject<void>();
+  firstPageLabel = 'Prvá stránka';
+  itemsPerPageLabel = 'Počet objednávok na stránku:';
+  lastPageLabel = 'Posledná stránka';
+  nextPageLabel = 'Ďalšia stránka';
+  previousPageLabel = 'Predchádzajúca stránka';
+
+  getRangeLabel = (page: number, pageSize: number, length: number): string => {
+    if (length === 0 || pageSize === 0) {
+      return `0 z ${length}`;
+    }
+    length = Math.max(length, 0);
+    const startIndex = page * pageSize;
+    const endIndex = startIndex < length ?
+      Math.min(startIndex + pageSize, length) :
+      startIndex + pageSize;
+    return `${startIndex + 1} – ${endIndex} z ${length}`;
+  };
+
+  ngOnDestroy() {
+    this.changes.complete();
+  }
+}
 @Component({
   selector: 'app-orders-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, CommonModule, FormsModule, PaginationComponent, MatPaginatorModule],
-  providers: [DatePipe],
+  imports: [CommonModule, RouterLink, DatePipe, CommonModule, FormsModule, MatPaginatorModule],
+  providers: [DatePipe, { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
   templateUrl: './orders-page.component.html',
-  styleUrl: './orders-page.component.css'
+  styleUrl: './orders-page.component.scss'
 })
-export class OrdersPageComponent implements OnInit{
+export class OrdersPageComponent implements OnInit, AfterViewInit{
   public ordersData: OrderDTO[] = [];
   filteredOrders = [...this.ordersData];
+  ourFilteredOrders: OrderDTO[] = [];
   statuses: string[] = [
     'Nezpracované - nová objednávka',
     'Vybaviť - Pošta',
@@ -64,21 +90,25 @@ export class OrdersPageComponent implements OnInit{
   pie_ctx: any;
   @ViewChild('ordersStatusChart') ordersStatusChart!: { nativeElement: any };
 
-  currentPage: number = 1;
+  currentPage: number = 0;
   totalItems: number = 0;
-  limitItems: number = 2;
+  pageIndex: number = 0;
+  pageSize: number = 2;
 
   constructor(private orderService: OrderService, private datePipe: DatePipe){}
 
-  onPageChange(page: number) {
-    this.currentPage = page;
-    this.updateCurrentOrders();
+  updatePagedOrders(): void {
+    const startIndex = this.pageIndex * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.ourFilteredOrders= this.filteredOrders.slice(startIndex, endIndex);
   }
-  updateCurrentOrders() {
-    const startIndex = (this.currentPage - 1) * this.limitItems;
-    const endIndex = startIndex + this.limitItems;
-    this.filteredOrders = this.ordersData.slice(startIndex, endIndex);
+
+  handlePageEvent(pageEvent: PageEvent){
+    this.pageSize = pageEvent.pageSize;
+    this.pageIndex = pageEvent.pageIndex;
+    this.updatePagedOrders();
   }
+
 
   toggleDropdown(dropdown: 'status' | 'date'){
     if(dropdown === 'status'){
@@ -276,33 +306,13 @@ export class OrdersPageComponent implements OnInit{
     }
 
     this.filteredOrders = filtered;
+    this.totalItems = this.filteredOrders.length;
+    this.pageIndex = 0;
+    this.updatePagedOrders();
   }
 
   searchOrders(): void {
-    if(!this.searchText){
-      this.filteredOrders = this.ordersData;
-    }
-    this.filteredOrders = this.ordersData.filter(order => {
-      switch(this.searchOption){
-        case 'customerName':
-          return  order.customerName.toLowerCase().includes(this.searchText.toLowerCase())
-        case 'orderId':
-          return order.orderId.toString().startsWith(this.searchText)
-        case 'email':
-          return  order.email.toLowerCase().includes(this.searchText.toLowerCase())
-        case 'note':
-          return order.note.toLowerCase().includes(this.searchText.toLowerCase())
-        case 'auto':
-          return (
-            order.customerName.toLowerCase().includes(this.searchText.toLowerCase()) ||
-            order.orderId.toString().startsWith(this.searchText) ||
-            order.email.toLowerCase().includes(this.searchText.toLowerCase()) ||
-            order.note.toLowerCase().includes(this.searchText.toLowerCase())
-          )
-        default:
-          return false
-      }
-    })
+    this.applyFilters();
   }
 
   parseDate(dateString: string): Date {
@@ -352,11 +362,15 @@ export class OrdersPageComponent implements OnInit{
         (this.ordersData.reduce((total, order) => total + (order.totalPrice) || 0, 0)).toFixed(2)
       )
       this.totalItems = this.ordersData.length;
-      this.updateCurrentOrders();
+      this.pageIndex = 0;
+      this.applyFilters();
     }, (error) =>{
       console.error("An error have occurred while trying to get data of orders", error);
     });
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
+  }
+  ngAfterViewInit(): void{
+    this.updatePagedOrders();
   }
 }

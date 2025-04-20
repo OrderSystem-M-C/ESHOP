@@ -41,11 +41,3 @@ input::placeholder {
     transform: rotate(360deg);
   }
 }
-.custom-snackbar {
-  background-color: #323232 !important;
-  color: #fff !important;
-}
-
-.custom-snackbar .mat-simple-snackbar-action {
-  color: #ff4081 !important; 
-}

@@ -89,7 +89,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let order of filteredOrders" class="order-row" [routerLink]="['/order-details', order.orderId]">
+          <tr *ngFor="let order of ourFilteredOrders" class="order-row" [routerLink]="['/order-details', order.orderId]">
             <td>{{ order.orderDate }}</td>
             <td>{{ order.orderId }}</td>
             <td>{{ order.customerName }}</td>
@@ -98,7 +98,9 @@
           </tr>
         </tbody>
       </table>
-      <mat-paginator [length]="100" [pageSize]="10" [pageSizeOptions]="[5, 10, 15, 20]" aria-label="Zvolte si stránku"></mat-paginator>
+      <div class="pagination-container">
+        <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku"></mat-paginator>
+      </div>
     }@else if(filteredOrders.length === 0 && ordersData.length > 0){
       <div class="no-orders-container">
         <h3>Neboli nájdené žiadne objednávky.</h3>
