@@ -6,11 +6,12 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Chart } from 'chart.js/auto';
 import { PaginationComponent } from '../pagination/pagination.component';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-orders-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, RouterLink, DatePipe, CommonModule, FormsModule, PaginationComponent, MatPaginatorModule],
   providers: [DatePipe],
   templateUrl: './orders-page.component.html',
   styleUrl: './orders-page.component.css'

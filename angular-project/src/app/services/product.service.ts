@@ -13,7 +13,7 @@ export class ProductService {
   createProduct(product: ProductDTO){
     const url = `${this.baseUrl}/product/create-product`;
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.put(url, product, {headers});
+    return this.http.post(url, product, {headers});
   }
   getProducts(): Observable<ProductDTO[]>{
     const url = `${this.baseUrl}/product/get-products`;
