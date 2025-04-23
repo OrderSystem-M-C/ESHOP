@@ -70,7 +70,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let product of filteredProducts" class="product-row">
+            <tr *ngFor="let product of ourFilteredProducts" class="product-row">
               <td style="width: 130px; text-align: center;">{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
               <td style="width: 200px; text-align: center;">{{ product.productPrice }} €</td>
@@ -79,6 +79,9 @@
             </tr>
           </tbody>
         </table>
+        <div class="pagination-container">
+          <mat-paginator [length]="totalItems" [pageSizeOptions]="[2, 6, 10]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
+        </div>
       }@else if(filteredProducts.length === 0){
         <div class="no-products-found-container">
           <h3>Neboli nájdené žiadne produkty.</h3>

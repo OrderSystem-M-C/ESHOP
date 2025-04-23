@@ -54,4 +54,11 @@ export class OrderService {
     }
     return this.http.put(url, body, { observe: 'response' });
   }
+  copyOrders(orders: OrderDTO[]){
+    const url = `${this.baseUrl}/order/copy-orders`;
+    const body = {
+      CopiedOrders: orders
+    }
+    return this.http.post(url, body);
+  }
 }

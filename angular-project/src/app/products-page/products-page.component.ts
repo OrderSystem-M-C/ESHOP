@@ -5,12 +5,14 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import { ProductService } from '../services/product.service';
+import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 
 @Component({
   selector: 'app-products-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, ReactiveFormsModule],
-  providers: [DatePipe],
+  imports: [CommonModule, RouterLink, FormsModule, ReactiveFormsModule, MatPaginatorModule],
+  providers: [DatePipe, { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
   templateUrl: './products-page.component.html',
   styleUrl: './products-page.component.css'
 })
@@ -20,6 +22,7 @@ export class ProductsPageComponent implements OnInit {
 
   public productsData: ProductDTO[] = [];
   filteredProducts: ProductDTO[] = [];
+  ourFilteredProducts: ProductDTO[] = [];
   
   isLoading: boolean = true;
   isLoadingForm: boolean = false;
@@ -30,6 +33,12 @@ export class ProductsPageComponent implements OnInit {
 
   searchText: string = '';
   searchOption: string = 'auto';
+  filtrationCriteria: string = '';
+
+  currentPage: number = 0;
+  totalItems: number = 0;
+  pageIndex: number = 0;
+  pageSize: number = 2;
 
   constructor(private datePipe: DatePipe, private dialog: MatDialog, private snackBar: MatSnackBar, private productService: ProductService){}
 
@@ -40,6 +49,18 @@ export class ProductsPageComponent implements OnInit {
     productWeight: new FormControl('', [Validators.required, Validators.pattern(/^\d+$/)])
   })
 
+  updatePagedProducts(): void {
+    const startIndex = this.pageIndex * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.ourFilteredProducts = this.filteredProducts.slice(startIndex, endIndex);
+  }
+
+  handlePageEvent(pageEvent: PageEvent){
+    this.pageSize = pageEvent.pageSize;
+    this.pageIndex = pageEvent.pageIndex;
+    this.updatePagedProducts();
+  }
+
   toggleDropdown(dropdown: 'alphabetical' | 'price'){
     if(dropdown === 'alphabetical'){
       this.isVisibleAlphabetical = !this.isVisibleAlphabetical;
@@ -47,42 +68,56 @@ export class ProductsPageComponent implements OnInit {
       this.isVisiblePrice = !this.isVisiblePrice;
     }
   }
+  
+  applyFilters(criteria?: string): void {
+    let filtered = [...this.productsData];
+
+    if (this.searchText.length > 0) {
+      filtered = filtered.filter(product => {
+        switch (this.searchOption) {
+          case 'productName':
+            return product.productName.toLowerCase().includes(this.searchText.toLowerCase());
+          case 'productId':
+            return product.productId.toString().startsWith(this.searchText);
+          case 'productPrice':
+            return product.productPrice.toString().startsWith(this.searchText);
+          case 'auto':
+            return (
+              product.productName.toLowerCase().includes(this.searchText.toLowerCase()) ||
+              product.productId.toString().startsWith(this.searchText) ||
+              product.productPrice.toString().startsWith(this.searchText)
+            );
+          default:
+            return false;
+        }
+      });
+    }
+
+    if(criteria){
+      if(criteria === 'alphabeticalAsc'){
+        filtered.sort((a, b) => a.productName.localeCompare(b.productName));
+      }else if(criteria === 'alphabeticalDesc'){
+        filtered.sort((a, b) => b.productName.localeCompare(a.productName));
+      }else if(criteria === 'priceAsc'){
+        filtered.sort((a, b) => b.productPrice - a.productPrice);
+      }else if(criteria === 'priceDesc'){
+        filtered.sort((a, b) => a.productPrice - b.productPrice);
+      }
+      this.isVisibleAlphabetical = this.isVisiblePrice = false;
+    }
+
+    this.filteredProducts = filtered;
+    this.totalItems = this.filteredProducts.length;
+    this.pageIndex = 0;
+    this.updatePagedProducts();
+  }
 
   searchOrders(): void {
-    if(!this.searchText){
-      this.filteredProducts = this.productsData;
-    }
-    this.filteredProducts = this.productsData.filter(product => {
-      switch(this.searchOption){
-        case 'productId':
-          return  product.productId.toString().startsWith(this.searchText);
-        case 'productName':
-          return product.productName.toLowerCase().includes(this.searchText.toLowerCase());
-        case 'productPrice':
-          return product.productPrice.toString().startsWith(this.searchText);
-        case 'auto':
-          return (
-            product.productId.toString().startsWith(this.searchText) ||
-            product.productName.toLowerCase().includes(this.searchText.toLowerCase()) ||
-            product.productPrice.toString().startsWith(this.searchText)
-          )
-        default:
-          return false
-      }
-    })
+    this.applyFilters();
   }
 
   sortProducts(criteria: 'alphabeticalAsc' | 'alphabeticalDesc' | 'priceAsc' | 'priceDesc'): void{
-    if(criteria === 'alphabeticalAsc'){
-      this.filteredProducts.sort((a, b) => a.productName.localeCompare(b.productName));
-    }else if(criteria === 'alphabeticalDesc'){
-      this.filteredProducts.sort((a, b) => b.productName.localeCompare(a.productName));
-    }else if(criteria === 'priceAsc'){
-      this.filteredProducts.sort((a, b) => b.productPrice - a.productPrice);
-    }else if(criteria === 'priceDesc'){
-      this.filteredProducts.sort((a, b) => a.productPrice - b.productPrice);
-    }
-    this.isVisibleAlphabetical = this.isVisiblePrice = false;
+    this.applyFilters(criteria);;
   }
 
   createProduct(){
@@ -110,6 +145,8 @@ export class ProductsPageComponent implements OnInit {
         })
 
         this.isLoadingForm = false;
+
+        this.updatePagedProducts();
 
         this.dialogRef.close();
       }, (error) => {
@@ -159,6 +196,8 @@ export class ProductsPageComponent implements OnInit {
 
           this.snackBar.open('Produkt bol úspešne vymazaný!', '', { duration: 1000 });
           this.isLoading = false;
+
+          this.updatePagedProducts();
         }
       }
     }, (error) => {
@@ -183,6 +222,9 @@ export class ProductsPageComponent implements OnInit {
       this.productsData = result;
       this.filteredProducts = [...this.productsData]; 
       this.isLoading = false;
+      this.pageIndex = 0;
+      this.applyFilters();
+      this.updatePagedProducts();
     }, (error) => {
       console.error("An error have occurred while trying to get products data", error);
     })

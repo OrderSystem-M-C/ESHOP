@@ -62,7 +62,7 @@ namespace AspNetCoreAPI.Controllers
                 await _context.Orders.AddAsync(order);
                 await _context.SaveChangesAsync();
                 //Odpoved s vytvoreným objektom (201 Created) druhy parameter je location header akoby kde je to ID(proste moze ziskat podrobnosti o tejto objednavke na zaklade ID) prvy je nazov akcie ktora bude zodpovedat ziskaniu detailov objednavky 
-                return CreatedAtAction(nameof(CreateOrder), new { id = order.OrderId }, order); 
+                return CreatedAtAction(nameof(CreateOrder), new { id = order.OrderId }, order);
             }
             catch (Exception ex)
             {
@@ -76,42 +76,42 @@ namespace AspNetCoreAPI.Controllers
             {
                 var orders = await _context.Orders
                     .Select(o => new OrderDTO
-                {
-                    Id = o.Id,
-                    OrderId = o.OrderId,
-                    CustomerName = o.CustomerName,
-                    Company = o.Company,
-                    ICO = o.ICO,
-                    DIC = o.DIC,
-                    ICDPH = o.ICDPH,
-                    Address = o.Address,
-                    City = o.City,
-                    PostalCode = o.PostalCode,
-                    Email = o.Email,
-                    PhoneNumber = o.PhoneNumber,
-                    Note = o.Note,
-                    DeliveryOption = o.DeliveryOption,
-                    PaymentOption = o.PaymentOption,
-                    DiscountAmount = o.DiscountAmount,
-                    OrderStatus = o.OrderStatus,
-                    OrderDate = o.OrderDate,
-                    TotalPrice = o.TotalPrice,
-                    InvoiceNumber = o.InvoiceNumber,
-                    VariableSymbol = o.VariableSymbol,
-                    InvoiceIssueDate = o.InvoiceIssueDate,
-                    InvoiceDueDate = o.InvoiceDueDate,
-                    InvoiceDeliveryDate = o.InvoiceDeliveryDate,
-                    InvoiceName = o.InvoiceName,
-                    InvoiceCompany = o.InvoiceCompany,
-                    InvoiceICO = o.InvoiceICO,
-                    InvoiceDIC = o.InvoiceDIC,
-                    InvoiceEmail = o.InvoiceEmail,
-                    InvoicePhoneNumber = o.InvoicePhoneNumber,
-                }).ToListAsync();
+                    {
+                        Id = o.Id,
+                        OrderId = o.OrderId,
+                        CustomerName = o.CustomerName,
+                        Company = o.Company,
+                        ICO = o.ICO,
+                        DIC = o.DIC,
+                        ICDPH = o.ICDPH,
+                        Address = o.Address,
+                        City = o.City,
+                        PostalCode = o.PostalCode,
+                        Email = o.Email,
+                        PhoneNumber = o.PhoneNumber,
+                        Note = o.Note,
+                        DeliveryOption = o.DeliveryOption,
+                        PaymentOption = o.PaymentOption,
+                        DiscountAmount = o.DiscountAmount,
+                        OrderStatus = o.OrderStatus,
+                        OrderDate = o.OrderDate,
+                        TotalPrice = o.TotalPrice,
+                        InvoiceNumber = o.InvoiceNumber,
+                        VariableSymbol = o.VariableSymbol,
+                        InvoiceIssueDate = o.InvoiceIssueDate,
+                        InvoiceDueDate = o.InvoiceDueDate,
+                        InvoiceDeliveryDate = o.InvoiceDeliveryDate,
+                        InvoiceName = o.InvoiceName,
+                        InvoiceCompany = o.InvoiceCompany,
+                        InvoiceICO = o.InvoiceICO,
+                        InvoiceDIC = o.InvoiceDIC,
+                        InvoiceEmail = o.InvoiceEmail,
+                        InvoicePhoneNumber = o.InvoicePhoneNumber,
+                    }).ToListAsync();
 
                 return Ok(orders);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(500, new { error = ex.Message });
             }
@@ -122,14 +122,14 @@ namespace AspNetCoreAPI.Controllers
             try
             {
                 var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
-                if(order == null)
+                if (order == null)
                 {
                     return NotFound(new { message = $"Details for order with orderId {orderId} were not found." });
                 }
 
                 return Ok(order);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(500, new { error = ex.Message });
             }
@@ -142,25 +142,25 @@ namespace AspNetCoreAPI.Controllers
                 var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == Id);
                 if (order == null)
                 {
-                    return NotFound(new {message = $"Order with ID {Id} not found." });
+                    return NotFound(new { message = $"Order with ID {Id} not found." });
                 }
                 var orderProducts = await _context.OrderProducts
                     .Where(op => op.OrderId == order.Id)
                     .ToListAsync();
-                if(orderProducts == null)
+                if (orderProducts == null)
                 {
-                    return NotFound(new {message = $"Order with ID {Id} does not have any products." });
+                    return NotFound(new { message = $"Order with ID {Id} does not have any products." });
                 }
                 _context.OrderProducts.RemoveRange(orderProducts);
                 _context.Orders.Remove(order);
                 await _context.SaveChangesAsync();
 
-                return Ok(new {message = $"Successfully deleted order with id {Id}." });
+                return Ok(new { message = $"Successfully deleted order with id {Id}." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message}); 
-            }    
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
         [HttpPut("update-order/{orderId}")]
         public async Task<IActionResult> UpdateOrder(int orderId, [FromBody] OrderDTO orderDto)
@@ -209,7 +209,69 @@ namespace AspNetCoreAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new {error = ex.Message});
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        [HttpPost("copy-orders")]
+        public async Task<IActionResult> CopyOrders([FromBody] OrderCopyDTO orderCopyDTO)
+        {
+            if (orderCopyDTO == null || orderCopyDTO.CopiedOrders == null)
+            {
+                return BadRequest("Data transfer object was not found.");
+            }
+            foreach(var item in orderCopyDTO.CopiedOrders)
+            {
+                if (item == null)
+                {
+                    return NotFound($"Order with ID {item.OrderId} not found.");
+                };
+                var lastOrderId = await _context.Orders.MaxAsync(o => o.OrderId);
+                var newOrderId = lastOrderId + 1;
+
+                var copy = new OrderModel
+                {
+                    OrderId = newOrderId,
+                    OrderDate = item.OrderDate,
+                    CustomerName = item.CustomerName,
+                    Company = item.Company,
+                    ICO = item.ICO,
+                    DIC = item.DIC,
+                    ICDPH = item.ICDPH,
+                    Address = item.Address,
+                    City = item.City,
+                    PostalCode = item.PostalCode,
+                    Email = item.Email,
+                    PhoneNumber = item.PhoneNumber,
+                    Note = item.Note,
+                    DeliveryOption = item.DeliveryOption,
+                    PaymentOption = item.PaymentOption,
+                    DiscountAmount = item.DiscountAmount,
+                    OrderStatus = item.OrderStatus,
+                    TotalPrice = item.TotalPrice,
+                    InvoiceNumber = item.InvoiceNumber,
+                    VariableSymbol = item.VariableSymbol,
+                    InvoiceIssueDate = item.InvoiceIssueDate,
+                    InvoiceDueDate = item.InvoiceDueDate,
+                    InvoiceDeliveryDate = item.InvoiceDeliveryDate,
+                    InvoiceName = item.InvoiceName,
+                    InvoiceCompany = item.InvoiceCompany,
+                    InvoiceICO = item.InvoiceICO,
+                    InvoiceDIC = item.InvoiceDIC,
+                    InvoiceEmail = item.InvoiceEmail,
+                    InvoicePhoneNumber = item.InvoicePhoneNumber
+                };
+
+                await _context.Orders.AddAsync(copy);
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Orders copied successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Chyba pri ukladaní objednávok.");
             }
         }
     }

@@ -2,37 +2,14 @@ import { AfterViewInit, Component, Injectable, OnDestroy, OnInit, ViewChild } fr
 import { OrderService } from '../services/order.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { OrderDTO } from '../order-form/order-form.component';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Chart } from 'chart.js/auto';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { Subject } from 'rxjs';
+import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
+import { HtmlTagDefinition } from '@angular/compiler';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
-@Injectable()
-export class CustomPaginatorIntl implements MatPaginatorIntl, OnDestroy {
-  changes = new Subject<void>();
-  firstPageLabel = 'Prvá stránka';
-  itemsPerPageLabel = 'Počet objednávok na stránku:';
-  lastPageLabel = 'Posledná stránka';
-  nextPageLabel = 'Ďalšia stránka';
-  previousPageLabel = 'Predchádzajúca stránka';
-
-  getRangeLabel = (page: number, pageSize: number, length: number): string => {
-    if (length === 0 || pageSize === 0) {
-      return `0 z ${length}`;
-    }
-    length = Math.max(length, 0);
-    const startIndex = page * pageSize;
-    const endIndex = startIndex < length ?
-      Math.min(startIndex + pageSize, length) :
-      startIndex + pageSize;
-    return `${startIndex + 1} – ${endIndex} z ${length}`;
-  };
-
-  ngOnDestroy() {
-    this.changes.complete();
-  }
-}
 @Component({
   selector: 'app-orders-page',
   standalone: true,
@@ -95,7 +72,9 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   pageIndex: number = 0;
   pageSize: number = 2;
 
-  constructor(private orderService: OrderService, private datePipe: DatePipe){}
+  selectedOrdersToCopy: OrderDTO[] = [];
+
+  constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar){}
 
   updatePagedOrders(): void {
     const startIndex = this.pageIndex * this.pageSize;
@@ -109,13 +88,40 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     this.updatePagedOrders();
   }
 
-
   toggleDropdown(dropdown: 'status' | 'date'){
     if(dropdown === 'status'){
       this.isVisibleCheckbox = !this.isVisibleCheckbox;
     }else{
       this.isVisibleDateFilter = !this.isVisibleDateFilter;
     }
+  }
+
+  navigateToDetails(order: OrderDTO, event: MouseEvent){
+    const target = event.target as HTMLElement;
+
+    if (target.hasAttribute('data-skip-navigation') || target.closest('[data-skip-navigation]')) {
+      return;
+    }
+    this.router.navigate(['/order-details', order.orderId])
+  }
+
+  selectOrder(){
+    const selected = this.ourFilteredOrders.filter(order => order.orderSelected);
+
+    this.selectedOrdersToCopy = selected.length === 0 ? [] : selected;
+  }
+
+  copySelectedOrders(): void {
+    this.isLoading = true;
+    this.orderService.copyOrders(this.selectedOrdersToCopy).subscribe(() => {
+      this.snackBar.open("Objednávka/y bola/i úspešne skopírované!", "", { duration: 1000 });
+      this.isLoading = false;
+      this.ourFilteredOrders.forEach(order => order.orderSelected = false);
+      this.selectedOrdersToCopy = [];
+    }, (error) => {
+      console.error("An error have occurred!", error);
+      this.isLoading = false;
+    })
   }
 
   createChart(chart: 'status' | 'orders' | 'revenue'): void {

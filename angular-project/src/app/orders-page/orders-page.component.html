@@ -34,39 +34,50 @@
         Načítava sa
     </div>
   }@else{
-    <div class="title-orders">
-      <h2>Objednávky</h2>
-    </div>
-    <div class="sorting-container">
-      <div class="checkbox-dropdown-container">
-        <div class="checkbox-dropdown">
-          <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('status')">Zvoľte stavy objednávok pre filtráciu</button>
-        </div>
-        <div class="dropdown-content" [ngClass]="isVisibleCheckbox ? 'is-visible': 'is-not-visible'">
-          <div class="checkbox-item" *ngFor="let status of statuses">
-            <label class="checkbox-label">
-              <input type="checkbox" class="form-check-input" id="checkbox" [value]="status" (change)="onCheckboxChange($event)" [checked]="selectedStatuses.includes(status)">
-              {{status}}
-            </label>
-          </div>
+    @if(selectedOrdersToCopy.length > 0){
+      <div class="title-orders">
+        <h2>Upravovací režim</h2>
+      </div>
+      <div class="copy-container">
+        <div class="copy-button">
+          <button class="btn btn-light" (click)="copySelectedOrders()">Kopírovať objednávku/y</button>
         </div>
       </div>
-      <div class="filter-date-container">
-        <div class="filter-date-dropdown">
-          <button type="button" class="btn btn-light filter-date-dropdown-btn" (click)="toggleDropdown('date')">Zvoľte spôsob filtrácie podľa dátumu</button>
-        </div>
-        <div class="dropdown-content" [ngClass]="isVisibleDateFilter ? 'is-visible': 'is-not-visible'">
-          <div class="filter-date-field">
-            <div class="filter-date-item" (click)="sortByDate('newest')">
-              <span>Najnovšie</span>
-            </div>
-            <div class="filter-date-item" (click)="sortByDate('oldest')">
-              <span>Najstaršie</span>
+    }@else{
+      <div class="title-orders">
+        <h2>Objednávky</h2>
+      </div>
+      <div class="sorting-container">
+        <div class="checkbox-dropdown-container">
+          <div class="checkbox-dropdown">
+            <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('status')">Zvoľte stavy objednávok pre filtráciu</button>
+          </div>
+          <div class="dropdown-content" [ngClass]="isVisibleCheckbox ? 'is-visible': 'is-not-visible'">
+            <div class="checkbox-item" *ngFor="let status of statuses">
+              <label class="checkbox-label">
+                <input type="checkbox" class="form-check-input" id="checkbox" [value]="status" (change)="onCheckboxChange($event)" [checked]="selectedStatuses.includes(status)">
+                {{status}}
+              </label>
             </div>
           </div>
         </div>
+        <div class="filter-date-container">
+          <div class="filter-date-dropdown">
+            <button type="button" class="btn btn-light filter-date-dropdown-btn" (click)="toggleDropdown('date')">Zvoľte spôsob filtrácie podľa dátumu</button>
+          </div>
+          <div class="dropdown-content" [ngClass]="isVisibleDateFilter ? 'is-visible': 'is-not-visible'">
+            <div class="filter-date-field">
+              <div class="filter-date-item" (click)="sortByDate('newest')">
+                <span>Najnovšie</span>
+              </div>
+              <div class="filter-date-item" (click)="sortByDate('oldest')">
+                <span>Najstaršie</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    }
     <div class="search-bar">
       <input type="search" class="form-control" placeholder="Kliknite sem pre vyhľadávanie objednávok" [(ngModel)]="searchText" (input)="searchOrders()">
       <select class="form-control" [(ngModel)]="searchOption" (change)="searchOrders()">
@@ -81,6 +92,7 @@
       <table class="orders-table">
         <thead>
           <tr>
+            <th style="width: 100px !important; text-align: center;">Zvoliť</th>
             <th>Dátum</th>
             <th>Číslo objednávky</th>
             <th>Meno</th>
@@ -89,7 +101,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let order of ourFilteredOrders" class="order-row" [routerLink]="['/order-details', order.orderId]">
+          <tr *ngFor="let order of ourFilteredOrders" class="order-row" (click)="navigateToDetails(order, $event)">
+            <td class="checkbox-section"><input type="checkbox" class="form-check-input" [(ngModel)]="order.orderSelected" (change)="selectOrder()" data-skip-navigation /></td>
             <td>{{ order.orderDate }}</td>
             <td>{{ order.orderId }}</td>
             <td>{{ order.customerName }}</td>
@@ -99,7 +112,7 @@
         </tbody>
       </table>
       <div class="pagination-container">
-        <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku"></mat-paginator>
+        <mat-paginator [length]="totalItems" [pageSizeOptions]="[2, 6, 10]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
       </div>
     }@else if(filteredOrders.length === 0 && ordersData.length > 0){
       <div class="no-orders-container">

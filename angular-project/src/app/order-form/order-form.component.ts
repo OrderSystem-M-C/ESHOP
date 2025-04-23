@@ -585,7 +585,5 @@ export interface OrderDTO {
   invoiceDIC?: string;
   invoiceEmail: string;
   invoicePhoneNumber: string;
-}
-interface OrderResponse {
-  id: number;
+  orderSelected?: boolean;
 }
