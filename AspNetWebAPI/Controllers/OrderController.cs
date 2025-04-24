@@ -215,64 +215,89 @@ namespace AspNetCoreAPI.Controllers
         [HttpPost("copy-orders")]
         public async Task<IActionResult> CopyOrders([FromBody] OrderCopyDTO orderCopyDTO)
         {
-            if (orderCopyDTO == null || orderCopyDTO.CopiedOrders == null)
-            {
-                return BadRequest("Data transfer object was not found.");
-            }
-            foreach(var item in orderCopyDTO.CopiedOrders)
-            {
-                if (item == null)
-                {
-                    return NotFound($"Order with ID {item.OrderId} not found.");
-                };
-                var lastOrderId = await _context.Orders.MaxAsync(o => o.OrderId);
-                var newOrderId = lastOrderId + 1;
-
-                var copy = new OrderModel
-                {
-                    OrderId = newOrderId,
-                    OrderDate = item.OrderDate,
-                    CustomerName = item.CustomerName,
-                    Company = item.Company,
-                    ICO = item.ICO,
-                    DIC = item.DIC,
-                    ICDPH = item.ICDPH,
-                    Address = item.Address,
-                    City = item.City,
-                    PostalCode = item.PostalCode,
-                    Email = item.Email,
-                    PhoneNumber = item.PhoneNumber,
-                    Note = item.Note,
-                    DeliveryOption = item.DeliveryOption,
-                    PaymentOption = item.PaymentOption,
-                    DiscountAmount = item.DiscountAmount,
-                    OrderStatus = item.OrderStatus,
-                    TotalPrice = item.TotalPrice,
-                    InvoiceNumber = item.InvoiceNumber,
-                    VariableSymbol = item.VariableSymbol,
-                    InvoiceIssueDate = item.InvoiceIssueDate,
-                    InvoiceDueDate = item.InvoiceDueDate,
-                    InvoiceDeliveryDate = item.InvoiceDeliveryDate,
-                    InvoiceName = item.InvoiceName,
-                    InvoiceCompany = item.InvoiceCompany,
-                    InvoiceICO = item.InvoiceICO,
-                    InvoiceDIC = item.InvoiceDIC,
-                    InvoiceEmail = item.InvoiceEmail,
-                    InvoicePhoneNumber = item.InvoicePhoneNumber
-                };
-
-                await _context.Orders.AddAsync(copy);
-            }
-
             try
             {
+                if (orderCopyDTO == null || orderCopyDTO.CopiedOrders == null)
+                {
+                    return BadRequest("Data transfer object was not found.");
+                }
+                foreach (var item in orderCopyDTO.CopiedOrders)
+                {
+                    var original = await _context.Orders
+                        .Include(o => o.OrderProducts)
+                        .FirstOrDefaultAsync(o => o.OrderId == item.OrderId);
+
+                    if (original == null)
+                    {
+                        return NotFound($"Order with ID {item.OrderId} not found.");
+                    };
+
+                    int newOrderId = await GetNewOrderId();
+
+                    var copy = new OrderModel
+                    {
+                        OrderId = newOrderId,
+                        OrderDate = original.OrderDate,
+                        CustomerName = original.CustomerName,
+                        Company = original.Company,
+                        ICO = original.ICO,
+                        DIC = original.DIC,
+                        ICDPH = original.ICDPH,
+                        Address = original.Address,
+                        City = original.City,
+                        PostalCode = original.PostalCode,
+                        Email = original.Email,
+                        PhoneNumber = original.PhoneNumber,
+                        Note = original.Note,
+                        DeliveryOption = original.DeliveryOption,
+                        PaymentOption = original.PaymentOption,
+                        DiscountAmount = original.DiscountAmount,
+                        OrderStatus = original.OrderStatus,
+                        TotalPrice = original.TotalPrice,
+                        InvoiceNumber = original.InvoiceNumber,
+                        VariableSymbol = original.VariableSymbol,
+                        InvoiceIssueDate = original.InvoiceIssueDate,
+                        InvoiceDueDate = original.InvoiceDueDate,
+                        InvoiceDeliveryDate = original.InvoiceDeliveryDate,
+                        InvoiceName = original.InvoiceName,
+                        InvoiceCompany = original.InvoiceCompany,
+                        InvoiceICO = original.InvoiceICO,
+                        InvoiceDIC = original.InvoiceDIC,
+                        InvoiceEmail = original.InvoiceEmail,
+                        InvoicePhoneNumber = original.InvoicePhoneNumber
+                    };
+
+                    await _context.Orders.AddAsync(copy);
+                    await _context.SaveChangesAsync();
+
+                    var newId = copy.Id;
+
+                    foreach (var product in original.OrderProducts)
+                    {
+                        var newProduct = new OrderProductModel
+                        {
+                            ProductId = product.ProductId,
+                            OrderId = newId,
+                            Quantity = product.Quantity,
+                            Product = product.Product
+                        };
+                        await _context.OrderProducts.AddAsync(newProduct);
+                    }
+                    await _context.SaveChangesAsync();
+                }
                 await _context.SaveChangesAsync();
+
                 return Ok(new { message = "Orders copied successfully." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "Chyba pri ukladaní objednávok.");
+                return StatusCode(500, $"An error has occurred while trying to copy orders - {ex}.");
             }
+        }
+        private async Task<int> GetNewOrderId()
+        {
+            var maxOrderId = await _context.Orders.MaxAsync(o => o.OrderId);
+            return maxOrderId + 1;
         }
     }
 }

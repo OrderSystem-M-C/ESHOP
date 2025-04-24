@@ -70,7 +70,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   currentPage: number = 0;
   totalItems: number = 0;
   pageIndex: number = 0;
-  pageSize: number = 2;
+  pageSize: number = 4;
 
   selectedOrdersToCopy: OrderDTO[] = [];
 
@@ -115,9 +115,18 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     this.isLoading = true;
     this.orderService.copyOrders(this.selectedOrdersToCopy).subscribe(() => {
       this.snackBar.open("Objednávka/y bola/i úspešne skopírované!", "", { duration: 1000 });
-      this.isLoading = false;
       this.ourFilteredOrders.forEach(order => order.orderSelected = false);
       this.selectedOrdersToCopy = [];
+
+      this.orderService.getOrders().subscribe((result) => {
+        this.filteredOrders = result;
+        this.updatePagedOrders();
+        this.isLoading = false;
+        this.pageIndex = 0;
+      }, (error) => {
+        console.error("An error have occurred!", error);
+        this.isLoading = false;
+      })
     }, (error) => {
       console.error("An error have occurred!", error);
       this.isLoading = false;
