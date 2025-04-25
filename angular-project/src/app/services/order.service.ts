@@ -61,4 +61,13 @@ export class OrderService {
     }
     return this.http.post(url, body);
   }
+  changeOrderStatus(orders: OrderDTO[], orderStatus: string){
+    const url = `${this.baseUrl}/order/change-order-status`;
+    let orderIds = orders.map(order => order.orderId);
+    let body = {
+      OrderIds: orderIds,
+      OrderStatus: orderStatus
+    }
+    return this.http.put(url, body);
+  }
 }

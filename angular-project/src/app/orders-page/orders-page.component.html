@@ -34,13 +34,28 @@
         Načítava sa
     </div>
   }@else{
-    @if(selectedOrdersToCopy.length > 0){
+    @if(selectedOrders.length > 0){
       <div class="title-orders">
         <h2>Upravovací režim</h2>
       </div>
-      <div class="copy-container">
-        <div class="copy-button">
-          <button class="btn btn-light" (click)="copySelectedOrders()">Skopírovať objednávku/y</button>
+      <div class="service-container">
+        <div class="copy-container">
+          <div class="copy-button">
+            <button class="btn btn-light" (click)="copySelectedOrders()"><img src="../../assets/Images/copy-icon.png" alt="copy-icon"> Skopírovať objednávku/y</button>
+          </div>
+        </div>
+        <div class="change-status-container">
+          <div class="change-status-button">
+           <button class="btn btn-light" (click)="toggleDropdown('changeStatus')"><img src="../../assets/Images/change-status-icon.png"> Rýchla zmena stavu objednávky</button>
+            <div class="dropdown-content" [ngClass]="isVisibleChangeStatus ? 'is-visible': 'is-not-visible'">
+              <h3><img src="../../assets/Images/click-icon.png" alt="click-icon"> Kliknutím zmeníte stav:</h3>
+              <div class="status-item" *ngFor="let status of statuses">
+                <a class="status-item-link" (click)="changeOrderStatus(status)">
+                  {{status}}
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     }@else{
@@ -50,7 +65,7 @@
       <div class="sorting-container">
         <div class="checkbox-dropdown-container">
           <div class="checkbox-dropdown">
-            <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('status')">Zvoľte stavy objednávok pre filtráciu</button>
+            <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('status')"><img src="../../assets/Images/filter-icon.png" alt="filter-icon"> Zvoľte stavy objednávok pre filtráciu</button>
           </div>
           <div class="dropdown-content" [ngClass]="isVisibleCheckbox ? 'is-visible': 'is-not-visible'">
             <div class="checkbox-item" *ngFor="let status of statuses">
@@ -63,7 +78,7 @@
         </div>
         <div class="filter-date-container">
           <div class="filter-date-dropdown">
-            <button type="button" class="btn btn-light filter-date-dropdown-btn" (click)="toggleDropdown('date')">Zvoľte spôsob filtrácie podľa dátumu</button>
+            <button type="button" class="btn btn-light filter-date-dropdown-btn" (click)="toggleDropdown('date')"><img src="../../assets/Images/date-icon.png" alt="date-icon"> Zvoľte spôsob filtrácie podľa dátumu</button>
           </div>
           <div class="dropdown-content" [ngClass]="isVisibleDateFilter ? 'is-visible': 'is-not-visible'">
             <div class="filter-date-field">

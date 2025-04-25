@@ -47,6 +47,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   isLoading: boolean = true;
   isVisibleCheckbox: boolean = false;
   isVisibleDateFilter: boolean = false;
+  isVisibleChangeStatus: boolean = false;
 
   dateSortOrder: string = '';
 
@@ -72,7 +73,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   pageIndex: number = 0;
   pageSize: number = 4;
 
-  selectedOrdersToCopy: OrderDTO[] = [];
+  selectedOrders: OrderDTO[] = [];
 
   constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar){}
 
@@ -88,11 +89,13 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     this.updatePagedOrders();
   }
 
-  toggleDropdown(dropdown: 'status' | 'date'){
+  toggleDropdown(dropdown: 'status' | 'date' | 'changeStatus'){
     if(dropdown === 'status'){
       this.isVisibleCheckbox = !this.isVisibleCheckbox;
-    }else{
+    }else if(dropdown === 'date'){
       this.isVisibleDateFilter = !this.isVisibleDateFilter;
+    }else{
+      this.isVisibleChangeStatus = !this.isVisibleChangeStatus;
     }
   }
 
@@ -108,29 +111,62 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   selectOrder(){
     const selected = this.ourFilteredOrders.filter(order => order.orderSelected);
 
-    this.selectedOrdersToCopy = selected.length === 0 ? [] : selected;
+    this.selectedOrders = selected.length === 0 ? [] : selected;
+
+    if(this.selectedOrders.length === 0){
+      this.isVisibleChangeStatus = false;
+    }
   }
 
   copySelectedOrders(): void {
     this.isLoading = true;
-    this.orderService.copyOrders(this.selectedOrdersToCopy).subscribe(() => {
-      this.snackBar.open("Objednávka/y bola/i úspešne skopírované!", "", { duration: 1000 });
-      this.ourFilteredOrders.forEach(order => order.orderSelected = false);
-      this.selectedOrdersToCopy = [];
-
-      this.orderService.getOrders().subscribe((result) => {
-        this.filteredOrders = result;
-        this.updatePagedOrders();
-        this.isLoading = false;
-        this.pageIndex = 0;
+    if(this.selectedOrders){
+      this.orderService.copyOrders(this.selectedOrders).subscribe(() => {
+        this.snackBar.open("Objednávka/y bola/i úspešne skopírované!", "", { duration: 1000 });
+        this.ourFilteredOrders.forEach(order => order.orderSelected = false);
+        this.selectedOrders = [];
+  
+        this.orderService.getOrders().subscribe((result) => {
+          this.filteredOrders = result;
+          this.updatePagedOrders();
+          this.isLoading = false;
+          this.pageIndex = 0;
+        }, (error) => {
+          console.error("An error have occurred!", error);
+          this.isLoading = false;
+        })
       }, (error) => {
         console.error("An error have occurred!", error);
         this.isLoading = false;
       })
-    }, (error) => {
-      console.error("An error have occurred!", error);
+    }else{
+      this.snackBar.open("Nemáte zvolenú/é objednávku/y na kopírovanie!", "", { duration: 1000 });
       this.isLoading = false;
-    })
+    }
+  }
+
+  changeOrderStatus(orderStatus: string): void{
+    this.isLoading = true;
+    if(this.selectedOrders){
+      this.orderService.changeOrderStatus(this.selectedOrders, orderStatus).subscribe((response) => {
+        if(response){
+          this.snackBar.open("Zmena stavu bola úspešná!", "", { duration: 1500 });
+          this.selectedOrders = [];
+          this.orderService.getOrders().subscribe((result) => {
+            this.filteredOrders = result;
+            this.updatePagedOrders();
+            this.isLoading = this.isVisibleChangeStatus = false;
+            this.pageIndex = 0;
+          }, (error) => {
+            console.error("An error have occurred!", error);
+            this.isLoading = false;
+          })
+        }
+      }, (error) => {
+        console.error("An error has occurred while trying to change status of the order/orders.", error);
+        this.isLoading = false;
+      })
+    }
   }
 
   createChart(chart: 'status' | 'orders' | 'revenue'): void {

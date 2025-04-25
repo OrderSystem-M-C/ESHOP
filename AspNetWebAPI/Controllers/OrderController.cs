@@ -299,5 +299,33 @@ namespace AspNetCoreAPI.Controllers
             var maxOrderId = await _context.Orders.MaxAsync(o => o.OrderId);
             return maxOrderId + 1;
         }
+        [HttpPut("change-order-status")]
+        public async Task<IActionResult> UpdateOrderProducts([FromBody] ChangeOrderStatusDTO changeOrderStatusDTO)
+        {
+            if(changeOrderStatusDTO == null || changeOrderStatusDTO.OrderIds == null)
+            {
+                return NotFound("Data transfer object was not found.");
+            }
+            var orders = await _context.Orders
+                .Where(o => changeOrderStatusDTO.OrderIds.Contains(o.OrderId))
+                .ToListAsync();
+            if(!orders.Any())
+            {
+                return NotFound("Orders with specified OrderId's were not found.");
+            }
+            foreach(var order in orders)
+            {
+                order.OrderStatus = changeOrderStatusDTO.OrderStatus;
+            };
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Order status updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
     }
 }
