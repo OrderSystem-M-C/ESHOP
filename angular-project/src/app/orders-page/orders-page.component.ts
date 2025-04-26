@@ -128,9 +128,9 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   
         this.orderService.getOrders().subscribe((result) => {
           this.filteredOrders = result;
+          this.pageIndex = 0;
           this.updatePagedOrders();
           this.isLoading = false;
-          this.pageIndex = 0;
         }, (error) => {
           console.error("An error have occurred!", error);
           this.isLoading = false;
@@ -145,7 +145,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     }
   }
 
-  changeOrderStatus(orderStatus: string): void{
+  changeOrderStatus(orderStatus: string): void {
     this.isLoading = true;
     if(this.selectedOrders){
       this.orderService.changeOrderStatus(this.selectedOrders, orderStatus).subscribe((response) => {
@@ -156,7 +156,6 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
             this.filteredOrders = result;
             this.updatePagedOrders();
             this.isLoading = this.isVisibleChangeStatus = false;
-            this.pageIndex = 0;
           }, (error) => {
             console.error("An error have occurred!", error);
             this.isLoading = false;
@@ -167,6 +166,42 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
         this.isLoading = false;
       })
     }
+  }
+
+  removeSelectedOrders(): void {
+    this.isLoading = true;
+    if(this.selectedOrders){
+      this.orderService.removeSelectedOrders(this.selectedOrders).subscribe((respone) => {
+        if(respone){
+          this.snackBar.open("Objednávka/y boli úspešne vymazané!", "", { duration: 1500 });
+          this.selectedOrders = [];
+          this.orderService.getOrders().subscribe((result) => {
+            this.filteredOrders = result;
+            this.pageIndex = 0;
+            this.updatePagedOrders();
+            this.isLoading = false;
+          }, (error) => {
+            console.error("An error have occurred!", error);
+            this.isLoading = false;
+          })
+        }
+      })
+    }
+  }
+
+  downloadXmlFile(){
+    this.orderService.getOrdersXmlFile().subscribe((blob) => {
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = "orders.xml";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(downloadUrl);
+    }, (error) => {
+      console.error("An error has occurred while trying to download XML file.", error);
+    })
   }
 
   createChart(chart: 'status' | 'orders' | 'revenue'): void {

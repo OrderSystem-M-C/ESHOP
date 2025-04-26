@@ -97,6 +97,7 @@ namespace AspNetCoreAPI.Models
         [Phone(ErrorMessage = "Zadajte platné telefónne číslo.")]
         [MaxLength(20, ErrorMessage = "Telefónne číslo nemôže byť dlhšie ako 20 znakov.")]
         public string InvoicePhoneNumber { get; set; }
+        [Required(ErrorMessage = "Produkty sú povinné.")]
         public ICollection<OrderProductModel> OrderProducts { get; set; }
     }
 }

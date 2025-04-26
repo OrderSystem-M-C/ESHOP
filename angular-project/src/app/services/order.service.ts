@@ -70,4 +70,18 @@ export class OrderService {
     }
     return this.http.put(url, body);
   }
+  removeSelectedOrders(orders: OrderDTO[]){
+    const url = `${this.baseUrl}/order/remove-selected-orders`;
+    let orderIds = orders.map(order => order.orderId);
+    let body = {
+      OrderIds: orderIds
+    };
+    return this.http.delete(url, {
+      body: body
+    });
+  }
+  getOrdersXmlFile(){
+    const url = `${this.baseUrl}/order/export-orders-to-xml`;
+    return this.http.get(url, { responseType: 'blob' });
+  }
 }

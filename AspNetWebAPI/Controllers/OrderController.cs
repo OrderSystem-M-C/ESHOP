@@ -11,10 +11,12 @@ namespace AspNetCoreAPI.Controllers
     public class OrderController : Controller
     {
         protected readonly ApplicationDbContext _context;
+        private readonly OrderExportService _orderExportService;
 
-        public OrderController(ApplicationDbContext context)
+        public OrderController(ApplicationDbContext context, OrderExportService orderExportService)
         {
             _context = context;
+            _orderExportService = orderExportService;
         }
 
         [HttpPost("create-order")]
@@ -326,6 +328,60 @@ namespace AspNetCoreAPI.Controllers
             {
                 return StatusCode(500, new { error = ex.Message });
             }
+        }
+        [HttpDelete("remove-selected-orders")]
+        public async Task<IActionResult> RemoveSelectedOrders([FromBody] RemoveSelectedOrdersDTO removeSelectedOrdersDTO)
+        {
+            if(removeSelectedOrdersDTO == null || removeSelectedOrdersDTO.OrderIds == null)
+            {
+                return NotFound("Data transfer object was not found.");
+            }
+            var orders = await _context.Orders
+                .Where(o => removeSelectedOrdersDTO.OrderIds.Contains(o.OrderId))
+                .ToListAsync();
+            if (!orders.Any())
+            {
+                return NotFound("Orders with specified OrderId's were not found.");
+            }
+            foreach (var order in orders)
+            {
+                var orderProducts = await _context.OrderProducts
+                    .Where(op => op.OrderId == order.Id)
+                    .ToListAsync();
+                if (orderProducts == null)
+                {
+                    return NotFound(new { message = $"Order with ID {order.Id} does not have any products." });
+                }
+                _context.OrderProducts.RemoveRange(orderProducts);
+                _context.Orders.Remove(order);
+            }
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Orders removed successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        [HttpGet("export-orders-to-xml")]
+        public async Task<IActionResult> ExportOrdersToXml()
+        {
+            var orders = await _context.Orders
+                .Select(o => new OrderModel
+                {
+                    OrderId = o.OrderId,
+                    CustomerName = o.CustomerName,
+                    Address = o.Address,
+                    City = o.City,
+                    PostalCode = o.PostalCode,
+                    Email = o.Email,
+                    PhoneNumber = o.PhoneNumber,
+                    TotalPrice = o.TotalPrice
+                }).ToListAsync();
+            var xmlBytes = _orderExportService.ExportOrdersToXmlBytes(orders);
+            return File(xmlBytes, "application/xml", "orders.xml");
         }
     }
 }
