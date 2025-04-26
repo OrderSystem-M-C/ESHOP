@@ -39,13 +39,13 @@
                     </table>
                   </div>
                   <div class="edit-products-button">
-                    <button class="btn btn-primary" (click)="openDialog(selectProductsDialog, true)">Upraviť produkty</button>
+                    <button class="btn btn-primary" (click)="openDialog(selectProductsDialog, true)"><img src="../../assets/Images/edit-icon.png" alt="edit-icon" class="edit-icon"> Upraviť produkty</button>
                   </div>
                 </div>
               }@else{
                 <div class="no-products-selected">
                   <p>Nemáte vybraté žiadne produkty</p>
-                  <button class="btn btn-primary" (click)="openDialog(selectProductsDialog, false)">Vybrať produkty</button>
+                  <button class="btn btn-primary" (click)="openDialog(selectProductsDialog, false)"><img src="../../assets/Images/add-icon.png" alt="add-icon" class="add-icon"> Pridať produkty</button>
                 </div>
               }
             </div>
@@ -320,7 +320,13 @@
       }@else{
         <table class="products-table">
           <tbody>
-            <tr *ngFor="let product of sortedProducts" class="product-row">
+            <tr>
+              <th style="text-align: center;">Zvoliť</th>
+              <th style="text-align: center;">Číslo produktu</th>
+              <th>Názov produktu</th>
+              <th style="text-align: center;">Cena</th>
+            </tr>
+            <tr *ngFor="let product of ourSortedProducts" class="product-row">
               <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="form-check-input" [(ngModel)]="product.productSelected" (change)="toggleProductSelection(product)" [checked]="selectedProducts.includes(product)" ></td>
               <td style="text-align: center;">{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
@@ -328,6 +334,9 @@
             </tr>
           </tbody>
         </table>
+        <div class="pagination-container">
+          <mat-paginator [length]="totalItems" [pageSizeOptions]="[4, 6]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
+        </div>
       }
     }
   </div>

@@ -7,8 +7,11 @@ export const loggedInGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
 
   if(authService.isAuthenticated()){
-    router.navigate(['/orders-page']);
+    if(state.url === '/login' || state.url === '/register'){
+      router.navigate(['/orders-page'])
+      return false;
+    }
     return true;
   }
-  return false;
+  return true;
 };

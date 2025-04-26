@@ -35,7 +35,6 @@ export class ProductsPageComponent implements OnInit {
   searchOption: string = 'auto';
   filtrationCriteria: string = '';
 
-  currentPage: number = 0;
   totalItems: number = 0;
   pageIndex: number = 0;
   pageSize: number = 2;

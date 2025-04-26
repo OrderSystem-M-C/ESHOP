@@ -31,6 +31,16 @@ h1 {
   flex-direction: row;
   gap: 10px;
 }
+.button-container button {
+  align-items: center;
+  display: flex;  
+  gap: 5px;
+  flex-direction: row;
+}
+.button-container button img {
+  height: 15px;
+  width: 15px;
+}
 .product-form{
   width: 500px;
   padding: 20px;

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { RegistrationResponse, UserLogin, UserLoginResponse, UserRegistration } from './user-registration';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class AuthenticationService {
   authenticated = signal(this.isAuthenticated());
   admin = signal(this.isAdmin());
 
-  constructor(@Inject('BASE_URL') private baseUrl: string) {  }
+  constructor(@Inject('BASE_URL') private baseUrl: string, private router: Router) {  }
 
   registerUser(userData: UserRegistration): Observable<RegistrationResponse> {
     return this.httpClient.post<RegistrationResponse>(this.baseUrl + '/user/register', userData);
@@ -27,6 +28,7 @@ export class AuthenticationService {
   logout() {
     localStorage.removeItem("token");
     this.authenticated.set(false);
+    this.router.navigate(['/login']);
   }
 
   storeUserCredentials(token: string, username: string) {

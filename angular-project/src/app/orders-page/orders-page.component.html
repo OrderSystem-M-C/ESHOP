@@ -6,8 +6,9 @@
       <p>{{currentDate}}</p>
     </div>
     <div class="button-container">
-      <button class="btn btn-secondary" [routerLink]="['/products-page']">Moje produkty</button>
-      <button class="btn btn-primary" [routerLink]="['/order-form']">Vytvoriť objednávku</button>
+      <button class="btn btn-secondary" [routerLink]="['/products-page']"><img src="../../assets/Images/products-icon.png" alt="products-icon" class="products-icon"> Moje produkty</button>
+      <button class="btn btn-primary" [routerLink]="['/order-form']"><img src="../../assets/Images/create-icon.png" alt="create-icon"> Vytvoriť objednávku</button>
+      <button class="btn btn-outline-danger" (click)="authService.logout()">Odhlásiť sa</button>
     </div>
   </div>
   <div class="title-charts">
@@ -62,8 +63,10 @@
             <button class="btn btn-light" (click)="removeSelectedOrders()"><img src="../../assets/Images/bin-icon.png" alt="bit-icon"> Odstrániť zvolenú/é objednávku/y</button>
           </div>
         </div>
-        <div class="download-xml-file">
-          <button (click)="downloadXmlFile()">TEST</button>
+        <div class="generate-xml-file-from-orders">
+          <div class="generate-xml-file-from-orders-button">
+            <button class="btn btn-light"><img src="../../assets/Images/xml-icon.png" alt="xml-icon"> Vygenerovať XML súbor</button>
+          </div>
         </div>
       </div>
     }@else{

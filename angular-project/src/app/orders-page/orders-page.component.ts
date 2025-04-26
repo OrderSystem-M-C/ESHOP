@@ -9,6 +9,7 @@ import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/materi
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { HtmlTagDefinition } from '@angular/compiler';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthenticationService } from '../api-authorization/authentication.service';
 
 @Component({
   selector: 'app-orders-page',
@@ -68,19 +69,18 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   pie_ctx: any;
   @ViewChild('ordersStatusChart') ordersStatusChart!: { nativeElement: any };
 
-  currentPage: number = 0;
   totalItems: number = 0;
   pageIndex: number = 0;
   pageSize: number = 4;
 
   selectedOrders: OrderDTO[] = [];
 
-  constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar){}
+  constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar, public authService: AuthenticationService){}
 
   updatePagedOrders(): void {
     const startIndex = this.pageIndex * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.ourFilteredOrders= this.filteredOrders.slice(startIndex, endIndex);
+    this.ourFilteredOrders = this.filteredOrders.slice(startIndex, endIndex);
   }
 
   handlePageEvent(pageEvent: PageEvent){

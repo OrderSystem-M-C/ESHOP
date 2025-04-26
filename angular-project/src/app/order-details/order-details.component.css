@@ -38,9 +38,16 @@ h1 {
   gap: 5px;
   flex-direction: row;
 }
-.remove-btn-icon {
+.remove-btn-icon, .return-home-icon {
+  height: 17px;
+  width: 17px;
+}
+.edit-icon {
   height: 20px;
   width: 20px;
+}
+.edit-icon {
+  filter: invert(1) brightness(2);
 }
 .details-container {
   border-radius: 10px;

@@ -9,12 +9,14 @@ import { ProductDTO } from '../products-page/products-page.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ProductService } from '../services/product.service';
 import { HttpResponse } from '@angular/common/http';
+import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 
 @Component({
   selector: 'app-order-form',
   standalone: true,
-  imports: [DatePipe, CommonModule, FormsModule, ReactiveFormsModule, MatSnackBarModule, NgClass],
-  providers: [DatePipe, OrderService],
+  imports: [DatePipe, CommonModule, FormsModule, ReactiveFormsModule, MatSnackBarModule, NgClass, MatPaginatorModule],
+  providers: [DatePipe, OrderService, { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
   templateUrl: './order-form.component.html',
   styleUrl: './order-form.component.css'
 })
@@ -39,6 +41,7 @@ export class OrderFormComponent implements OnInit {
 
   productsData: ProductDTO[] = [];
   sortedProducts: ProductDTO[] = [];
+  ourSortedProducts: ProductDTO[] = [];
   selectedProducts: ProductDTO[] = [];
   newSelectedProducts: ProductDTO[] = [];
 
@@ -48,8 +51,25 @@ export class OrderFormComponent implements OnInit {
 
   totalPrice: number = 0;
 
+  totalItems: number = 0;
+  pageIndex: number = 0;
+  pageSize: number = 4;
+
   constructor(private datePipe: DatePipe, private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar, private dialog: MatDialog, private productService: ProductService){}
 
+  updatePagedProducts(): void {
+    const startIndex = this.pageIndex * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.ourSortedProducts = this.sortedProducts.slice(startIndex, endIndex);
+  }
+
+  handlePageEvent(pageEvent: PageEvent){
+    this.pageSize = pageEvent.pageSize;
+    this.pageIndex = pageEvent.pageIndex;
+    this.updatePagedProducts();
+  }
+
+  
   orderForm = new FormGroup({
     customerName: new FormControl('', Validators.required),
     company: new FormControl(''),
@@ -134,6 +154,9 @@ export class OrderFormComponent implements OnInit {
         product.productId.toString().includes(this.searchText)
       );
     }
+    this.pageIndex = 0;
+    this.totalItems = this.sortedProducts.length;
+    this.updatePagedProducts();
   }
 
   openDialog(selectProductsDialog: TemplateRef<any>, edit: boolean | null){
@@ -153,6 +176,9 @@ export class OrderFormComponent implements OnInit {
   
       this.sortedProducts = this.productsData;
       this.isLoading = false;
+      this.totalItems = this.sortedProducts.length;
+      this.updatePagedProducts();
+      
     }, (error) => {
       console.error('An error occurred while trying to get products data.', error);
       this.isLoading = false;
@@ -194,7 +220,9 @@ export class OrderFormComponent implements OnInit {
     }
   }
   confirmSelection() {
-    this.dialogRef.close(this.isEditingProducts);
+    if(this.selectedProducts.length > 0){
+      this.dialogRef.close(this.isEditingProducts);
+    }
   }
   closeDialog(){
     this.dialogRef.close();
