@@ -239,7 +239,7 @@ namespace AspNetCoreAPI.Controllers
                     var copy = new OrderModel
                     {
                         OrderId = newOrderId,
-                        OrderDate = original.OrderDate,
+                        OrderDate = orderCopyDTO.OrderDate,
                         CustomerName = original.CustomerName,
                         Company = original.Company,
                         ICO = original.ICO,

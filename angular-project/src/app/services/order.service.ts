@@ -54,10 +54,11 @@ export class OrderService {
     }
     return this.http.put(url, body, { observe: 'response' });
   }
-  copyOrders(orders: OrderDTO[]){
+  copyOrders(orders: OrderDTO[], currentDate: string){
     const url = `${this.baseUrl}/order/copy-orders`;
     const body = {
-      CopiedOrders: orders
+      CopiedOrders: orders,
+      OrderDate: currentDate
     }
     return this.http.post(url, body);
   }

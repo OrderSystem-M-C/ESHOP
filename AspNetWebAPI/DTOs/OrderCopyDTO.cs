@@ -6,5 +6,7 @@ namespace AspNetCoreAPI.DTOs
     {
         [Required]
         public List<OrderDTO> CopiedOrders { get; set; } = new List<OrderDTO>();
+        [Required]
+        public string OrderDate { get; set; }
     }
 }

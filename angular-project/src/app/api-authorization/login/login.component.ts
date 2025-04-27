@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -15,7 +15,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnDestroy {
   authService = inject(AuthenticationService);
   private router = inject(Router);
 
@@ -65,5 +65,13 @@ export class LoginComponent {
       return { invalidEmail: true };
     }
     return null;
+  }
+  ngOnInit(): void {
+    document.body.style.maxWidth = 'unset';
+    document.body.style.width = 'auto';
+  }
+  ngOnDestroy() {
+    document.body.style.maxWidth = '1200px';
+    document.body.style.width = '100%';
   }
 }

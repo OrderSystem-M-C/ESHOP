@@ -10,6 +10,7 @@ import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { HtmlTagDefinition } from '@angular/compiler';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../api-authorization/authentication.service';
+import { from } from 'rxjs';
 
 @Component({
   selector: 'app-orders-page',
@@ -75,6 +76,8 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
 
   selectedOrders: OrderDTO[] = [];
 
+  selectedRange: '1d' | '7d' | '1m' | '1y' | 'all' = 'all';
+
   constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar, public authService: AuthenticationService){}
 
   updatePagedOrders(): void {
@@ -121,7 +124,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   copySelectedOrders(): void {
     this.isLoading = true;
     if(this.selectedOrders){
-      this.orderService.copyOrders(this.selectedOrders).subscribe(() => {
+      this.orderService.copyOrders(this.selectedOrders, this.currentDate).subscribe(() => {
         this.snackBar.open("Objednávka/y bola/i úspešne skopírované!", "", { duration: 1000 });
         this.ourFilteredOrders.forEach(order => order.orderSelected = false);
         this.selectedOrders = [];
@@ -131,6 +134,9 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
           this.pageIndex = 0;
           this.updatePagedOrders();
           this.isLoading = false;
+
+          this.updateOrdersChart();
+          this.updateRevenueChart();
         }, (error) => {
           console.error("An error have occurred!", error);
           this.isLoading = false;
@@ -156,6 +162,8 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
             this.filteredOrders = result;
             this.updatePagedOrders();
             this.isLoading = this.isVisibleChangeStatus = false;
+
+            this.updateStatusChart();
           }, (error) => {
             console.error("An error have occurred!", error);
             this.isLoading = false;
@@ -180,6 +188,9 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
             this.pageIndex = 0;
             this.updatePagedOrders();
             this.isLoading = false;
+
+            this.updateOrdersChart();
+            this.updateRevenueChart();
           }, (error) => {
             console.error("An error have occurred!", error);
             this.isLoading = false;
@@ -202,6 +213,43 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     }, (error) => {
       console.error("An error has occurred while trying to download XML file.", error);
     })
+  }
+
+  filterOrdersByRange(): any[] {
+    const now = new Date();
+    let fromDate: Date;
+    switch(this.selectedRange){
+      case '1d':
+        fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1); 
+        break;
+      case '7d':
+        fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+        break;
+      case '1m':
+        fromDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        break;
+      case '1y':
+        fromDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        break;
+      case 'all':
+        default:
+          return this.ordersData;
+    }
+    return this.ordersData.filter(order => {
+      const orderDate = this.parseDate(order.orderDate);
+      return orderDate >= fromDate;
+    })
+  }
+
+  changeRange(range: '1d' | '7d' | '1m' | '1y' | 'all', chart: 'orders' | 'revenue'){
+    this.selectedRange = range;
+    if(chart === 'orders'){
+      this.orders_chartInstance.destroy();
+      this.createChart(chart);
+    }else{
+      this.revenue_chartInstance.destroy();
+      this.createChart(chart);
+    }
   }
 
   createChart(chart: 'status' | 'orders' | 'revenue'): void {
@@ -239,7 +287,9 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     }else if(chart === 'orders'){
       this.orders_chartInstance = this.ordersDate.nativeElement;
       this.orders_ctx = this.orders_chartInstance.getContext('2d');
-      const ordersByDate = this.groupOrdersByDate(this.ordersData);
+
+      const filteredOrders = this.filterOrdersByRange();
+      const ordersByDate = this.groupOrdersByDate(filteredOrders);
 
       const dates = Object.keys(ordersByDate);
       const orderCounts = Object.values(ordersByDate);
@@ -281,7 +331,9 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     }else if(chart === 'revenue') {
       this.revenue_chartInstance= this.revenueChart.nativeElement;
       this.revenue_ctx = this.revenue_chartInstance.getContext('2d');
-      const ordersRevenue = this.groupOrdersByDateRevenue(this.ordersData);
+
+      const filteredOrders = this.filterOrdersByRange();
+      const ordersRevenue = this.groupOrdersByDateRevenue(filteredOrders);
 
       const labels = Object.keys(ordersRevenue);
       const data = Object.values(ordersRevenue).map(o => o.totalRevenue);
@@ -317,6 +369,38 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
         }
       })
     }
+  }
+
+  updateStatusChart(): void {
+    const statusCounts: { [key: string]: number } = {};
+    this.filteredOrders.forEach(order => {
+      statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;
+    });
+  
+    const labels = Object.keys(statusCounts);
+    const data = Object.values(statusCounts);
+  
+    this.pie_chartInstance.data.labels = labels;
+    this.pie_chartInstance.data.datasets[0].data = data;
+    this.pie_chartInstance.update();
+  }
+  updateOrdersChart(): void {
+    const ordersByDate = this.groupOrdersByDate(this.filteredOrders);
+    const dates = Object.keys(ordersByDate);
+    const orderCounts = Object.values(ordersByDate);
+
+    this.orders_chartInstance.data.labels = dates;
+    this.orders_chartInstance.data.datasets[0].data = orderCounts;
+    this.orders_chartInstance.update();
+  }
+  updateRevenueChart(): void {
+    const ordersRevenue = this.groupOrdersByDateRevenue(this.filteredOrders);
+    const labels = Object.keys(ordersRevenue);
+    const data = Object.values(ordersRevenue).map(o => o.totalRevenue);
+
+    this.revenue_chartInstance.data.labels = [0, ...labels];
+    this.revenue_chartInstance.data.datasets[0].data = [0, ...data];
+    this.revenue_chartInstance.update();
   }
 
   groupOrdersByDate(orders: OrderDTO[]) {

@@ -19,7 +19,7 @@
     <div class="sorting-container">
       <div class="alphabetical-dropdown-container">
         <div class="alphabetical-dropdown">
-          <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('alphabetical')">Zvoľte filtráciu podľa abecedy</button>
+          <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('alphabetical')"><img src="../../assets/Images/filter-icon.png" alt="filter-icon"> Zvoľte filtráciu podľa abecedy</button>
         </div>
         <div class="dropdown-content" [ngClass]="isVisibleAlphabetical ? 'is-visible': 'is-not-visible'">
           <div class="alphabetical-field">
@@ -34,7 +34,7 @@
       </div>
       <div class="price-dropdown-container">
         <div class="price-dropdown">
-          <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('price')">Zvoľte filtráciu podľa veľkosti ceny</button>
+          <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('price')"><img src="../../assets/Images/price-icon.png" alt="price-icon"> Zvoľte filtráciu podľa veľkosti ceny</button>
         </div>
         <div class="dropdown-content" [ngClass]="isVisiblePrice ? 'is-visible': 'is-not-visible'">
           <div class="price-field">
@@ -64,6 +64,7 @@
             <tr>
               <th style="text-align: center;">Číslo produktu</th>
               <th>Názov produktu</th>
+              <th>Popis produktu</th>
               <th style="text-align: center;">Cena produktu</th>
               <th style="text-align: center;">Hmotnosť produktu</th>
               <th>Vymazať</th>
@@ -73,6 +74,7 @@
             <tr *ngFor="let product of ourFilteredProducts" class="product-row">
               <td style="width: 130px; text-align: center;">{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
+              <td>{{ product.productDescription || 'Popis produktu bol vynechaný'}}</td>
               <td style="width: 200px; text-align: center;">{{ product.productPrice }} €</td>
               <td style="width: 200px; text-align: center;">{{ product.productWeight }} kg</td>
               <td class="remove-column" title="Vymazať produkt" (click)="removeProduct(product.productId)"><img src="../../assets/Images/bin-icon.png" class="remove-icon"></td>
@@ -80,7 +82,7 @@
           </tbody>
         </table>
         <div class="pagination-container">
-          <mat-paginator [length]="totalItems" [pageSizeOptions]="[2, 6, 10]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
+          <mat-paginator [length]="totalItems" [pageSizeOptions]="[4, 6, 8]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
         </div>
       }@else if(filteredProducts.length === 0){
         <div class="no-products-found-container">

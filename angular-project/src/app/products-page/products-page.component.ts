@@ -37,15 +37,15 @@ export class ProductsPageComponent implements OnInit {
 
   totalItems: number = 0;
   pageIndex: number = 0;
-  pageSize: number = 2;
+  pageSize: number = 4;
 
   constructor(private datePipe: DatePipe, private dialog: MatDialog, private snackBar: MatSnackBar, private productService: ProductService){}
 
   productForm = new FormGroup({
     productName: new FormControl('', Validators.required),
     productDescription: new FormControl(''),
-    productPrice: new FormControl('', [Validators.required, Validators.pattern(/^\d+$/)]),
-    productWeight: new FormControl('', [Validators.required, Validators.pattern(/^\d+$/)])
+    productPrice: new FormControl('', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
+    productWeight: new FormControl('', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/) ])
   })
 
   updatePagedProducts(): void {
