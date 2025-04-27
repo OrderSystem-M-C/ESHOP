@@ -146,7 +146,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let order of ourFilteredOrders" class="order-row" (click)="navigateToDetails(order, $event)">
-            <td class="checkbox-section"><input type="checkbox" class="form-check-input" [(ngModel)]="order.orderSelected" (change)="selectOrder()" data-skip-navigation /></td>
+            <td class="checkbox-section" [attr.title]="order.orderStatus" [ngStyle]="{'border-left': '8px solid ' + getStatusColor(order.orderStatus)}"><input type="checkbox" class="form-check-input" [(ngModel)]="order.orderSelected" (change)="selectOrder()" data-skip-navigation /></td>
             <td>{{ order.orderDate }}</td>
             <td>{{ order.orderId }}</td>
             <td>{{ order.customerName }}</td>

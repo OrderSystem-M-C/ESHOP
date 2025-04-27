@@ -265,10 +265,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
       const labels = Object.keys(statusCounts);
       const data = Object.values(statusCounts);
 
-      const backgroundColors = [
-        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#66FF66',
-        '#FF6666', '#3399FF', '#FF3399', '#99FF33', '#FF6633', '#33FF99', '#6633FF'
-      ];
+      const backgroundColors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#ff6347', '#90ee90', '#ffd700', '#ff4500', '#4682b4', '#32cd32'];
   
       this.pie_chartInstance = new Chart(this.pie_ctx, {
         type: 'doughnut',
@@ -369,6 +366,15 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
         }
       })
     }
+  }
+
+  getStatusColor(orderStatus: string): string {
+    const statusIndex = this.statuses.indexOf(orderStatus);
+    const backgroundColors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#ff6347', '#90ee90', '#ffd700', '#ff4500', '#4682b4', '#32cd32'];
+    if(statusIndex !== -1 && statusIndex < backgroundColors.length){
+      return backgroundColors[statusIndex];
+    }
+    return '#ccc';
   }
 
   updateStatusChart(): void {
