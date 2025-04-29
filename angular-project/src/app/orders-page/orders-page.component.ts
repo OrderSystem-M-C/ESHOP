@@ -285,6 +285,10 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
             }
           ]
         },
+        options: {
+          responsive: false,
+          maintainAspectRatio: false,
+        }
       });
     }else if(chart === 'orders'){
       this.orders_chartInstance = this.ordersDate.nativeElement;
@@ -327,7 +331,9 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
                 precision: 0
               }
             }
-          }
+          },
+          responsive: false,
+          maintainAspectRatio: false,
         }
       })
     }else if(chart === 'revenue') {
@@ -367,7 +373,9 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
                 text: 'Tržba v €'
               }
             }
-          }
+          },
+          responsive: false,
+          maintainAspectRatio: false,
         }
       })
     }

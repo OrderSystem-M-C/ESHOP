@@ -28,6 +28,9 @@
           <option value="1y">1 rok</option>
           <option value="all" selected>Celý čas</option>
         </select>
+        <div class="total-orders">
+          <p><b>Celkovo objednávok:</b> {{ ordersData.length }}</p>
+        </div>
       </div>
     </div>
     <div class="canvas-chart">
@@ -146,7 +149,9 @@
         </thead>
         <tbody>
           <tr *ngFor="let order of ourFilteredOrders" class="order-row" (click)="navigateToDetails(order, $event)">
-            <td class="checkbox-section" [attr.title]="order.orderStatus" [ngStyle]="{'border-left': '8px solid ' + getStatusColor(order.orderStatus)}"><input type="checkbox" class="form-check-input" [(ngModel)]="order.orderSelected" (change)="selectOrder()" data-skip-navigation /></td>
+            <td class="checkbox-section" [attr.title]="order.orderStatus" [ngStyle]="{'border-left': '8px solid ' + getStatusColor(order.orderStatus)}">
+              <input type="checkbox" class="form-check-input" [(ngModel)]="order.orderSelected" (change)="selectOrder()" data-skip-navigation />
+            </td>
             <td>{{ order.orderDate }}</td>
             <td>{{ order.orderId }}</td>
             <td>{{ order.customerName }}</td>
