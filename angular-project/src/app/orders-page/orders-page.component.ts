@@ -241,6 +241,11 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     })
   }
 
+  onRangeChange(event: Event, chart: 'orders' | 'revenue'){
+    const value = (event.target as HTMLSelectElement).value as '1d' | '7d' | '1m' | '1y' | 'all';
+    this.changeRange(value, chart);
+  }
+
   changeRange(range: '1d' | '7d' | '1m' | '1y' | 'all', chart: 'orders' | 'revenue'){
     this.selectedRange = range;
     if(chart === 'orders'){
