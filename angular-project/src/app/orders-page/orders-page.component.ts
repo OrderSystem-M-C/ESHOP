@@ -132,11 +132,13 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
         this.orderService.getOrders().subscribe((result) => {
           this.filteredOrders = result;
           this.pageIndex = 0;
+          this.totalItems = this.filteredOrders.length;
           this.updatePagedOrders();
           this.isLoading = false;
 
           this.updateOrdersChart();
           this.updateRevenueChart();
+          this.updateStatusChart();
         }, (error) => {
           console.error("An error have occurred!", error);
           this.isLoading = false;
@@ -160,6 +162,8 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
           this.selectedOrders = [];
           this.orderService.getOrders().subscribe((result) => {
             this.filteredOrders = result;
+            this.pageIndex = 0;
+            this.totalItems = this.filteredOrders.length;
             this.updatePagedOrders();
             this.isLoading = this.isVisibleChangeStatus = false;
 
@@ -186,9 +190,11 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
           this.orderService.getOrders().subscribe((result) => {
             this.filteredOrders = result;
             this.pageIndex = 0;
+            this.totalItems = this.filteredOrders.length;
             this.updatePagedOrders();
             this.isLoading = false;
 
+            this.updateStatusChart();
             this.updateOrdersChart();
             this.updateRevenueChart();
           }, (error) => {
@@ -241,11 +247,6 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     })
   }
 
-  onRangeChange(event: Event, chart: 'orders' | 'revenue'){
-    const value = (event.target as HTMLSelectElement).value as '1d' | '7d' | '1m' | '1y' | 'all';
-    this.changeRange(value, chart);
-  }
-
   changeRange(range: '1d' | '7d' | '1m' | '1y' | 'all', chart: 'orders' | 'revenue'){
     this.selectedRange = range;
     if(chart === 'orders'){
@@ -270,7 +271,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
       const labels = Object.keys(statusCounts);
       const data = Object.values(statusCounts);
 
-      const backgroundColors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#ff6347', '#90ee90', '#ffd700', '#ff4500', '#4682b4', '#32cd32'];
+      const backgroundColors = ['#4CAF50', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
   
       this.pie_chartInstance = new Chart(this.pie_ctx, {
         type: 'doughnut',
@@ -285,10 +286,6 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
             }
           ]
         },
-        options: {
-          responsive: false,
-          maintainAspectRatio: false,
-        }
       });
     }else if(chart === 'orders'){
       this.orders_chartInstance = this.ordersDate.nativeElement;
@@ -331,9 +328,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
                 precision: 0
               }
             }
-          },
-          responsive: false,
-          maintainAspectRatio: false,
+          }
         }
       })
     }else if(chart === 'revenue') {
@@ -373,9 +368,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
                 text: 'Tržba v €'
               }
             }
-          },
-          responsive: false,
-          maintainAspectRatio: false,
+          }
         }
       })
     }
@@ -383,7 +376,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
 
   getStatusColor(orderStatus: string): string {
     const statusIndex = this.statuses.indexOf(orderStatus);
-    const backgroundColors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#ff6347', '#90ee90', '#ffd700', '#ff4500', '#4682b4', '#32cd32'];
+    const backgroundColors = ['#4CAF50', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
     if(statusIndex !== -1 && statusIndex < backgroundColors.length){
       return backgroundColors[statusIndex];
     }
@@ -391,6 +384,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   }
 
   updateStatusChart(): void {
+    const backgroundColors = ['#4CAF50', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
     const statusCounts: { [key: string]: number } = {};
     this.filteredOrders.forEach(order => {
       statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;
@@ -401,6 +395,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   
     this.pie_chartInstance.data.labels = labels;
     this.pie_chartInstance.data.datasets[0].data = data;
+    this.pie_chartInstance.data.datasets[0].backgroundColor = backgroundColors.slice(0, labels.length);
     this.pie_chartInstance.update();
   }
   updateOrdersChart(): void {
