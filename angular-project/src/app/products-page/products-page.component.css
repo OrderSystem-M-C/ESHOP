@@ -179,8 +179,7 @@ h1 {
   border-width: 0px 1px 1px 1px;
   border: 1px solid #333;
 }
-.alphabetical-field, .price-field{
-  padding: 4px 0;
+.alphabetical-field, .price-field {
   border-radius: 5px;
 }
 .alphabetical-item, .price-item{

@@ -139,13 +139,13 @@ export class ProductsPageComponent implements OnInit {
         this.productService.getProducts().subscribe((result) => {
           this.productsData = result
           this.filteredProducts = [...this.productsData];
+          this.totalItems = this.filteredProducts.length;
+          this.updatePagedProducts();
         }, (error) => {
           console.error("An error have occurred while trying to get products data.", error);
         })
 
         this.isLoadingForm = false;
-
-        this.updatePagedProducts();
 
         this.dialogRef.close();
       }, (error) => {
@@ -189,14 +189,16 @@ export class ProductsPageComponent implements OnInit {
 
           if(index_2 != -1){
             this.filteredProducts.splice(index_2, 1);
+            this.pageIndex = 0;
+            this.totalItems = this.filteredProducts.length;
+            this.updatePagedProducts();
           }else{
             console.error("An error have occurred while trying to splice the filteredProducts array.")
           }
 
           this.snackBar.open('Produkt bol úspešne vymazaný!', '', { duration: 1000 });
-          this.isLoading = false;
 
-          this.updatePagedProducts();
+          this.isLoading = false;
         }
       }
     }, (error) => {

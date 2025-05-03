@@ -280,6 +280,14 @@ input[type="radio"] {
 .title-submit h2 {
   margin: 0;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+}
+.title-submit h2 img {
+  height: 25px;
+  width: 25px;
 }
 .products-table {
   width: 100%;
@@ -312,8 +320,8 @@ input[type="radio"] {
   background-color: #f9f9f9;
 }
 .product-row input[type="checkbox"] {
-  height: 17px;
-  width: 17px;
+  height: 20px;
+  width: 20px;
   margin-top: 2px;
 }
 .product-row:hover td {
