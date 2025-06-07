@@ -207,12 +207,19 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   }
 
   downloadXmlFile(){
-    this.orderService.getOrdersXmlFile(this.selectedOrders).subscribe(() => {
-      this.snackBar.open("Súbor XML bol úspešne stiahnutý!", "", { duration: 1500 });
+    this.orderService.getOrdersXmlFile(this.selectedOrders).subscribe((blob) => {
+      const a = document.createElement('a');
+      const objectUrl = URL.createObjectURL(blob);
+      a.href = objectUrl;
+      a.download = `Zasielky_${new Date().toLocaleDateString("sk").replace(/\s/g, "").replace(/\./g, "")}.xml`
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+
+      this.snackBar.open("XML súbor bol úspešne stiahnutý!", "", { duration: 1500 });
+      this.selectedOrders = [];
       this.ordersData.forEach(order => {
         order.orderSelected = false;
       })
-      this.selectedOrders = [];
     }, (error) => {
       console.error("An error has occurred while trying to download XML file.", error);
     })

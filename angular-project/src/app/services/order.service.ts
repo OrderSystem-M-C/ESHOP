@@ -86,6 +86,6 @@ export class OrderService {
     let body = {
       OrderList: orders
     }
-    return this.http.post(url, body, { responseType: 'text' });
+    return this.http.post(url, body, { responseType: 'blob' });
   }
 }

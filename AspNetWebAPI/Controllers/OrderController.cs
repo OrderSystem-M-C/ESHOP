@@ -494,11 +494,11 @@ namespace AspNetCoreAPI.Controllers
             );
 
             var requestBody = ephXml.ToString();
-
+            var fileBytes = Encoding.UTF8.GetBytes(requestBody);
+            var contentType = "application/xml";
             string fileName = $"Zasielky_{DateTime.Now:ddMMyyyy}.xml";
-            SaveXmlToDisk(requestBody, fileName);
 
-            return Ok("Testing...");
+            return File(fileBytes, contentType, fileName);
         }
         private async Task<XElement> ProcessOrderAsync(OrderDTO order, XNamespace tns)
         {
