@@ -3,6 +3,10 @@ using AspNetCoreAPI.DTOs;
 using AspNetCoreAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SlovakPostApi;
+using System.Net.Http;
+using System.Text;
+using System.Xml.Linq;
 
 namespace AspNetCoreAPI.Controllers
 {
@@ -11,12 +15,24 @@ namespace AspNetCoreAPI.Controllers
     public class OrderController : Controller
     {
         protected readonly ApplicationDbContext _context;
-        private readonly OrderExportService _orderExportService;
+        private readonly IConfiguration _configuration;
+        private readonly HttpClient _httpClient;
 
-        public OrderController(ApplicationDbContext context, OrderExportService orderExportService)
+        private readonly string _slovakPostApiUrl; 
+        private readonly string _userId;
+        private readonly string _apiKey;
+
+        private readonly string _xmlSavePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+
+        public OrderController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
-            _orderExportService = orderExportService;
+            _httpClient = new HttpClient();
+            _configuration = configuration;
+            _userId = _configuration["SlovakPostApi:UserId"];
+            _apiKey = _configuration["SlovakPostApi:ApiKey"];
+            _slovakPostApiUrl = _configuration["SlovakPostApi:ApiUrl"];
         }
 
         [HttpPost("create-order")]
@@ -365,23 +381,164 @@ namespace AspNetCoreAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-        [HttpGet("export-orders-to-xml")]
-        public async Task<IActionResult> ExportOrdersToXml()
+        [HttpPost("export-orders-to-xml")]
+        public async Task<IActionResult> ExportOrdersToXml([FromBody] OrdersXML_DTO ordersXML_DTO)
         {
-            var orders = await _context.Orders
-                .Select(o => new OrderModel
+            var orders = ordersXML_DTO.OrderList
+                .Select(o => new OrderDTO
                 {
+                    Id = o.Id,
                     OrderId = o.OrderId,
                     CustomerName = o.CustomerName,
+                    Company = o.Company,
+                    ICO = o.ICO,
+                    DIC = o.DIC,
+                    ICDPH = o.ICDPH,
                     Address = o.Address,
                     City = o.City,
                     PostalCode = o.PostalCode,
                     Email = o.Email,
                     PhoneNumber = o.PhoneNumber,
-                    TotalPrice = o.TotalPrice
-                }).ToListAsync();
-            var xmlBytes = _orderExportService.ExportOrdersToXmlBytes(orders);
-            return File(xmlBytes, "application/xml", "orders.xml");
+                    Note = o.Note,
+                    DeliveryOption = o.DeliveryOption,
+                    PaymentOption = o.PaymentOption,
+                    DiscountAmount = o.DiscountAmount,
+                    OrderStatus = o.OrderStatus,
+                    OrderDate = o.OrderDate,
+                    TotalPrice = o.TotalPrice,
+                    InvoiceNumber = o.InvoiceNumber,
+                    VariableSymbol = o.VariableSymbol,
+                    InvoiceIssueDate = o.InvoiceIssueDate,
+                    InvoiceDueDate = o.InvoiceDueDate,
+                    InvoiceDeliveryDate = o.InvoiceDeliveryDate,
+                    InvoiceName = o.InvoiceName,
+                    InvoiceCompany = o.InvoiceCompany,
+                    InvoiceICO = o.InvoiceICO,
+                    InvoiceDIC = o.InvoiceDIC,
+                    InvoiceEmail = o.InvoiceEmail,
+                    InvoicePhoneNumber = o.InvoicePhoneNumber,
+                }).ToList();
+
+            if (orders == null || !orders.Any())
+            {
+                return NotFound("Orders selected for generation of the XML file were not found.");
+            }
+
+            XNamespace tns = "http://mojezasielky.posta.sk/api";
+            var zasielkyElements = new List<XElement>();    
+            int pocetZasielok = 0;
+
+            foreach (var order in orders)
+            {
+                try
+                {
+                    var zasielkaXml = await ProcessOrderAsync(order, tns);
+                    if(zasielkaXml != null)
+                    {
+                        zasielkyElements.Add(zasielkaXml);
+                        pocetZasielok++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Error processing order {order.OrderId}: {ex.Message}");
+                    return StatusCode(500, new { error = $"An error occurred while processing order {order.OrderId} - {ex.Message}" });
+                }
+            }
+
+            if (!zasielkyElements.Any())
+            {
+                return NotFound("No valid orders found for XML export.");
+            }
+
+            var ephXml = new XElement(tns + "EPH",
+                new XAttribute("verzia", "1.0"),
+                new XElement(tns + "InfoEPH",
+                    new XElement(tns + "EPHID", Guid.NewGuid().ToString().Replace("-", "").Substring(0, 20)),
+                    new XElement(tns + "Datum", DateTime.Now.ToString("dd.MM.yyyy")),
+                    new XElement(tns + "PocetZasielok", pocetZasielok.ToString()),
+                    new XElement(tns + "DruhZasielky", "1"),
+                    new XElement(tns + "Odosielatel",
+                        new XElement(tns + "OdosielatelID", "WEB_EPH"),
+                        new XElement(tns + "Meno", ""),
+                        new XElement(tns + "Organizacia", "Anna Bylinková Cibulková"),
+                        new XElement(tns + "Ulica", "Cesta do Rudiny 1007"),
+                        new XElement(tns + "Mesto", "Kysucké Nové Mesto"),
+                        new XElement(tns + "PSC", "02401"),
+                        new XElement(tns + "Krajina", "SK"),
+                        new XElement(tns + "Telefon", ""),
+                        new XElement(tns + "Email", "ephdobierky@gmail.com"),
+                        new XElement(tns + "CisloUctu", "SK56 1111 0000 0010 7290 6017")
+                    )
+                ),
+                new XElement(tns + "Zasielky", zasielkyElements)
+            );
+
+            XNamespace soapenv = "http://schemas.xmlsoap.org/soap/envelope/";
+            var soapEnvelope = new XDocument(
+                new XDeclaration("1.0", "UTF-8", "no"),
+                new XElement(soapenv + "Envelope",
+                    new XAttribute(XNamespace.Xmlns + "soapenv", soapenv.NamespaceName),
+                    new XAttribute(XNamespace.Xmlns + "tns", tns.NamespaceName),
+                    new XElement(soapenv + "Header"),
+                    new XElement(soapenv + "Body",
+                    new XElement(tns + "importSheetRequest",
+                        new XElement(tns + "auth",
+                            new XElement(tns + "userId", _userId),
+                            new XElement(tns + "apiKey", _apiKey)
+                        ),
+                        ephXml
+                        )
+                    )
+                )
+            );
+
+            var requestBody = ephXml.ToString();
+
+            string fileName = $"Zasielky_{DateTime.Now:ddMMyyyy}.xml";
+            SaveXmlToDisk(requestBody, fileName);
+
+            return Ok("Testing...");
+        }
+        private async Task<XElement> ProcessOrderAsync(OrderDTO order, XNamespace tns)
+        {
+            return new XElement(tns + "Zasielka",
+                new XElement(tns + "Adresat",
+                    new XElement(tns + "Meno", order.CustomerName),
+                    new XElement(tns + "Organizacia", string.IsNullOrWhiteSpace(order.Company) ? "" : $"{order.Company}"),
+                    new XElement(tns + "Ulica", order.Address),
+                    new XElement(tns + "Mesto", order.City),
+                    new XElement(tns + "PSC", order.PostalCode),
+                    new XElement(tns + "Krajina", "SK"),
+                    new XElement(tns + "Telefon", order.PhoneNumber),
+                    new XElement(tns + "Email", order.Email),
+
+                    string.IsNullOrEmpty(order.ICO) ? null : new XElement(tns + "ICO", order.ICO),
+                    string.IsNullOrEmpty(order.DIC) ? null : new XElement(tns + "DIC", order.DIC),
+                    string.IsNullOrEmpty(order.ICDPH) ? null : new XElement(tns + "ICDPH", order.ICDPH)
+                ),
+                new XElement(tns + "Info",
+                    new XElement(tns + "ZasielkaID", order.OrderId),
+                    new XElement(tns + "Hmotnost", "0"),
+                    (order.PaymentOption == "Dobierka" ? new XElement(tns + "CenaDobierky", order.TotalPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)) : null),
+                    new XElement(tns + "DruhZasielky", "8"),
+                    new XElement(tns + "Poznamka", order.Note),
+                    new XElement(tns + "SymbolPrevodu", order.VariableSymbol)
+                )
+            );
+        }
+        private void SaveXmlToDisk(string xmlContent, string fileName)
+        {
+            try
+            {
+                string filePath = Path.Combine(_xmlSavePath, fileName);
+                System.IO.File.WriteAllText(filePath, xmlContent);
+                Console.WriteLine($"XML saved to: {filePath}");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error saving XML to disk: {ex.Message}");
+            }
         }
     }
 }

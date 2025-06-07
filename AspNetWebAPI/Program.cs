@@ -38,7 +38,6 @@ builder.Services.AddScoped<JwtHandler>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<OrderExportService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(

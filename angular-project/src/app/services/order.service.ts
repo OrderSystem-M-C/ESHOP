@@ -81,8 +81,11 @@ export class OrderService {
       body: body
     });
   }
-  getOrdersXmlFile(){
+  getOrdersXmlFile(orders: OrderDTO[]){
     const url = `${this.baseUrl}/order/export-orders-to-xml`;
-    return this.http.get(url, { responseType: 'blob' });
+    let body = {
+      OrderList: orders
+    }
+    return this.http.post(url, body, { responseType: 'text' });
   }
 }
