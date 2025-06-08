@@ -147,8 +147,13 @@
             <td><b>Dátum dodania:</b></td>
             <td>{{order.invoiceDeliveryDate}}</td>
           </tr>
+        </table>
+        <table class="order-table">
           <tr>
-            <td><b>Faktúra:</b></td>
+            <th colspan="2" class="main-title"><b>Faktúra:</b></th>
+          </tr>
+          <tr>
+            <td><b>Kliknutím na odkaz stiahnete faktúru objednávky:</b></td>
             <td><a (click)="getInvoice()" title="Kliknutím stiahnete faktúru objednávky"><img src="../../assets/Images/download-icon.png" alt="download-icon">Prevziať faktúru</a></td>
           </tr>
         </table>
