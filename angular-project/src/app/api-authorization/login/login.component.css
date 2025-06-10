@@ -21,7 +21,7 @@
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   padding: 25px 25px 17px 25px;
-  width: 300px;
+  width: 350px;
 }
 .login-form input {
   border-radius: 5px;
@@ -63,6 +63,9 @@
 }
 .isLogging{
   display: block;
+}
+.re-captcha {
+  margin-top: 6px;
 }
 .form-control.is-invalid {
   border-color: red !important;

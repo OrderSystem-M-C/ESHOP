@@ -7,11 +7,12 @@ import { AuthenticationService } from '../authentication.service';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { RecaptchaModule } from 'ng-recaptcha';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ MatButton, MatFormField, MatInput, MatLabel, ReactiveFormsModule, AsyncPipe, CommonModule ],
+  imports: [ MatButton, MatFormField, MatInput, MatLabel, ReactiveFormsModule, AsyncPipe, CommonModule, RecaptchaModule ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -25,8 +26,15 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   loginForm: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email, this.emailValidator]),
-    password: new FormControl('', Validators.required)
+    password: new FormControl('', Validators.required),
+    recaptcha: new FormControl(null, Validators.required)
   });
+
+  onCaptchaResolved(event: any){
+    this.loginForm.patchValue({
+      recaptcha: event
+    })
+  }
 
   login() {
     if (this.loginForm.valid) {
@@ -46,11 +54,17 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.isLogging = false;
         }
       });
-    }else{
-      this.snackBar.open("Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!", "", { duration: 3000, panelClass: ['custom-snackbar'] });
+    }else {
       this.validateAllFormFields(this.loginForm);
+      
+      if(!this.loginForm.get('recaptcha')?.value){
+        this.snackBar.open("Zabudli ste na overenie reCAPTCHA!", "", { duration: 3000, panelClass: ['custom-snackbar'] });
+      }else{
+        this.snackBar.open("Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!", "", { duration: 3000, panelClass: ['custom-snackbar'] });
+      }
     }
   }
+
   validateAllFormFields(formGroup: FormGroup){
     Object.keys(formGroup.controls).forEach(field => {
       const control = formGroup.get(field);
