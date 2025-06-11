@@ -1,6 +1,7 @@
 ﻿using AspNetCoreAPI.Authentication.dto;
 using AspNetCoreAPI.Models;
 using AspNetCoreAPI.Registration.dto;
+using AspNetCoreAPI.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -13,11 +14,13 @@ namespace AspNetCoreAPI.Registration
     {
         private readonly UserManager<User> _userManager;
         private readonly JwtHandler _jwtHandler;
+        private readonly RecaptchaService _recaptchaService;
 
-        public UserController(UserManager<User> userManager, JwtHandler jwtHandler)
+        public UserController(UserManager<User> userManager, JwtHandler jwtHandler, RecaptchaService recaptchaService)
         {
             _userManager = userManager;
             _jwtHandler = jwtHandler;
+            _recaptchaService = recaptchaService;
         }
 
         [HttpPost("register")]
@@ -50,10 +53,15 @@ namespace AspNetCoreAPI.Registration
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto userLoginDto)
         {
+            var isCaptchaValid = await _recaptchaService.VerifyCaptcha(userLoginDto.RecaptchaResponse);
+
+            if(!isCaptchaValid)
+                return BadRequest(new UserLoginResponseDto { ErrorMessage = "Invalid reCAPTCHA.", IsAuthSuccessful = false });
+
             var user = await _userManager.FindByNameAsync(userLoginDto.Email);
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, userLoginDto.Password))
-                return Unauthorized(new UserLoginResponseDto { ErrorMessage = "Invalid Authentication", IsAuthSuccessful = false });
+                return Unauthorized(new UserLoginResponseDto { ErrorMessage = "Invalid Authentication.", IsAuthSuccessful = false });
 
             var signingCredentials = _jwtHandler.GetSigningCredentials();
             var claims = _jwtHandler.GetClaims(user);

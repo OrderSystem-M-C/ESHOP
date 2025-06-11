@@ -2,7 +2,6 @@ import { importProvidersFrom } from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
-import { RegistrationComponent } from './app/api-authorization/registration/registration.component';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { LoginComponent } from './app/api-authorization/login/login.component';
@@ -16,6 +15,7 @@ import { authGuard } from './app/api-authorization/auth.guard';
 import { OrderDetailsComponent } from './app/order-details/order-details.component';
 import { ProductsPageComponent } from './app/products-page/products-page.component';
 import { loggedInGuard } from './app/api-authorization/logged-in.guard';
+import { PageNotFoundComponent } from './app/page-not-found/page-not-found.component';
 
 export function getBaseUrl() {
   return 'https://localhost:7186/api';
@@ -44,12 +44,12 @@ bootstrapApplication(AppComponent, {
       provideRouter([
         { path: '', component: LoginComponent},
         { path: 'login', component: LoginComponent, canActivate: [loggedInGuard]},
-        { path: 'register', component: RegistrationComponent, canActivate: [loggedInGuard]},
         { path: 'order-form', component: OrderFormComponent, canActivate: [authGuard]},
         { path: 'order-form/:orderId', component: OrderFormComponent, canActivate: [authGuard] },
         { path: 'orders-page', component: OrdersPageComponent, canActivate: [authGuard]},
         { path: 'order-details/:orderId', component: OrderDetailsComponent, canActivate: [authGuard]},
         { path: 'products-page', component: ProductsPageComponent, canActivate: [authGuard]},
+        { path: '**', component: PageNotFoundComponent}
       ]), provideAnimationsAsync()
     ]
 })

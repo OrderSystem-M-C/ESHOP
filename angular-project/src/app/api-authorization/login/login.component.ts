@@ -27,12 +27,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email, this.emailValidator]),
     password: new FormControl('', Validators.required),
-    recaptcha: new FormControl(null, Validators.required)
+    recaptchaResponse: new FormControl(null, Validators.required)
   });
 
   onCaptchaResolved(event: any){
     this.loginForm.patchValue({
-      recaptcha: event
+      recaptchaResponse: event
     })
   }
 
