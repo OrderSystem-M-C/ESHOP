@@ -7,10 +7,8 @@ import { FormsModule } from '@angular/forms';
 import { Chart } from 'chart.js/auto';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
-import { HtmlTagDefinition } from '@angular/compiler';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../api-authorization/authentication.service';
-import { from } from 'rxjs';
 
 @Component({
   selector: 'app-orders-page',
@@ -72,7 +70,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
 
   totalItems: number = 0;
   pageIndex: number = 0;
-  pageSize: number = 4;
+  pageSize: number = 6;
 
   selectedOrders: OrderDTO[] = [];
 
@@ -124,7 +122,8 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   copySelectedOrders(): void {
     this.isLoading = true;
     if(this.selectedOrders){
-      this.orderService.copyOrders(this.selectedOrders, this.currentDate).subscribe(() => {
+      let orderIds = this.selectedOrders.map(order => order.orderId);
+      this.orderService.copyOrders(orderIds, this.currentDate).subscribe(() => {
         this.snackBar.open("Objednávka/y bola/i úspešne skopírované!", "", { duration: 1000 });
         this.ourFilteredOrders.forEach(order => order.orderSelected = false);
         this.selectedOrders = [];
@@ -156,7 +155,8 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   changeOrderStatus(orderStatus: string): void {
     this.isLoading = true;
     if(this.selectedOrders){
-      this.orderService.changeOrderStatus(this.selectedOrders, orderStatus).subscribe((response) => {
+      let orderIds = this.selectedOrders.map(order => order.orderId);
+      this.orderService.changeOrderStatus(orderIds, orderStatus).subscribe((response) => {
         if(response){
           this.snackBar.open("Zmena stavu bola úspešná!", "", { duration: 1500 });
           this.selectedOrders = [];
@@ -183,7 +183,8 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   removeSelectedOrders(): void {
     this.isLoading = true;
     if(this.selectedOrders){
-      this.orderService.removeSelectedOrders(this.selectedOrders).subscribe((respone) => {
+      let orderIds = this.selectedOrders.map(order => order.orderId);
+      this.orderService.removeSelectedOrders(orderIds).subscribe((respone) => {
         if(respone){
           this.snackBar.open("Objednávka/y boli úspešne vymazané!", "", { duration: 1500 });
           this.selectedOrders = [];
@@ -207,7 +208,9 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   }
 
   downloadXmlFile(){
-    this.orderService.getOrdersXmlFile(this.selectedOrders).subscribe((blob) => {
+    if(this.selectedOrders){
+      let orderIds = this.selectedOrders.map(order => order.orderId);
+      this.orderService.getOrdersXmlFile(orderIds).subscribe((blob) => {
       const a = document.createElement('a');
       const objectUrl = URL.createObjectURL(blob);
       a.href = objectUrl;
@@ -223,6 +226,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     }, (error) => {
       console.error("An error has occurred while trying to download XML file.", error);
     })
+    }
   }
 
   filterOrdersByRange(): any[] {
@@ -272,11 +276,12 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
         statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;
       });
 
-      const labels = Object.keys(statusCounts);
-      const data = Object.values(statusCounts);
+       const backgroundColors = ['#4CAF50', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
 
-      const backgroundColors = ['#4CAF50', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
-  
+      const labels = this.statuses.filter(status => statusCounts[status]);
+      const data = labels.map(status => statusCounts[status]);
+      const colors = labels.map(status => backgroundColors[this.statuses.indexOf(status)]);
+
       this.pie_chartInstance = new Chart(this.pie_ctx, {
         type: 'doughnut',
         data: {
@@ -285,7 +290,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
             {
               label: 'Stavy objednávok',
               data: data,
-              backgroundColor: backgroundColors.slice(0, labels.length),
+              backgroundColor: colors,
               hoverOffset: 8
             }
           ]
@@ -380,7 +385,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
 
   getStatusColor(orderStatus: string): string {
     const statusIndex = this.statuses.indexOf(orderStatus);
-    const backgroundColors = ['#4CAF50', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
+   const backgroundColors = ['#4CAF50', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
     if(statusIndex !== -1 && statusIndex < backgroundColors.length){
       return backgroundColors[statusIndex];
     }
@@ -468,11 +473,14 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
             return order.orderId.toString().startsWith(this.searchText);
           case 'email':
             return order.email.toLowerCase().includes(this.searchText.toLowerCase());
+          case 'note':
+            return order.note.toLowerCase().includes(this.searchText.toLowerCase())
           case 'auto':
             return (
               order.customerName.toLowerCase().includes(this.searchText.toLowerCase()) ||
               order.orderId.toString().startsWith(this.searchText) ||
-              order.email.toLowerCase().includes(this.searchText.toLowerCase())
+              order.email.toLowerCase().includes(this.searchText.toLowerCase()) ||
+              order.note.toLowerCase().includes(this.searchText.toLowerCase())
             );
           default:
             return false;

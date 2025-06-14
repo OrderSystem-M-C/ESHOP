@@ -131,7 +131,6 @@ export class ProductsPageComponent implements OnInit {
       this.isLoadingForm = true;
 
       this.productService.createProduct(product).subscribe((response) => {
-        console.log(response);
         this.snackBar.open('Produkt bol úspešne vytvorený.', '', { duration: 1000 });
         this.creationSuccessful = true;
         this.productForm.reset();

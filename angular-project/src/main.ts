@@ -42,7 +42,7 @@ bootstrapApplication(AppComponent, {
       provideAnimations(),
       provideHttpClient(withInterceptors([errorHandlerInterceptor, jwtInterceptor])),
       provideRouter([
-        { path: '', component: LoginComponent},
+        { path: '', redirectTo: 'orders-page', pathMatch: 'full'},
         { path: 'login', component: LoginComponent, canActivate: [loggedInGuard]},
         { path: 'order-form', component: OrderFormComponent, canActivate: [authGuard]},
         { path: 'order-form/:orderId', component: OrderFormComponent, canActivate: [authGuard] },

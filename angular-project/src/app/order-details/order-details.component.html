@@ -27,20 +27,8 @@
             <td>{{order?.customerName}}</td>
           </tr>
           <tr>
-            <td><b>Spoločnosť:</b></td>
-            <td>{{ order?.company ? order.company : 'Nezadané' }}</td>
-          </tr>
-          <tr>
-            <td><b>IČO:</b></td>
-            <td>{{ order?.ico ? order.ico : 'Nezadané'}}</td>
-          </tr>
-          <tr>
-            <td><b>DIČ:</b></td>
-            <td>{{ order?.dic ? order.dic: 'Nezadané'}}</td>
-          </tr>
-          <tr>
-            <td><b>IČ DPH:</b></td>
-            <td>{{ order?.icDph ? order.icDph : 'Nezadané' }}</td>
+            <td><b>Spoločnosť, IČO, DIČ, IČ DPH:</b></td>
+            <td>{{ order?.company ? order.company : 'Nezadané' }}, {{ order?.ico ? order.ico : 'Nezadané'}}, {{ order?.dic ? order.dic: 'Nezadané'}}, {{ order?.icDph ? order.icDph : 'Nezadané' }}</td>
           </tr>
           <tr>
             <td><b>Adresa:</b></td>
@@ -150,11 +138,15 @@
         </table>
         <table class="order-table">
           <tr>
-            <th colspan="2" class="main-title"><b>Faktúra:</b></th>
+            <th colspan="2" class="main-title"><b>Faktúra a podacie číslo objednávky:</b></th>
           </tr>
           <tr>
             <td><b>Kliknutím na odkaz stiahnete faktúru objednávky:</b></td>
             <td><a (click)="getInvoice()" title="Kliknutím stiahnete faktúru objednávky"><img src="../../assets/Images/download-icon.png" alt="download-icon">Prevziať faktúru</a></td>
+          </tr>
+          <tr>
+            <td><b>Podacie číslo objednávky:</b></td>
+            <td>{{order.packageCode ? order.packageCode : 'Nezadané'}}</td>
           </tr>
         </table>
       </div>

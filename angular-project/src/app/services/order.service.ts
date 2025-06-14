@@ -54,26 +54,24 @@ export class OrderService {
     }
     return this.http.put(url, body, { observe: 'response' });
   }
-  copyOrders(orders: OrderDTO[], currentDate: string){
+  copyOrders(orderIds: number[], currentDate: string){
     const url = `${this.baseUrl}/order/copy-orders`;
     const body = {
-      CopiedOrders: orders,
+      OrderIds: orderIds,
       OrderDate: currentDate
     }
     return this.http.post(url, body);
   }
-  changeOrderStatus(orders: OrderDTO[], orderStatus: string){
+  changeOrderStatus(orderIds: number[], orderStatus: string){
     const url = `${this.baseUrl}/order/change-order-status`;
-    let orderIds = orders.map(order => order.orderId);
     let body = {
       OrderIds: orderIds,
       OrderStatus: orderStatus
     }
     return this.http.put(url, body);
   }
-  removeSelectedOrders(orders: OrderDTO[]){
+  removeSelectedOrders(orderIds: number[]){
     const url = `${this.baseUrl}/order/remove-selected-orders`;
-    let orderIds = orders.map(order => order.orderId);
     let body = {
       OrderIds: orderIds
     };
@@ -81,10 +79,10 @@ export class OrderService {
       body: body
     });
   }
-  getOrdersXmlFile(orders: OrderDTO[]){
+  getOrdersXmlFile(orderIds: number[]){
     const url = `${this.baseUrl}/order/export-orders-to-xml`;
     let body = {
-      OrderList: orders
+      OrderIds: orderIds
     }
     return this.http.post(url, body, { responseType: 'blob' });
   }

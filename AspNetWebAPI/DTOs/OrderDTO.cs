@@ -54,5 +54,6 @@ namespace AspNetCoreAPI.DTOs
         public string InvoiceEmail { get; set; }
         [Required]
         public string InvoicePhoneNumber { get; set; }
+        public string PackageCode { get; set; } = string.Empty;
     }
 }

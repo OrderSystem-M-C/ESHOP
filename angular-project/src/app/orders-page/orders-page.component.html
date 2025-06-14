@@ -164,7 +164,7 @@
         </tbody>
       </table>
       <div class="pagination-container">
-        <mat-paginator [length]="totalItems" [pageSizeOptions]="[4, 6, 8]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
+        <mat-paginator [length]="totalItems" [pageSizeOptions]="[6, 8, 10]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
       </div>
     }@else if(filteredOrders.length === 0 && ordersData.length > 0){
       <div class="no-orders-container">

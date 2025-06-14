@@ -195,42 +195,36 @@
             </div>
             <div class="field">
               <p>Poznámka: Faktúra bude automaticky vygenerovaná pri odoslaní objednávky. Toto tlačidlo slúži na jej náhľad a kontrolu.</p>
-              <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn" (click)="createInvoice()">Vytvoriť faktúru</button>
+              <button class="create-invoice-btn btn btn-primary" id="create-invoice-btn" (click)="createInvoice()">Vytvoriť faktúru</button>
             </div>
             </form>
         </div>
     </div>
+    @if(isEditMode){
+      <div class="package-code">
+      <h3>Podacie číslo objednávky</h3>
+      <label for="packageCode" class="form-label">Podacie číslo vašej objednávky (Pošta)*</label>
+         <div class="field">
+            <input formControlName="packageCode" type="text" id="packageCode" class="form-control" placeholder="Zadajte podacie číslo o dĺžke 13 znakov a s dodržaním formátu (napr.: RR123456789SK)" maxlength="13" [ngClass]="{'is-invalid': orderForm.get('packageCode').invalid && orderForm.get('packageCode').touched}">
+            <button class="btn btn-primary" (click)="checkPackageCode(orderForm.get('packageCode').value)">Skontrolovať</button>
+         </div>
+      </div>
+    }
     <div class="order-status">
       <h3>Stav objednávky</h3>
       <p class="default-status">
-        Bez výberu objednávky je automaticky nastavený stav ako:  
-        <input formControlName="orderStatus" type="radio" class="form-check-input" value="Nezpracované - nová objednávka" checked>
-        <b>Nezpracované - nová objednávka</b>
+        Bez výberu objednávky je automaticky nastavený stav ako "Nezpracované - nová objednávka"!
       </p>
-      <div class="order-status-groups">
-        <fieldset>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Vybaviť - Pošta"> Vybaviť - Pošta</label>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Zasielanie čísla zásielky"> Zasielanie čísla zásielky</label>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Uhradené - Vybaviť"> Uhradené - Vybaviť</label>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Vybaviť - Odložené, osobný odber"> Vybaviť - Odložené, osobný odber</label>
-        </fieldset>
-        <fieldset>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Neuhradené - čakám na platbu"> Neuhradené - čakám na platbu</label>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Neuhradené - 2x poslaný e-mail"> Neuhradené - 2x poslaný e-mail</label>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Poslané, neuhradené"> Poslané, neuhradené</label>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Neuhradené - Údaje k platbe, poslať e-mail"> Neuhradené - Údaje k platbe, poslať e-mail</label>
-        </fieldset>
-        <fieldset>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Dobierka - Info k objednávke (poslať e-mail)"> Dobierka - Info k objednávke (poslať e-mail)</label>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Objednávka vybavená"> Objednávka vybavená</label>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Objednávka odoslaná, čakám na úhradu dobierkou"> Objednávka odoslaná, čakám na úhradu dobierkou</label>
-        </fieldset>
-        <fieldset>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Storno"> Storno</label>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Oprava"> Oprava</label>
-          <label><input formControlName="orderStatus" class="form-check-input" type="radio" value="Rozbité, zničené, vrátené"> Rozbité, zničené, vrátené</label>
-        </fieldset>
-      </div>
+      <div class="order-status-grid">
+        <div
+          class="order-status-tile"
+          *ngFor="let status of statuses"
+           [class.selected]="orderForm.get('orderStatus')?.value === status"
+           (click)="orderForm.get('orderStatus')?.setValue(status)"
+            >
+          {{ status }}
+  </div>
+</div>
     </div>
     <!--<div class="order-summary">
       <div class="order-summary-container">
@@ -281,7 +275,7 @@
     @if(!isLoading){
       @if(isEditMode){
         <div class="submit">
-          <button type="button" class="btn btn-primary" (click)="updateOrder()">Uložiť zmeny</button>
+          <button type="button" class="btn btn-primary save-button" (click)="updateOrder()"><img src="../../assets/Images/save-icon.png" height="17px" width="17px" alt="save-icon" style="margin: 0 5px 4px 0;">Uložiť zmeny</button>
         </div>
       }@else{
         <div class="submit">

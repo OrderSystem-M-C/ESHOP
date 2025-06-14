@@ -55,6 +55,24 @@ export class OrderFormComponent implements OnInit {
   pageIndex: number = 0;
   pageSize: number = 4;
 
+  statuses: string[] = [
+    'Nezpracované - nová objednávka',
+    'Vybaviť - Pošta',
+    'Zasielanie čísla zásielky',
+    'Uhradené - Vybaviť',
+    'Vybaviť - Odložené, osobný odber',
+    'Neuhradené - čakám na platbu',
+    'Neuhradené - 2x poslaný e-mail',
+    'Poslané, neuhradené',
+    'Neuhradené - Údaje k platbe, poslať e-mail',
+    'Dobierka - Info k objednávke (poslať e-mail)',
+    'Objednávka vybavená',
+    'Objednávka odoslaná, čakám na úhradu dobierkou',
+    'Storno',
+    'Oprava',
+    'Rozbité, zničené, vrátené'
+  ];
+
   constructor(private datePipe: DatePipe, private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar, private dialog: MatDialog, private productService: ProductService){}
 
   updatePagedProducts(): void {
@@ -94,7 +112,8 @@ export class OrderFormComponent implements OnInit {
     deliveryOption: new FormControl('', Validators.required),
     paymentOption: new FormControl('', Validators.required),
     discountAmount: new FormControl(null, Validators.pattern('^[0-9]*$')),
-    orderStatus: new FormControl('Nezpracované - nová objednávka')
+    orderStatus: new FormControl('Nezpracované - nová objednávka'),
+    packageCode: new FormControl('', Validators.pattern('^[A-Z]{2}\\d{9}[A-Z]{2}$'))
   });
 
   invoiceForm = new FormGroup({
@@ -130,6 +149,7 @@ export class OrderFormComponent implements OnInit {
       discountAmount: this.orderForm.value.discountAmount || 0,
       orderStatus: this.orderForm.value.orderStatus,
       ...(this.isEditMode ? {} : {orderDate: this.currentDate}),
+      packageCode: this.orderForm.value.packageCode,
       totalPrice: this.totalPrice,
       invoiceNumber: this.invoiceForm.value.invoiceNumber,
       variableSymbol: this.invoiceForm.value.invoiceVariable,
@@ -331,7 +351,6 @@ export class OrderFormComponent implements OnInit {
       this.orderService.getOrderProducts(orderId).subscribe((result) => {
         this.selectedProducts = result;
         this.isLoading_edit = false;
-        console.log(this.newSelectedProducts, this.selectedProducts)
       });
     })
   }
@@ -427,6 +446,15 @@ export class OrderFormComponent implements OnInit {
       return { invalidPhone: true };
     }
     return null
+  }
+  checkPackageCode(code: string){
+    const trackingPattern = /^[A-Z]{2}\d{9}[A-Z]{2}$/;
+    const result = trackingPattern.test(code);
+    if(result){
+      this.snackBar.open('Zadané podacie číslo je správne!', '', {duration: 2000});
+    }else{
+      this.snackBar.open('Zadané podacie číslo nie je správne!', '', {duration: 2000});
+    }
   }
 
   createInvoice(){
@@ -614,4 +642,5 @@ export interface OrderDTO {
   invoiceEmail: string;
   invoicePhoneNumber: string;
   orderSelected?: boolean;
+  packageCode?: string;
 }

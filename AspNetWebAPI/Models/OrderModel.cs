@@ -99,5 +99,6 @@ namespace AspNetCoreAPI.Models
         public string InvoicePhoneNumber { get; set; }
         [Required(ErrorMessage = "Produkty sú povinné.")]
         public ICollection<OrderProductModel> OrderProducts { get; set; }
+        public string PackageCode { get; set; }
     }
 }

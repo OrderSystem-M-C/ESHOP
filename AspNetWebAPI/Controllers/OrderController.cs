@@ -3,8 +3,6 @@ using AspNetCoreAPI.DTOs;
 using AspNetCoreAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SlovakPostApi;
-using System.Net.Http;
 using System.Text;
 using System.Xml.Linq;
 
@@ -98,33 +96,11 @@ namespace AspNetCoreAPI.Controllers
                         Id = o.Id,
                         OrderId = o.OrderId,
                         CustomerName = o.CustomerName,
-                        Company = o.Company,
-                        ICO = o.ICO,
-                        DIC = o.DIC,
-                        ICDPH = o.ICDPH,
-                        Address = o.Address,
-                        City = o.City,
-                        PostalCode = o.PostalCode,
                         Email = o.Email,
-                        PhoneNumber = o.PhoneNumber,
                         Note = o.Note,
-                        DeliveryOption = o.DeliveryOption,
-                        PaymentOption = o.PaymentOption,
-                        DiscountAmount = o.DiscountAmount,
                         OrderStatus = o.OrderStatus,
                         OrderDate = o.OrderDate,
                         TotalPrice = o.TotalPrice,
-                        InvoiceNumber = o.InvoiceNumber,
-                        VariableSymbol = o.VariableSymbol,
-                        InvoiceIssueDate = o.InvoiceIssueDate,
-                        InvoiceDueDate = o.InvoiceDueDate,
-                        InvoiceDeliveryDate = o.InvoiceDeliveryDate,
-                        InvoiceName = o.InvoiceName,
-                        InvoiceCompany = o.InvoiceCompany,
-                        InvoiceICO = o.InvoiceICO,
-                        InvoiceDIC = o.InvoiceDIC,
-                        InvoiceEmail = o.InvoiceEmail,
-                        InvoicePhoneNumber = o.InvoicePhoneNumber,
                     }).ToListAsync();
 
                 return Ok(orders);
@@ -221,6 +197,7 @@ namespace AspNetCoreAPI.Controllers
                 order.InvoiceDIC = orderDto.InvoiceDIC;
                 order.InvoiceEmail = orderDto.InvoiceEmail;
                 order.InvoicePhoneNumber = orderDto.InvoicePhoneNumber;
+                order.PackageCode = orderDto.PackageCode;
 
                 await _context.SaveChangesAsync();
                 return Ok(new { id = order.Id });
@@ -235,19 +212,19 @@ namespace AspNetCoreAPI.Controllers
         {
             try
             {
-                if (orderCopyDTO == null || orderCopyDTO.CopiedOrders == null)
+                if (orderCopyDTO == null || orderCopyDTO.OrderIds == null)
                 {
                     return BadRequest("Data transfer object was not found.");
                 }
-                foreach (var item in orderCopyDTO.CopiedOrders)
+                foreach (var orderId in orderCopyDTO.OrderIds)
                 {
                     var original = await _context.Orders
                         .Include(o => o.OrderProducts)
-                        .FirstOrDefaultAsync(o => o.OrderId == item.OrderId);
+                        .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
                     if (original == null)
                     {
-                        return NotFound($"Order with ID {item.OrderId} not found.");
+                        return NotFound($"Order with ID {orderId} not found.");
                     };
 
                     int newOrderId = await GetNewOrderId();
@@ -282,7 +259,8 @@ namespace AspNetCoreAPI.Controllers
                         InvoiceICO = original.InvoiceICO,
                         InvoiceDIC = original.InvoiceDIC,
                         InvoiceEmail = original.InvoiceEmail,
-                        InvoicePhoneNumber = original.InvoicePhoneNumber
+                        InvoicePhoneNumber = original.InvoicePhoneNumber,
+                        PackageCode = original.PackageCode ?? string.Empty
                     };
 
                     await _context.Orders.AddAsync(copy);
@@ -382,9 +360,10 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpPost("export-orders-to-xml")]
-        public async Task<IActionResult> ExportOrdersToXml([FromBody] OrdersXML_DTO ordersXML_DTO)
+        public async Task<IActionResult> ExportOrdersToXml([FromBody] OrderXML_DTO ordersXML_DTO)
         {
-            var orders = ordersXML_DTO.OrderList
+            var orders = _context.Orders
+                .Where(o => ordersXML_DTO.OrderIds.Contains(o.OrderId))
                 .Select(o => new OrderDTO
                 {
                     Id = o.Id,
