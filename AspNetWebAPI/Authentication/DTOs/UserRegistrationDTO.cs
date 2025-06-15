@@ -2,7 +2,7 @@
 
 namespace AspNetCoreAPI.Registration.dto
 {
-    public class UserRegistrationDto
+    public class UserRegistrationDTO
     {
         [Required(ErrorMessage = "Email is required.")]
         public string? Email { get; set; }

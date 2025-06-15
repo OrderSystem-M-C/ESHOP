@@ -2,7 +2,7 @@
 
 namespace AspNetCoreAPI.Registration.dto
 {
-    public class UserLoginDto
+    public class UserLoginDTO
     {
         [Required(ErrorMessage = "E-mailová adresa je povinná.")]
         public string? Email { get; set; }

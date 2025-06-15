@@ -37,7 +37,7 @@ export class ProductsPageComponent implements OnInit {
 
   totalItems: number = 0;
   pageIndex: number = 0;
-  pageSize: number = 4;
+  pageSize: number = 6;
 
   constructor(private datePipe: DatePipe, private dialog: MatDialog, private snackBar: MatSnackBar, private productService: ProductService){}
 

@@ -348,7 +348,7 @@ export class OrderFormComponent implements OnInit {
         invoicePhoneNumber: order.invoicePhoneNumber,
       });
 
-      this.orderService.getOrderProducts(orderId).subscribe((result) => {
+      this.orderService.getOrderProducts(order.id).subscribe((result) => {
         this.selectedProducts = result;
         this.isLoading_edit = false;
       });
@@ -400,7 +400,7 @@ export class OrderFormComponent implements OnInit {
 
       this.orderService.createOrder(order).subscribe((response: OrderDTO) => {
         if(response){
-          this.orderService.addProductsToOrder(this.orderId, this.selectedProducts).subscribe();
+          this.orderService.addProductsToOrder(response.id, this.selectedProducts).subscribe();
           this.isLoading = false;
           if(!this.invoiceCreated){
             this.createInvoice();

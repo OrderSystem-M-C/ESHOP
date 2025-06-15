@@ -24,7 +24,7 @@ namespace AspNetCoreAPI.Registration
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDto userRegistrationDto)
+        public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDTO userRegistrationDto)
         {
             if (userRegistrationDto == null || !ModelState.IsValid)
                 return BadRequest();
@@ -35,14 +35,14 @@ namespace AspNetCoreAPI.Registration
             {
                 var errors = result.Errors.Select(e => e.Description);
 
-                return BadRequest(new UserRegistrationResponseDto { Errors = errors });
+                return BadRequest(new UserRegistrationResponseDTO { Errors = errors });
             }
             
             return StatusCode(201);
         }
 
         [HttpPost("add-claim")]
-        public async Task<IActionResult> AddClaim([FromBody] ClaimDto claimDto)
+        public async Task<IActionResult> AddClaim([FromBody] ClaimDTO claimDto)
         {
             var user = await _userManager.FindByNameAsync(claimDto.userEmail);
             var result = await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim(claimDto.type, claimDto.value));
@@ -51,17 +51,17 @@ namespace AspNetCoreAPI.Registration
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginDto userLoginDto)
+        public async Task<IActionResult> Login([FromBody] UserLoginDTO userLoginDto)
         {
             var isCaptchaValid = await _recaptchaService.VerifyCaptcha(userLoginDto.RecaptchaResponse);
 
             if(!isCaptchaValid)
-                return BadRequest(new UserLoginResponseDto { ErrorMessage = "Invalid reCAPTCHA.", IsAuthSuccessful = false });
+                return BadRequest(new UserLoginResponseDTO { ErrorMessage = "Invalid reCAPTCHA.", IsAuthSuccessful = false });
 
             var user = await _userManager.FindByNameAsync(userLoginDto.Email);
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, userLoginDto.Password))
-                return Unauthorized(new UserLoginResponseDto { ErrorMessage = "Invalid Authentication.", IsAuthSuccessful = false });
+                return Unauthorized(new UserLoginResponseDTO { ErrorMessage = "Invalid Authentication.", IsAuthSuccessful = false });
 
             var signingCredentials = _jwtHandler.GetSigningCredentials();
             var claims = _jwtHandler.GetClaims(user);
@@ -69,7 +69,7 @@ namespace AspNetCoreAPI.Registration
             var tokenOptions = _jwtHandler.GenerateTokenOptions(signingCredentials, claims);
             var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
-            return Ok(new UserLoginResponseDto { IsAuthSuccessful = true, Token = token, Username = user.UserName });
+            return Ok(new UserLoginResponseDTO { IsAuthSuccessful = true, Token = token, Username = user.UserName });
         }
     }
 }

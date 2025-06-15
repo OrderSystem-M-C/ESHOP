@@ -4,6 +4,7 @@ using AspNetCoreAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AspNetCoreAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250615223309_Fix")]
+    partial class Fix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -179,6 +182,9 @@ namespace AspNetCoreAPI.Migrations
                     b.Property<string>("ProductDescriptionSnapshot")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ProductModelProductId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ProductNameSnapshot")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -196,6 +202,8 @@ namespace AspNetCoreAPI.Migrations
 
                     b.HasIndex("ProductId");
 
+                    b.HasIndex("ProductModelProductId");
+
                     b.ToTable("OrderProducts");
                 });
 
@@ -206,9 +214,6 @@ namespace AspNetCoreAPI.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<string>("ProductDescription")
                         .IsRequired()
@@ -442,10 +447,14 @@ namespace AspNetCoreAPI.Migrations
                         .IsRequired();
 
                     b.HasOne("AspNetCoreAPI.Models.ProductModel", "Product")
-                        .WithMany("OrderProducts")
+                        .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("AspNetCoreAPI.Models.ProductModel", null)
+                        .WithMany("OrderProducts")
+                        .HasForeignKey("ProductModelProductId");
 
                     b.Navigation("Order");
 

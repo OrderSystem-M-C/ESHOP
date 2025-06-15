@@ -73,8 +73,8 @@
           <tbody>
             <tr *ngFor="let product of ourFilteredProducts" class="product-row">
               <td style="width: 130px; text-align: center;">{{ product.productId }}</td>
-              <td>{{ product.productName }}</td>
-              <td>{{ product.productDescription || 'Popis produktu bol vynechaný'}}</td>
+              <td><div class="scrollable-cell">{{ product.productName }}</div></td>
+              <td><div class="scrollable-cell">{{ product.productDescription || 'Popis produktu bol vynechaný'}}</div></td>
               <td style="width: 200px; text-align: center;">{{ product.productPrice }} €</td>
               <td style="width: 200px; text-align: center;">{{ product.productWeight }} kg</td>
               <td class="remove-column" title="Vymazať produkt" (click)="removeProduct(product.productId)"><img src="../../assets/Images/bin-icon.png" class="remove-icon"></td>
@@ -82,7 +82,7 @@
           </tbody>
         </table>
         <div class="pagination-container">
-          <mat-paginator [length]="totalItems" [pageSizeOptions]="[4, 6, 8]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
+          <mat-paginator [length]="totalItems" [pageSizeOptions]="[6, 8, 10]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
         </div>
       }@else if(filteredProducts.length === 0){
         <div class="no-products-found-container">

@@ -216,14 +216,11 @@
         Bez výberu objednávky je automaticky nastavený stav ako "Nezpracované - nová objednávka"!
       </p>
       <div class="order-status-grid">
-        <div
-          class="order-status-tile"
-          *ngFor="let status of statuses"
+        <div class="order-status-tile" *ngFor="let status of statuses"
            [class.selected]="orderForm.get('orderStatus')?.value === status"
-           (click)="orderForm.get('orderStatus')?.setValue(status)"
-            >
+           (click)="orderForm.get('orderStatus')?.setValue(status)">
           {{ status }}
-  </div>
+    </div>
 </div>
     </div>
     <!--<div class="order-summary">
@@ -317,8 +314,8 @@
             <tr>
               <th style="text-align: center;">Zvoliť</th>
               <th style="text-align: center;">Číslo produktu</th>
-              <th>Názov produktu</th>
-              <th style="text-align: center;">Cena</th>
+              <th>Kompletný názov produktu</th>
+              <th style="text-align: center;">Cena/ks</th>
             </tr>
             <tr *ngFor="let product of ourSortedProducts" class="product-row">
               <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="form-check-input" [(ngModel)]="product.productSelected" (change)="toggleProductSelection(product)" [checked]="selectedProducts.includes(product)" ></td>

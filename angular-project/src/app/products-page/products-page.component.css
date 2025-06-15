@@ -99,10 +99,16 @@ h1 {
 }
 .products-table td {
   background-color: #fff;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 300px;
+}
+.scrollable-cell {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow-x: auto;
+  display: block;
+  padding-bottom: 10px;
+  margin-bottom: -10px;
 }
 .products-table tr:nth-child(even) {
   background-color: #f9f9f9;

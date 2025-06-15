@@ -207,7 +207,7 @@ export class OrderDetailsComponent implements OnInit{
     this.orderService.getOrderDetails(this.orderId).subscribe((result) => {
       this.order = result;
       if(this.order){
-        this.orderService.getOrderProducts(this.order.orderId).subscribe((result) => {
+        this.orderService.getOrderProducts(this.order.id).subscribe((result) => {
           this.order.invoiceIssueDate = this.formatDate(this.order.invoiceIssueDate);
           this.order.invoiceDueDate = this.formatDate(this.order.invoiceDueDate);
           this.order.invoiceDeliveryDate = this.formatDate(this.order.invoiceDeliveryDate);

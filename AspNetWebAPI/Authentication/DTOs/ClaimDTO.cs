@@ -1,6 +1,6 @@
 ﻿namespace AspNetCoreAPI.Authentication.dto
 {
-    public class ClaimDto
+    public class ClaimDTO
     {
         public string? userEmail {  get; set; }
         public string? type { get; set; }

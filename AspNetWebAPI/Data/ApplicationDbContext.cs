@@ -25,17 +25,15 @@ namespace AspNetCoreAPI.Data
             base.OnModelCreating(builder);
 
             builder.Entity<OrderProductModel>()
-            .HasKey(op => new { op.OrderId, op.ProductId });
+                .HasKey(op => new { op.OrderId, op.ProductId });
 
             builder.Entity<OrderProductModel>()
                 .HasOne(op => op.Order)
                 .WithMany(o => o.OrderProducts)
                 .HasForeignKey(op => op.OrderId);
 
-            builder.Entity<OrderProductModel>()
-                .HasOne(op => op.Product)
-                .WithMany(p => p.OrderProducts)
-                .HasForeignKey(op => op.ProductId);
+            builder.Entity<ProductModel>()
+                .HasQueryFilter(p => !p.IsDeleted);
         }
     }
 }

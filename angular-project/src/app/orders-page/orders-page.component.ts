@@ -276,11 +276,14 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
         statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;
       });
 
-       const backgroundColors = ['#4CAF50', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
+      const backgroundColors = ['#4CAF50', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
 
-      const labels = this.statuses.filter(status => statusCounts[status]);
+      const labels = this.statuses.filter(status => statusCounts[status] !== undefined);
       const data = labels.map(status => statusCounts[status]);
-      const colors = labels.map(status => backgroundColors[this.statuses.indexOf(status)]);
+      const colors = labels.map(status => {
+        const idx = this.statuses.indexOf(status);
+        return idx !== -1 ? backgroundColors[idx] : '#ccc';
+      });
 
       this.pie_chartInstance = new Chart(this.pie_ctx, {
         type: 'doughnut',
@@ -385,7 +388,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
 
   getStatusColor(orderStatus: string): string {
     const statusIndex = this.statuses.indexOf(orderStatus);
-   const backgroundColors = ['#4CAF50', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
+    const backgroundColors = ['#4CAF50', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
     if(statusIndex !== -1 && statusIndex < backgroundColors.length){
       return backgroundColors[statusIndex];
     }
@@ -399,12 +402,16 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
       statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;
     });
   
-    const labels = Object.keys(statusCounts);
-    const data = Object.values(statusCounts);
+    const labels = this.statuses.filter(status => statusCounts[status] !== undefined);
+    const data = labels.map(status => statusCounts[status]);
+    const colors = labels.map(status => {
+      const idx = this.statuses.indexOf(status);
+      return idx !== -1 ? backgroundColors[idx] : '#ccc'; 
+    });
   
     this.pie_chartInstance.data.labels = labels;
     this.pie_chartInstance.data.datasets[0].data = data;
-    this.pie_chartInstance.data.datasets[0].backgroundColor = backgroundColors.slice(0, labels.length);
+    this.pie_chartInstance.data.datasets[0].backgroundColor = colors;
     this.pie_chartInstance.update();
   }
   updateOrdersChart(): void {

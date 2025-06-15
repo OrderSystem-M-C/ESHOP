@@ -71,6 +71,7 @@ namespace AspNetCoreAPI.Controllers
                 InvoiceDIC = orderDto.InvoiceDIC,
                 InvoiceEmail = orderDto.InvoiceEmail,
                 InvoicePhoneNumber = orderDto.InvoicePhoneNumber,
+                PackageCode = orderDto.PackageCode ?? string.Empty
             };
 
             try
@@ -78,11 +79,14 @@ namespace AspNetCoreAPI.Controllers
                 await _context.Orders.AddAsync(order);
                 await _context.SaveChangesAsync();
                 //Odpoved s vytvoreným objektom (201 Created) druhy parameter je location header akoby kde je to ID(proste moze ziskat podrobnosti o tejto objednavke na zaklade ID) prvy je nazov akcie ktora bude zodpovedat ziskaniu detailov objednavky 
-                return CreatedAtAction(nameof(CreateOrder), new { id = order.OrderId }, order);
+                return CreatedAtAction(nameof(CreateOrder), new { id = order.Id }, order);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = ex.Message,
+                    innerException = ex.InnerException?.Message,
+                    stackTrace = ex.StackTrace
+                });
             }
         }
         [HttpGet("get-orders")]
@@ -275,7 +279,11 @@ namespace AspNetCoreAPI.Controllers
                             ProductId = product.ProductId,
                             OrderId = newId,
                             Quantity = product.Quantity,
-                            Product = product.Product
+                            Product = product.Product,
+                            ProductDescriptionSnapshot = product.ProductDescriptionSnapshot,
+                            ProductNameSnapshot = product.ProductNameSnapshot,
+                            ProductPriceSnapshot = product.ProductPriceSnapshot,
+                            ProductWeightSnapshot = product.ProductWeightSnapshot
                         };
                         await _context.OrderProducts.AddAsync(newProduct);
                     }

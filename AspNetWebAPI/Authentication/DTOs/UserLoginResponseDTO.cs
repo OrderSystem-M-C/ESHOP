@@ -1,6 +1,6 @@
 ﻿namespace AspNetCoreAPI.Registration.dto
 {
-    public class UserLoginResponseDto
+    public class UserLoginResponseDTO
     {
         public bool IsAuthSuccessful { get; set; }
         public string? ErrorMessage { get; set; }

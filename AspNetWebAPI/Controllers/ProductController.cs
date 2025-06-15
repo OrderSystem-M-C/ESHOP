@@ -74,7 +74,7 @@ namespace AspNetCoreAPI.Controllers
                 {
                     return NotFound(new { message = $"Product with ID {productId} not found." });
                 }
-                _context.Products.Remove(product);
+                product.IsDeleted = true;
                 await _context.SaveChangesAsync();
                 return Ok(new { message = $"Successfully deleted product with id {productId}." });
             }
@@ -90,26 +90,42 @@ namespace AspNetCoreAPI.Controllers
             {
                 return BadRequest("Data transfer object was not found.");
             }
-            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderProductsDTO.OrderId);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == orderProductsDTO.OrderId);
             if (order == null)
             {
                 return NotFound("Order was not found.");
             }
+            var productIds = orderProductsDTO.Products.Select(p => p.ProductId).ToList();
+
             var products = await _context.Products
-                .Where(p => orderProductsDTO.Products.Select(p => p.ProductId).Contains(p.ProductId)).ToListAsync();
+                .Where(p => productIds.Contains(p.ProductId))
+                .ToListAsync();
+
             if (products.Count != orderProductsDTO.Products.Count)
             {
                 return NotFound("One or more products were not found.");
             }
-            var orderProducts = products.Select(product => new OrderProductModel
+
+            var orderProducts = products.Select(product =>
             {
-                OrderId = orderProductsDTO.OrderId,
-                ProductId = product.ProductId,
-                Product = product,
-                Order = order,
-                Quantity = orderProductsDTO.Products
-                .FirstOrDefault(p => p.ProductId == product.ProductId)?.ProductAmount ?? 0
-            }).ToList();
+                var quantity = orderProductsDTO.Products
+                    .FirstOrDefault(p => p.ProductId == product.ProductId)?.ProductAmount ?? 0;
+                if (quantity < 1) quantity = 1;
+
+                return new OrderProductModel
+                {
+                    OrderId = orderProductsDTO.OrderId,
+                    ProductId = product.ProductId,
+                    Product = product,
+                    Order = order,
+                    Quantity = quantity,
+                    ProductNameSnapshot = product.ProductName,
+                    ProductDescriptionSnapshot = product.ProductDescription ?? string.Empty,
+                    ProductPriceSnapshot = product.ProductPrice,
+                    ProductWeightSnapshot = product.ProductWeight
+                };
+            }).ToList();    
+
             await _context.OrderProducts.AddRangeAsync(orderProducts);
             await _context.SaveChangesAsync();
 
@@ -118,26 +134,26 @@ namespace AspNetCoreAPI.Controllers
         [HttpGet("get-products/{orderId}")]
         public async Task<IActionResult> GetOrderProducts(int orderId)
         {
-            var order = await _context.Orders
-                .Include(o => o.OrderProducts)
-                .ThenInclude(op => op.Product)
-                .FirstOrDefaultAsync(o => o.OrderId == orderId);
-            if (order == null)
-            {
-                return NotFound("Order was not found.");
-            }
-            var orderProducts = order.OrderProducts
-                .Select(op => new ProductDTO
-                {
-                    ProductId = op.ProductId,
-                    ProductName = op.Product.ProductName,
-                    ProductDescription = op.Product.ProductDescription,
-                    ProductPrice = op.Product.ProductPrice,
-                    ProductWeight = op.Product.ProductWeight,
-                    ProductAmount = op.Quantity
-                }).ToList();
+            var orderProducts = await _context.OrderProducts
+                .Where(op => op.OrderId == orderId)
+                .ToListAsync();
 
-            return Ok(orderProducts);
+            if (!orderProducts.Any())
+            {
+                return NotFound("Order products were not found.");
+            }
+
+            var result = orderProducts.Select(op => new ProductDTO
+            {
+                ProductId = op.ProductId,
+                ProductName = op.ProductNameSnapshot,
+                ProductDescription = op.ProductDescriptionSnapshot,
+                ProductPrice = op.ProductPriceSnapshot,
+                ProductWeight = op.ProductWeightSnapshot,
+                ProductAmount = op.Quantity
+            }).ToList();
+
+            return Ok(result);
         }
         [HttpPut("update-products")]
         public async Task<IActionResult> UpdateOrderProducts([FromBody] UpdateOrderProductsRequestDTO request)
@@ -146,44 +162,55 @@ namespace AspNetCoreAPI.Controllers
             {
                 return BadRequest("Data transfer object was not found.");
             }
+
             var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == request.OrderId);
+
+            if(order == null)
+            {
+                return NotFound("Order was not found.");
+            }
+
             var orderProducts = await _context.OrderProducts
                 .Where(op => op.OrderId == request.OrderId)
                 .ToListAsync();
-            if (order == null || orderProducts == null)
-            {
-                return NotFound("Order or products were not found.");
-            }
+
+            var productIds = request.Products.Select(p => p.ProductId).ToList();
+
+            var products = await _context.Products
+                .Where(p => productIds.Contains(p.ProductId))
+                .ToListAsync();
+
             var productsToRemove = orderProducts
-                .Where(op => !request.Products.Any(p => p.ProductId == op.ProductId))
+                .Where(op => !productIds.Contains(op.ProductId))
                 .ToList();
-            _context.OrderProducts.RemoveRange(productsToRemove);
+
+            _context.OrderProducts.RemoveRange(productsToRemove);   
+
             foreach (var updatedProduct in request.Products)
             {
-                var orderProduct = await _context.OrderProducts
-                    .FirstOrDefaultAsync(op => op.OrderId == request.OrderId && op.ProductId == updatedProduct.ProductId);
-                if (orderProduct != null)
+                if (updatedProduct.ProductAmount < 1) updatedProduct.ProductAmount = 1;
+
+                var orderProduct = orderProducts.FirstOrDefault(op => op.ProductId == updatedProduct.ProductId);
+                var product = products.FirstOrDefault(p => p.ProductId == updatedProduct.ProductId);
+
+                if(orderProduct != null)
                 {
                     orderProduct.Quantity = updatedProduct.ProductAmount;
-                }
-                else
+                }else if(product != null)
                 {
                     var newOrderProduct = new OrderProductModel
                     {
-                        OrderId = request.OrderId,
-                        ProductId = updatedProduct.ProductId,
-                        Quantity = updatedProduct.ProductAmount
+                        OrderId = order.Id,
+                        ProductId = product.ProductId,
+                        Quantity = updatedProduct.ProductAmount,
+                        ProductNameSnapshot = product.ProductName,
+                        ProductDescriptionSnapshot = product.ProductDescription ?? string.Empty,
+                        ProductPriceSnapshot = product.ProductPrice,
+                        ProductWeightSnapshot = product.ProductWeight
                     };
                     await _context.OrderProducts.AddAsync(newOrderProduct);
                 }
             }
-            //var updatedOrderProducts = await _context.OrderProducts
-            //    .Where(op => op.OrderId == request.OrderId)
-            //    .Include(op => op.Product)
-            //    .ToListAsync(); 
-            //order.TotalPrice = updatedOrderProducts
-            //    .Where(op => op.Product != null)
-            //    .Sum(op => op.Product.ProductPrice * op.Quantity);
             await _context.SaveChangesAsync();
             return Ok(true); 
         }
