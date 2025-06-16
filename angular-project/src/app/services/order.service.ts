@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { OrderDTO } from '../order-form/order-form.component';
 import { Observable } from 'rxjs';
@@ -34,13 +34,13 @@ export class OrderService {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.put(url, order, {headers, responseType: 'json'}); //znamena ze Angular bude ocakavat textovu spravu a nie JSON takze sa spravne spracuje
   }
-  addProductsToOrder(orderId: number, products: ProductDTO[]){
+  addProductsToOrder(orderId: number, products: ProductDTO[]): Observable<HttpResponse<any>>{
     const url = `${this.baseUrl}/product/add-products`;
     const body = {
       orderId, 
       products
     }
-    return this.http.post(url, body);
+    return this.http.post(url, body, { observe: 'response' });
   }
   getOrderProducts(orderId: number){
     const url = `${this.baseUrl}/product/get-products/${orderId}`;

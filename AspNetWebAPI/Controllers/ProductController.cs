@@ -129,7 +129,7 @@ namespace AspNetCoreAPI.Controllers
             await _context.OrderProducts.AddRangeAsync(orderProducts);
             await _context.SaveChangesAsync();
 
-            return Ok("Products have been successfully added to the order.");
+            return NoContent();
         }
         [HttpGet("get-products/{orderId}")]
         public async Task<IActionResult> GetOrderProducts(int orderId)

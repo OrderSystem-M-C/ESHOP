@@ -9,6 +9,9 @@ import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/materi
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../api-authorization/authentication.service';
+import { EmailService } from '../services/email.service';
+import { pack } from 'html2canvas/dist/types/css/types/color';
+import { catchError, EMPTY, finalize, of, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-orders-page',
@@ -76,7 +79,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
 
   selectedRange: '1d' | '7d' | '1m' | '1y' | 'all' = 'all';
 
-  constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar, public authService: AuthenticationService){}
+  constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar, public authService: AuthenticationService, private emailService: EmailService){}
 
   updatePagedOrders(): void {
     const startIndex = this.pageIndex * this.pageSize;
@@ -120,113 +123,144 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   }
 
   copySelectedOrders(): void {
-    this.isLoading = true;
-    if(this.selectedOrders){
-      let orderIds = this.selectedOrders.map(order => order.orderId);
-      this.orderService.copyOrders(orderIds, this.currentDate).subscribe(() => {
-        this.snackBar.open("Objednávka/y bola/i úspešne skopírované!", "", { duration: 1000 });
-        this.ourFilteredOrders.forEach(order => order.orderSelected = false);
-        this.selectedOrders = [];
-  
-        this.orderService.getOrders().subscribe((result) => {
-          this.filteredOrders = result;
-          this.pageIndex = 0;
-          this.totalItems = this.filteredOrders.length;
-          this.updatePagedOrders();
-          this.isLoading = false;
-
-          this.updateOrdersChart();
-          this.updateRevenueChart();
-          this.updateStatusChart();
-        }, (error) => {
-          console.error("An error have occurred!", error);
-          this.isLoading = false;
-        })
-      }, (error) => {
-        console.error("An error have occurred!", error);
-        this.isLoading = false;
-      })
-    }else{
+    if(!this.selectedOrders?.length){
       this.snackBar.open("Nemáte zvolenú/é objednávku/y na kopírovanie!", "", { duration: 1000 });
-      this.isLoading = false;
+      return;
     }
+    this.isLoading = true;
+    const orderIds = this.selectedOrders.map(o => o.orderId);
+
+    this.orderService.copyOrders(orderIds, this.currentDate).pipe(
+      switchMap(() => {
+        this.snackBar.open("Objednávka/y bola/i úspešne skopírované!", "", { duration: 1000 });
+        this.clearSelection();
+        return this.reloadOrders();
+      })
+    ).subscribe({
+      next: () => this.isLoading = false,
+      error: (err) => {
+        console.error("An error has occurred while trying to copy order/orders.", err);
+        this.isLoading = false;
+      }
+    })
   }
 
   changeOrderStatus(orderStatus: string): void {
-    this.isLoading = true;
-    if(this.selectedOrders){
-      let orderIds = this.selectedOrders.map(order => order.orderId);
-      this.orderService.changeOrderStatus(orderIds, orderStatus).subscribe((response) => {
-        if(response){
-          this.snackBar.open("Zmena stavu bola úspešná!", "", { duration: 1500 });
-          this.selectedOrders = [];
-          this.orderService.getOrders().subscribe((result) => {
-            this.filteredOrders = result;
-            this.pageIndex = 0;
-            this.totalItems = this.filteredOrders.length;
-            this.updatePagedOrders();
-            this.isLoading = this.isVisibleChangeStatus = false;
-
-            this.updateStatusChart();
-          }, (error) => {
-            console.error("An error have occurred!", error);
-            this.isLoading = false;
-          })
-        }
-      }, (error) => {
-        console.error("An error has occurred while trying to change status of the order/orders.", error);
-        this.isLoading = false;
-      })
+    if(!this.selectedOrders?.length){
+      this.snackBar.open("Nemáte zvolenú/é objednávku/y na kopírovanie!", "", { duration: 1000 });
+      return;
     }
+    this.isLoading = true;
+    const orderIds = this.selectedOrders.map(o => o.orderId);
+    const emailDtos = this.selectedOrders.map(order => ({
+      email: order.email,
+      orderId: order.orderId,
+      packageCode: order.packageCode
+    }))
+    
+    this.orderService.changeOrderStatus(orderIds, orderStatus).pipe(
+      switchMap((response) => {
+        if(!response) throw new Error("Not success!");
+        this.snackBar.open("Zmena stavu bola úspešná!", "", { duration: 1500 });
+        this.clearSelection();
+        
+        if(orderStatus === 'Zasielanie čísla zásielky') {
+          return this.emailService.sendPackageCodeEmails(emailDtos).pipe(
+            catchError((error) => {
+              console.error("An error has occurred while trying to send emails.", error?.message);
+               return of(null);
+            }),
+            switchMap(() => this.reloadOrders())
+          );
+        }
+        return of(null);
+      }),
+      switchMap(() => this.reloadOrders()),
+      finalize(() => {
+        this.isLoading = false;
+        this.isVisibleChangeStatus = false;
+        this.updateStatusChart();
+      })
+    ).subscribe({
+      next: () => {},
+      error: (err) => {
+        console.error("An error has occurred while trying to change order status.", err);
+        this.isLoading = false;
+      }
+    })
   }
 
   removeSelectedOrders(): void {
-    this.isLoading = true;
-    if(this.selectedOrders){
-      let orderIds = this.selectedOrders.map(order => order.orderId);
-      this.orderService.removeSelectedOrders(orderIds).subscribe((respone) => {
-        if(respone){
-          this.snackBar.open("Objednávka/y boli úspešne vymazané!", "", { duration: 1500 });
-          this.selectedOrders = [];
-          this.orderService.getOrders().subscribe((result) => {
-            this.filteredOrders = result;
-            this.pageIndex = 0;
-            this.totalItems = this.filteredOrders.length;
-            this.updatePagedOrders();
-            this.isLoading = false;
-
-            this.updateStatusChart();
-            this.updateOrdersChart();
-            this.updateRevenueChart();
-          }, (error) => {
-            console.error("An error have occurred!", error);
-            this.isLoading = false;
-          })
-        }
-      })
+    if(!this.selectedOrders?.length){
+      this.snackBar.open("Nemáte zvolenú/é objednávku/y na kopírovanie!", "", { duration: 1000 });
+      return;
     }
+    this.isLoading = true;
+    const orderIds = this.selectedOrders.map(o => o.orderId);
+
+    this.orderService.removeSelectedOrders(orderIds).pipe(
+      switchMap((response) => {
+        if(!response) throw new Error("Not success!");
+        this.snackBar.open("Objednávka/y boli úspešne vymazané!", "", { duration: 1500 });
+        this.clearSelection();
+        return this.reloadOrders();
+      })
+    ).subscribe({
+      next: () => this.isLoading = false,
+      error: (err) => {
+        console.error("An error has occurred while trying to remove orders.", err);
+        this.isLoading = false;
+      }
+    })
   }
 
   downloadXmlFile(){
-    if(this.selectedOrders){
-      let orderIds = this.selectedOrders.map(order => order.orderId);
-      this.orderService.getOrdersXmlFile(orderIds).subscribe((blob) => {
-      const a = document.createElement('a');
-      const objectUrl = URL.createObjectURL(blob);
-      a.href = objectUrl;
-      a.download = `Zasielky_${new Date().toLocaleDateString("sk").replace(/\s/g, "").replace(/\./g, "")}.xml`
-      a.click();
-      URL.revokeObjectURL(objectUrl);
-
-      this.snackBar.open("XML súbor bol úspešne stiahnutý!", "", { duration: 1500 });
-      this.selectedOrders = [];
-      this.ordersData.forEach(order => {
-        order.orderSelected = false;
-      })
-    }, (error) => {
-      console.error("An error has occurred while trying to download XML file.", error);
-    })
+    if(!this.selectedOrders?.length){
+      this.snackBar.open("Nemáte zvolenú/é objednávku/y na kopírovanie!", "", { duration: 1000 });
+      return;
     }
+
+    const orderIds = this.selectedOrders.map(o => o.orderId);
+
+    this.orderService.getOrdersXmlFile(orderIds).subscribe({
+      next: (blob) => {
+        const a = document.createElement('a');
+        const objectUrl = URL.createObjectURL(blob);
+        a.href = objectUrl;
+        a.download = `Zasielky_${new Date().toLocaleDateString("sk").replace(/\s/g, "").replace(/\./g, "")}.xml`;
+        a.click();
+        URL.revokeObjectURL(objectUrl);
+
+        this.snackBar.open("XML súbor bol úspešne stiahnutý!", "", { duration: 1500 });
+        this.clearSelection();
+      },
+      error: (err) => console.error("An error has occurred while trying to download XML file.", err)
+    })
+  }
+
+  private reloadOrders() {
+    return this.orderService.getOrders().pipe(
+      tap((result) => {
+        this.filteredOrders = result;
+        this.pageIndex = 0;
+        this.totalItems = this.filteredOrders.length;
+        this.updatePagedOrders();
+
+        this.updateOrdersChart();
+        this.updateRevenueChart();
+        this.updateStatusChart();
+      }),
+      catchError((error) => {
+        console.error("An error has occured while trying to reload orders.", error);
+        this.isLoading = false;
+        return EMPTY;
+      })
+    )
+  }
+
+  private clearSelection() {
+    this.selectedOrders = [];
+    this.ourFilteredOrders?.forEach(order => order.orderSelected = false);
   }
 
   filterOrdersByRange(): any[] {

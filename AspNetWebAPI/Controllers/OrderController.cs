@@ -105,6 +105,7 @@ namespace AspNetCoreAPI.Controllers
                         OrderStatus = o.OrderStatus,
                         OrderDate = o.OrderDate,
                         TotalPrice = o.TotalPrice,
+                        PackageCode = o.PackageCode
                     }).ToListAsync();
 
                 return Ok(orders);
