@@ -18,7 +18,7 @@ import { loggedInGuard } from './app/api-authorization/logged-in.guard';
 import { PageNotFoundComponent } from './app/page-not-found/page-not-found.component';
 
 export function getBaseUrl() {
-  return 'https://localhost:7186/api';
+  return 'https://web1244125.bsite.net/api';
 }
 
 export function tokenGetter() {
