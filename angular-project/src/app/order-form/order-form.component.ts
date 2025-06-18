@@ -111,7 +111,9 @@ export class OrderFormComponent implements OnInit {
     phoneNumber: new FormControl('', [Validators.required, this.phoneValidator]),
     note: new FormControl(''),
     deliveryOption: new FormControl('', Validators.required),
+    deliveryCost: new FormControl(0, Validators.required),
     paymentOption: new FormControl('', Validators.required),
+    paymentCost: new FormControl(0, Validators.required),
     discountAmount: new FormControl(null, Validators.pattern('^[0-9]*$')),
     orderStatus: new FormControl('Nezpracované - nová objednávka'),
     packageCode: new FormControl('', Validators.pattern('^[A-Z]{2}\\d{9}[A-Z]{2}$'))
@@ -146,7 +148,9 @@ export class OrderFormComponent implements OnInit {
       phoneNumber: this.orderForm.value.phoneNumber,
       note: this.orderForm.value.note || '',
       deliveryOption: this.orderForm.value.deliveryOption,
+      deliveryCost: this.orderForm.value.deliveryCost,
       paymentOption: this.orderForm.value.paymentOption,
+      paymentCost: this.orderForm.value.paymentCost,
       discountAmount: this.orderForm.value.discountAmount || 0,
       orderStatus: this.orderForm.value.orderStatus,
       ...(this.isEditMode ? {} : {orderDate: this.currentDate}),
@@ -289,10 +293,38 @@ export class OrderFormComponent implements OnInit {
   }
   recalculateTotalPrice(){
     const products = this.isEditingProducts ? this.newSelectedProducts : this.selectedProducts;
-    const total = products.reduce((acc, product) => {
+    let total = products.reduce((acc, product) => {
       return acc + (product.productPrice * product.productAmount);
-    }, 0)
+    }, 0)    
+
+    const deliveryCost = Number(this.orderForm.get('deliveryCost')?.value || 0);
+    const paymentCost = Number(this.orderForm.get('paymentCost')?.value || 0);
+
+    total += deliveryCost + paymentCost;
+
     this.totalPrice = Number(total.toFixed(2));
+  }
+  onDeliveryChange() {
+    const deliveryOption = this.orderForm.get('deliveryOption')?.value;
+
+    if (deliveryOption === 'Kuriér') {
+      this.orderForm.get('deliveryCost')?.setValue(5);
+    } else {
+      this.orderForm.get('deliveryCost')?.setValue(0);
+    }
+
+    this.recalculateTotalPrice();
+  }
+  onPaymentChange() {
+    const paymentOption = this.orderForm.get('paymentOption')?.value;
+
+    if (paymentOption === 'Hotovosť') {
+      this.orderForm.get('paymentCost')?.setValue(2);
+    } else {
+      this.orderForm.get('paymentCost')?.setValue(0);
+    }
+
+    this.recalculateTotalPrice();
   }
 
   updateOrder(){
@@ -350,7 +382,7 @@ export class OrderFormComponent implements OnInit {
   private checkOrderStatusAndSendEmails(order: OrderDTO){
     const orderStatus = this.orderForm.get('orderStatus')?.value || order.orderStatus;
 
-    const emailDtos = this.selectedProducts.map(product => ({
+    const emailDtos = this.selectedProducts.map(() => ({
         email: order.email,
         orderId: order.orderId,
         packageCode: order.packageCode
@@ -358,7 +390,8 @@ export class OrderFormComponent implements OnInit {
 
     if(orderStatus === 'Zasielanie čísla zásielky') {
        this.emailService.sendPackageCodeEmails(emailDtos).subscribe();
-    } else if(orderStatus === 'Dobierka - Info k objednávke') {
+    } else if(orderStatus === 'Dobierka - Info k objednávke (poslať e-mail)') {
+      this.emailService.sendOrderConfirmationEmails(emailDtos).subscribe();
     }
   }
 
@@ -525,27 +558,27 @@ export class OrderFormComponent implements OnInit {
     if(this.invoiceForm.valid){
       const invoiceHTML = `
 <div style="width: 100%; margin: 10px auto; box-sizing: border-box; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333;">
-  <div style="background-color: #f8f9fa; padding: 10px; text-align: center; border-bottom: 1px solid #e0e0e0;">
+  <div style="background-color: #f8f9fa; padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
     <h2 style="margin-top: 14px;">Číslo objednávky: <strong>${this.isEditMode ? this.existingOrderId : this.orderId}</strong></h2>
   </div>
   <div style="padding: 20px;">
     <div style="margin-bottom: 20px;">
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Dátum vystavenia faktúry</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${formattedInvoiceIssueDate}</td>
+          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0; width: 40%;">Dátum vystavenia faktúry</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${formattedInvoiceIssueDate}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Číslo faktúry</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceNumber}</td>
+          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Číslo faktúry</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceNumber}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white;">Celkový počet produktov</th>
-          <td style="padding: 10px;">${this.selectedProducts.reduce((sum, product) => sum + product.productAmount, 0)} ks</td>
+          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Celkový počet produktov</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.selectedProducts.reduce((sum, product) => sum + product.productAmount, 0)} ks</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white;">Celková hmotnosť</th>
-          <td style="padding: 10px;">${this.selectedProducts.reduce((sum, product) => sum + product.productWeight * product.productAmount, 0)} kg</td>
+          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Celková hmotnosť</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">1 kg</td>
         </tr>
       </table>
     </div>
@@ -555,35 +588,49 @@ export class OrderFormComponent implements OnInit {
       <table style="width: 100%; border-collapse: collapse;">
         <thead style="background-color: #0d6efd; color: white;">
           <tr>
-            <th style="padding: 10px; text-align: left;">Názov produktu</th>
-            <th style="padding: 10px; text-align: center;">Cena/ks</th>
-            <th style="padding: 10px; text-align: center;">Hmotnosť</th>
-            <th style="padding: 10px; text-align: center;">Množstvo</th>
-            <th style="padding: 10px; text-align: center;">Celkom (€)</th>
-            <th style="padding: 10px; text-align: center;">Celkom (kg)</th>
+            <th style="padding: 8px; text-align: left;">Názov produktu</th>
+            <th style="padding: 8px; text-align: center;">Cena/ks</th>
+            <th style="padding: 8px; text-align: center;">Množstvo</th>
+            <th style="padding: 8px; text-align: center;">Celkom (€)</th>
           </tr>
         </thead>
         <tbody>
           ${this.selectedProducts.map(product => `
             <tr>
-              <td style="padding: 10px; text-align: left; border-bottom: 1px solid #f0f0f0;">${product.productName}</td>
-              <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productPrice}€</td>
-              <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productWeight} kg</td>
-              <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productAmount} ks</td>
-              <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${(product.productAmount * (product.productPrice - ((product.productPrice / 100) * discountAmount))).toFixed(2)}€</td>
-              <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productWeight * product.productAmount} kg</td>
+              <td style="padding: 8px; text-align: left; border-bottom: 1px solid #f0f0f0;">${product.productName}</td>
+              <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productPrice} €</td>
+              <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productAmount} ks</td>
+              <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;">
+                ${(product.productAmount * (product.productPrice - ((product.productPrice / 100) * discountAmount))).toFixed(2)} €
+              </td>
             </tr>
           `).join('')}
+
           <tr>
-            <td style="padding: 10px; font-weight: bold; text-align: left;">CELKOM:</td>
-            <td style="padding: 10px;"></td>
-            <td style="padding: 10px;"></td>
-            <td style="padding: 10px;"></td>
-            <td style="padding: 10px; font-weight: bold; text-align: center;">
-              ${discountAmount ? ((this.totalPrice - (this.totalPrice * discountAmount / 100)).toFixed(2) + '€ <span style="color: #6c757d;">(-' + discountAmount + '%)</span>') : (this.totalPrice.toFixed(2) + '€ <span style="color: #6c757d;">(-' + discountAmount + '%)</span>')}
+            <td colspan="2" style="padding: 8px; text-align: left; border-bottom: 1px solid #f0f0f0;">Zvolený spôsob dopravy</td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;">${this.orderForm.get('deliveryOption').value}</td>
+            <td style="padding: 8px; text-align: center;">
+              ${(this.orderForm.get('deliveryCost')?.value || 0).toFixed(2)} €
             </td>
-            <td style="padding: 10px; font-weight: bold; text-align: center;">
-              ${this.selectedProducts.reduce((sum, product) => sum + product.productWeight * product.productAmount, 0)} kg
+          </tr>
+
+          <tr>
+            <td colspan="2" style="padding: 8px; text-align: left; border-bottom: 1px solid #f0f0f0;">Zvolený spôsob platby</td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;">${this.orderForm.get('paymentOption').value}</td>
+            <td style="padding: 8px; text-align: center;">
+              ${(this.orderForm.get('paymentCost')?.value || 0).toFixed(2)} €
+            </td>
+          </tr>
+
+          <tr>
+            <td colspan="2" style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;"></td>
+            <td style="padding: 8px; font-weight: bold; text-align: left;">CELKOM:</td>
+            <td style="padding: 8px; font-weight: bold; text-align: center; border-bottom: 1px solid #f0f0f0;">
+              ${
+                discountAmount
+                  ? ((this.totalPrice - (this.totalPrice * discountAmount / 100)).toFixed(2) + ' € <span style="color: #6c757d;">(-' + discountAmount + '%)</span>')
+                  : (this.totalPrice.toFixed(2) + ' €')
+              }
             </td>
           </tr>
         </tbody>
@@ -594,24 +641,24 @@ export class OrderFormComponent implements OnInit {
       <h3 style="margin-bottom: 10px; font-weight: bold;">Objednávateľ</h3>
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Meno a priezvisko</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.customerName}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Meno a priezvisko</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.customerName}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Spoločnosť, IČO, DIČ, IČ DPH</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.company || 'Nie je zadané'}, ${this.orderForm.value.ico || 'Nie je zadané'}, ${this.orderForm.value.dic || 'Nie je zadané'}, ${this.orderForm.value.icDph || 'Nie je zadané'}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Spoločnosť, IČO, DIČ, IČ DPH</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.company || 'Nie je zadané'}, ${this.orderForm.value.ico || 'Nie je zadané'}, ${this.orderForm.value.dic || 'Nie je zadané'}, ${this.orderForm.value.icDph || 'Nie je zadané'}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Adresa</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.address}, ${this.orderForm.value.postalCode}, ${this.orderForm.value.city}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Adresa</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.address}, ${this.orderForm.value.postalCode}, ${this.orderForm.value.city}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">E-mail</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.email}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">E-mail</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.email}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white;">Tel.č.</th>
-          <td style="padding: 10px;">${this.orderForm.value.phoneNumber}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Tel.č.</th>
+          <td style="padding: 8px;">${this.orderForm.value.phoneNumber}</td>
         </tr>
       </table>
     </div>
@@ -620,20 +667,20 @@ export class OrderFormComponent implements OnInit {
       <h3 style="margin-bottom: 10px; font-weight: bold;">Fakturačné údaje</h3>
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Meno a priezvisko</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceName}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Meno a priezvisko</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceName}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Spoločnosť, IČO, DIČ</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceCompany || 'Nie je zadané'}, ${this.invoiceForm.value.invoiceICO || 'Nie je zadané'}, ${this.invoiceForm.value.invoiceDIC || 'Nie je zadané'}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Spoločnosť, IČO, DIČ</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceCompany || 'Nie je zadané'}, ${this.invoiceForm.value.invoiceICO || 'Nie je zadané'}, ${this.invoiceForm.value.invoiceDIC || 'Nie je zadané'}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">E-mail</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceEmail}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">E-mail</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceEmail}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white;">Tel.č.</th>
-          <td style="padding: 10px;">${this.invoiceForm.value.invoicePhoneNumber}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Tel.č.</th>
+          <td style="padding: 8px;">${this.invoiceForm.value.invoicePhoneNumber}</td>
         </tr>
       </table>
     </div>
@@ -670,6 +717,9 @@ export class OrderFormComponent implements OnInit {
     }else{
       this.isEditMode = false;
     }
+
+    this.onDeliveryChange();
+    this.onPaymentChange();
   }
 }
 export interface OrderDTO {
@@ -687,7 +737,9 @@ export interface OrderDTO {
   phoneNumber: string;
   note?: string;
   deliveryOption: string;
+  deliveryCost: number;
   paymentOption: string;
+  paymentCost: number;
   discountAmount?: number;
   orderStatus: string;
   orderDate?: string;

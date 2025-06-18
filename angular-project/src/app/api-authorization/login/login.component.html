@@ -5,11 +5,11 @@
     <h1>Prihlásiť sa</h1>
     <div class="field">
       <label class="form-label">E-mailová adresa*</label><br>
-      <input class="form-control" type="email" placeholder="Enter your email" formControlName="email" [ngClass]="{'is-invalid': loginForm.get('email')?.invalid && loginForm.get('email')?.touched}">
+      <input class="form-control" type="email" placeholder="Zadajte e-mailovú adresu" formControlName="email" [ngClass]="{'is-invalid': loginForm.get('email')?.invalid && loginForm.get('email')?.touched}">
     </div>
     <div class="field">
       <label class="form-label">Heslo*</label><br>
-      <input class="form-control" type="password" placeholder="Enter your password" formControlName="password" [ngClass]="{'is-invalid': loginForm.get('password')?.invalid && loginForm.get('password')?.touched}">
+      <input class="form-control" type="password" placeholder="Zadajte heslo" formControlName="password" [ngClass]="{'is-invalid': loginForm.get('password')?.invalid && loginForm.get('password')?.touched}">
     </div>
     <div class="re-captcha">
       <re-captcha siteKey="6Le7IFwrAAAAALTQTj8u6Gc5tWIevrRC1Y-LREdV" (resolved)="onCaptchaResolved($event)"></re-captcha>

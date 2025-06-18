@@ -220,6 +220,17 @@ mat-paginator {
   width: 100%;
   font-size: 14px;
 }
+.stock-input{
+  width: 80px;
+  padding: 3px;
+  margin: 0;
+}
+.in-stock {
+  color: green;
+}
+.out-of-stock {
+  color: red;
+}
 /*Pre neplatné polia*/
 .form-control.is-invalid {
   border-color: red !important;
@@ -228,6 +239,6 @@ mat-paginator {
   border-color: red;
 }
 /*Pre platné polia*/
-.form-control.ng-valid:not(:placeholder-shown):not([type="search"]):not(select) {
+.form-control.ng-valid:not(:placeholder-shown):not([type="search"]):not(select):not(.stock-input) {
   border-color: #28a745;
 }

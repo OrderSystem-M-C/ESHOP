@@ -35,7 +35,7 @@ bootstrapApplication(AppComponent, {
       importProvidersFrom(BrowserModule, JwtModule.forRoot({
         config: {
           tokenGetter: tokenGetter,
-          allowedDomains: ['https://localhost:7186', 'https://openlab.bsite.net'],
+          allowedDomains: ['https://localhost:7186', 'https://web1244125.bsite.net'],
           disallowedRoutes: [],
         },
       })),

@@ -27,7 +27,11 @@ namespace AspNetCoreAPI.DTOs
         [Required]
         public string DeliveryOption { get; set; }
         [Required]
+        public decimal DeliveryCost { get; set; } = 0.0m;
+        [Required]
         public string PaymentOption { get; set; }
+        [Required]
+        public decimal PaymentCost { get; set; } = 0.0m;
         [Range(0, 100)]
         public int DiscountAmount { get; set; }
         [Required]

@@ -37,27 +37,27 @@ export class OrderDetailsComponent implements OnInit{
   getInvoice(){
     if(this.order){
       const invoiceHTML = `<div style="width: 100%; margin: 10px auto; box-sizing: border-box; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333;">
-  <div style="background-color: #f8f9fa; padding: 10px; text-align: center; border-bottom: 1px solid #e0e0e0;">
+  <div style="background-color: #f8f9fa; padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
     <h2 style="margin-top: 14px;">Číslo objednávky: <strong>${this.order.orderId}</strong></h2>
   </div>
   <div style="padding: 20px;">
     <div style="margin-bottom: 20px;">
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Dátum vystavenia faktúry</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceIssueDate}</td>
+          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0; width: 40%;">Dátum vystavenia faktúry</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceIssueDate}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Číslo faktúry</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceNumber}</td>
+          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Číslo faktúry</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceNumber}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white;">Celkový počet produktov</th>
-          <td style="padding: 10px;">${this.calculateTotalAmount()} ks</td>
+          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Celkový počet produktov</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.calculateTotalAmount()} ks</td>
         </tr>
          <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white;">Celková hmotnosť</th>
-          <td style="padding: 10px;">${this.calculateTotalWeight()} kg</td>
+          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Celková hmotnosť</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">1 kg</td>
         </tr>
       </table>
     </div>
@@ -67,35 +67,42 @@ export class OrderDetailsComponent implements OnInit{
       <table style="width: 100%; border-collapse: collapse;">
         <thead style="background-color: #0d6efd; color: white;">
           <tr>
-            <th style="padding: 10px; text-align: left;">Názov produktu</th>
-            <th style="padding: 10px; text-align: center;">Cena/ks</th>
-            <th style="padding: 10px; text-align: center;">Hmotnosť</th>
-            <th style="padding: 10px; text-align: center;">Množstvo</th>
-            <th style="padding: 10px; text-align: center;">Celkom (€)</th>
-            <th style="padding: 10px; text-align: center;">Celkom (kg)</th>
+            <th style="padding: 8px; text-align: left;">Názov produktu</th>
+            <th style="padding: 8px; text-align: center;">Cena/ks</th>
+            <th style="padding: 8px; text-align: center;">Množstvo</th>
+            <th style="padding: 8px; text-align: center;">Celkom (€)</th>
           </tr>
         </thead>
         <tbody>
           ${this.selectedProducts.map(product => `
-            <tr>
-              <td style="padding: 10px; text-align: left; border-bottom: 1px solid #f0f0f0;">${product.productName}</td>
-              <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productPrice}€</td>
-              <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productWeight} kg</td>
-              <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productAmount} ks</td>
-              <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${(product.productAmount * (product.productPrice - ((product.productPrice / 100) * this.order.discountAmount))).toFixed(2)}€</td>
-              <td style="padding: 10px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productWeight * product.productAmount} kg</td>
-            </tr>
+          <tr>
+            <td style="padding: 8px; text-align: left; border-bottom: 1px solid #f0f0f0;">${product.productName}</td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productPrice} €</td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;">${product.productAmount} ks</td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;">
+              ${(product.productAmount * (product.productPrice - ((product.productPrice / 100) * this.order.discountAmount))).toFixed(2)} €
+            </td>
+          </tr>
           `).join('')}
           <tr>
-            <td style="padding: 10px; font-weight: bold; text-align: left;">CELKOM:</td>
-            <td style="padding: 10px;"></td>
-            <td style="padding: 10px;"></td>
-            <td style="padding: 10px;"></td>
-            <td style="padding: 10px; font-weight: bold; text-align: center;">
-              ${this.order.discountAmount ? ((this.order.totalPrice - (this.order.totalPrice * this.order.discountAmount / 100)).toFixed(2) + '€ <span style="color: #6c757d;">(-' + this.order.discountAmount + '%)</span>') : (this.order.totalPrice.toFixed(2) + '€ <span style="color: #6c757d;">(-' + this.order.discountAmount + '%)</span>')}
-            </td>
-            <td style="padding: 10px; font-weight: bold; text-align: center;">
-              ${this.calculateTotalWeight()} kg
+            <td colspan="2" style="padding: 8px; text-align: left; border-bottom: 1px solid #f0f0f0;">Zvolený spôsob dopravy</td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;">Poštovné (${this.order.deliveryOption}):</td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;">${this.order.deliveryCost.toFixed(2)} €</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="padding: 8px; text-align: left; border-bottom: 1px solid #f0f0f0;">Zvolený spôsob platby</td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;">${this.order.paymentOption}:</td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;">${this.order.paymentCost.toFixed(2)} €</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0;"></td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0; font-weight: bold;">CELKOM:</td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #f0f0f0; font-weight: bold;">
+              ${
+                this.order.discountAmount
+                  ? ((this.order.totalPrice - (this.order.totalPrice * this.order.discountAmount / 100)).toFixed(2) + ' € <span style="color: #6c757d;">(-' + this.order.discountAmount + '%)</span>')
+                  : (this.order.totalPrice.toFixed(2) + ' €')
+              }
             </td>
           </tr>
         </tbody>
@@ -106,24 +113,24 @@ export class OrderDetailsComponent implements OnInit{
       <h3 style="margin-bottom: 10px; font-weight: bold;">Objednávateľ</h3>
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Meno a priezvisko</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.order.customerName}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Meno a priezvisko</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.customerName}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Spoločnosť, IČO, DIČ, IČ DPH</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.order.company || 'Nie je zadané'}, ${this.order.ico || 'Nie je zadané'}, ${this.order.dic || 'Nie je zadané'}, ${this.order.icDph || 'Nie je zadané'}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Spoločnosť, IČO, DIČ, IČ DPH</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.company || 'Nie je zadané'}, ${this.order.ico || 'Nie je zadané'}, ${this.order.dic || 'Nie je zadané'}, ${this.order.icDph || 'Nie je zadané'}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Adresa</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.order.address}, ${this.order.postalCode}, ${this.order.city}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Adresa</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.address}, ${this.order.postalCode}, ${this.order.city}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">E-mail</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.order.email}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">E-mail</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.email}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white;">Tel.č.</th>
-          <td style="padding: 10px;">${this.order.phoneNumber}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Tel.č.</th>
+          <td style="padding: 8px;">${this.order.phoneNumber}</td>
         </tr>
       </table>
     </div>
@@ -132,26 +139,26 @@ export class OrderDetailsComponent implements OnInit{
       <h3 style="margin-bottom: 10px; font-weight: bold;">Fakturačné údaje</h3>
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Meno a priezvisko</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceName}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Meno a priezvisko</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceName}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Spoločnosť, IČO, DIČ</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceCompany || 'Nie je zadané'}, ${this.order.invoiceICO || 'Nie je zadané'}, ${this.order.invoiceDIC || 'Nie je zadané'}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">Spoločnosť, IČO, DIČ</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceCompany || 'Nie je zadané'}, ${this.order.invoiceICO || 'Nie je zadané'}, ${this.order.invoiceDIC || 'Nie je zadané'}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">E-mail</th>
-          <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceEmail}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white; border-bottom: 1px solid #0d6efd;">E-mail</th>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceEmail}</td>
         </tr>
         <tr>
-          <th style="padding: 10px; text-align: left; background-color: #0d6efd; color: white;">Tel.č.</th>
-          <td style="padding: 10px;">${this.order.invoicePhoneNumber}</td>
+          <th style="padding: 8px; text-align: left; background-color: #0d6efd; color: white;">Tel.č.</th>
+          <td style="padding: 8px;">${this.order.invoicePhoneNumber}</td>
         </tr>
       </table>
     </div>
   </div>
-</div>`
-
+</div>
+`
 
      const options = {
         margin: 5,
@@ -222,7 +229,4 @@ export class OrderDetailsComponent implements OnInit{
       console.error("An error occurred while trying to get order details", error);
     })
   }
-}
-interface OrderProductsDTO {
-  
 }

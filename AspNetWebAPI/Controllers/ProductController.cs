@@ -56,6 +56,7 @@ namespace AspNetCoreAPI.Controllers
                         ProductDescription = p.ProductDescription,
                         ProductPrice = p.ProductPrice,
                         ProductWeight = p.ProductWeight,
+                        StockAmount = p.StockAmount,
                     }).ToListAsync();
                 return Ok(products);
             }
@@ -77,6 +78,34 @@ namespace AspNetCoreAPI.Controllers
                 product.IsDeleted = true;
                 await _context.SaveChangesAsync();
                 return Ok(new { message = $"Successfully deleted product with id {productId}." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        [HttpPut("update-stock-batch")]
+        public async Task<IActionResult> UpdateStockBatch([FromBody] List<ProductStockUpdateDTO> updates)
+        {
+            try
+            {
+                if(updates == null || !updates.Any())
+                {
+                    return BadRequest("No updates provided.");
+                }
+                foreach(var update in updates)
+                {
+                    var product = await _context.Products.FindAsync(update.ProductId);
+                    if(product == null)
+                    {
+                        return NotFound($"Product with ID {update.ProductId} not found.");
+                    }
+
+                    product.StockAmount = update.StockAmount;
+                }
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Stock amounts updated successfully." });
             }
             catch (Exception ex)
             {
@@ -111,6 +140,8 @@ namespace AspNetCoreAPI.Controllers
                 var quantity = orderProductsDTO.Products
                     .FirstOrDefault(p => p.ProductId == product.ProductId)?.ProductAmount ?? 0;
                 if (quantity < 1) quantity = 1;
+
+                product.StockAmount -= quantity;
 
                 return new OrderProductModel
                 {
@@ -193,10 +224,13 @@ namespace AspNetCoreAPI.Controllers
                 var orderProduct = orderProducts.FirstOrDefault(op => op.ProductId == updatedProduct.ProductId);
                 var product = products.FirstOrDefault(p => p.ProductId == updatedProduct.ProductId);
 
-                if(orderProduct != null)
+                if (orderProduct != null)
                 {
+                    int difference = updatedProduct.ProductAmount - orderProduct.Quantity;
+                    product.StockAmount -= difference; 
                     orderProduct.Quantity = updatedProduct.ProductAmount;
-                }else if(product != null)
+                }
+                else if(product != null)
                 {
                     var newOrderProduct = new OrderProductModel
                     {

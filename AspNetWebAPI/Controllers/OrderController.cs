@@ -71,7 +71,9 @@ namespace AspNetCoreAPI.Controllers
                 InvoiceDIC = orderDto.InvoiceDIC,
                 InvoiceEmail = orderDto.InvoiceEmail,
                 InvoicePhoneNumber = orderDto.InvoicePhoneNumber,
-                PackageCode = orderDto.PackageCode ?? string.Empty
+                PackageCode = orderDto.PackageCode ?? string.Empty,
+                DeliveryCost = orderDto.DeliveryCost,
+                PaymentCost = orderDto.PaymentCost
             };
 
             try
@@ -146,10 +148,21 @@ namespace AspNetCoreAPI.Controllers
                 var orderProducts = await _context.OrderProducts
                     .Where(op => op.OrderId == order.Id)
                     .ToListAsync();
+
                 if (orderProducts == null)
                 {
                     return NotFound(new { message = $"Order with ID {Id} does not have any products." });
                 }
+
+                foreach (var op in orderProducts)
+                {
+                    var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == op.ProductId);
+                    if (product != null)
+                    {
+                        product.StockAmount += op.Quantity;
+                    }
+                }
+
                 _context.OrderProducts.RemoveRange(orderProducts);
                 _context.Orders.Remove(order);
                 await _context.SaveChangesAsync();
@@ -203,6 +216,8 @@ namespace AspNetCoreAPI.Controllers
                 order.InvoiceEmail = orderDto.InvoiceEmail;
                 order.InvoicePhoneNumber = orderDto.InvoicePhoneNumber;
                 order.PackageCode = orderDto.PackageCode;
+                order.DeliveryCost = orderDto.DeliveryCost;
+                order.PaymentCost = orderDto.PaymentCost;
 
                 await _context.SaveChangesAsync();
                 return Ok(new { id = order.Id });
@@ -265,7 +280,9 @@ namespace AspNetCoreAPI.Controllers
                         InvoiceDIC = original.InvoiceDIC,
                         InvoiceEmail = original.InvoiceEmail,
                         InvoicePhoneNumber = original.InvoicePhoneNumber,
-                        PackageCode = original.PackageCode ?? string.Empty
+                        PackageCode = original.PackageCode ?? string.Empty,
+                        DeliveryCost = original.DeliveryCost,
+                        PaymentCost = original.PaymentCost
                     };
 
                     await _context.Orders.AddAsync(copy);
@@ -354,6 +371,14 @@ namespace AspNetCoreAPI.Controllers
                 if (orderProducts == null)
                 {
                     return NotFound(new { message = $"Order with ID {order.Id} does not have any products." });
+                }
+                foreach (var op in orderProducts)
+                {
+                    var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == op.ProductId);
+                    if (product != null)
+                    {
+                        product.StockAmount += op.Quantity;
+                    }
                 }
                 _context.OrderProducts.RemoveRange(orderProducts);
                 _context.Orders.Remove(order);
@@ -507,7 +532,7 @@ namespace AspNetCoreAPI.Controllers
                 ),
                 new XElement(tns + "Info",
                     new XElement(tns + "ZasielkaID", order.OrderId),
-                    new XElement(tns + "Hmotnost", "0"),
+                    new XElement(tns + "Hmotnost", "1"),
                     (order.PaymentOption == "Dobierka" ? new XElement(tns + "CenaDobierky", order.TotalPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)) : null),
                     new XElement(tns + "DruhZasielky", "8"),
                     new XElement(tns + "Poznamka", order.Note),

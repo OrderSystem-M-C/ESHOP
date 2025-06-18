@@ -23,23 +23,23 @@ namespace AspNetCoreAPI.Registration
             _recaptchaService = recaptchaService;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDTO userRegistrationDto)
-        {
-            if (userRegistrationDto == null || !ModelState.IsValid)
-                return BadRequest();
+        //[HttpPost("register")]
+        //public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDTO userRegistrationDto)
+        //{
+        //    if (userRegistrationDto == null || !ModelState.IsValid)
+        //        return BadRequest();
 
-            var user = new User { UserName = userRegistrationDto.Email,  Email = userRegistrationDto.Email };
-            var result = await _userManager.CreateAsync(user, userRegistrationDto.Password);
-            if (!result.Succeeded)
-            {
-                var errors = result.Errors.Select(e => e.Description);
+        //    var user = new User { UserName = userRegistrationDto.Email,  Email = userRegistrationDto.Email };
+        //    var result = await _userManager.CreateAsync(user, userRegistrationDto.Password);
+        //    if (!result.Succeeded)
+        //    {
+        //        var errors = result.Errors.Select(e => e.Description);
 
-                return BadRequest(new UserRegistrationResponseDTO { Errors = errors });
-            }
+        //        return BadRequest(new UserRegistrationResponseDTO { Errors = errors });
+        //    }
             
-            return StatusCode(201);
-        }
+        //    return StatusCode(201);
+        //}
 
         [HttpPost("add-claim")]
         public async Task<IActionResult> AddClaim([FromBody] ClaimDTO claimDto)

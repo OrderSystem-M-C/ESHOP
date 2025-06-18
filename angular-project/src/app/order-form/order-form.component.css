@@ -200,6 +200,17 @@ textarea {
 .discount-input p {
   margin: 0 0 0 10px;
 }
+.delivery-price-container, .payment-cost-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: row;
+  gap: 5px;
+  margin: 0 0 0 10px;
+}
+.delivery-price-container p, .payment-cost-container p {
+  margin: 0;
+}
 .char-count {
   margin-top: 7.5px;
 }
@@ -313,6 +324,12 @@ mat-paginator {
   border-radius: 10px;
   width: 100%;
   font-size: 14px;
+}
+.in-stock {
+  color: green;
+}
+.out-of-stock {
+  color: red;
 }
 /*Pre neplatné polia*/
 .form-control.is-invalid {

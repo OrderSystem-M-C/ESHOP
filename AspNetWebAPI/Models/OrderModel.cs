@@ -46,8 +46,12 @@ namespace AspNetCoreAPI.Models
 
         [Required(ErrorMessage = "Možnosť dopravy je povinná.")]
         public string DeliveryOption { get; set; }
+        [Required(ErrorMessage = "Poplatok za dopravu je povinný.")]
+        public decimal DeliveryCost { get; set; } = 0.0m;
         [Required(ErrorMessage = "Možnosť platby je povinná.")]
         public string PaymentOption { get; set; }
+        [Required(ErrorMessage = "Poplatok za platbu je povinný.")]
+        public decimal PaymentCost { get; set; }
         [Range(0, 100, ErrorMessage = "Zľava nemôže byť záporná.")]
         public int DiscountAmount { get; set; } = 0;
 

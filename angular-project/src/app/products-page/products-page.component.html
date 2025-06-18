@@ -6,7 +6,13 @@
       <p>{{currentDate}}</p>
     </div>
     <div class="button-container">
-      <button class="btn btn-primary" (click)="openDialog(createProductDialog)"><img src="../../assets/Images/add-icon.png" alt="add-icon"> Pridať produkt</button>
+      @if(isEditingProducts){
+        <button class="btn btn-secondary" (click)="openDialog(createProductDialog)"><img src="../../assets/Images/add-icon.png" alt="add-icon"> Pridať produkt</button>
+        <button class="btn btn-primary" (click)="saveAllChanges()"><img src="../../assets/Images/save-icon.png" height="17px" width="17px" alt="save-icon" style="margin: 0 0 1px 0;">Uložiť zmeny</button>
+        <button class="btn btn-outline-danger" (click)="cancelEditing()">Zahodiť zmeny</button>
+      }@else{
+        <button class="btn btn-primary" (click)="openDialog(createProductDialog)"><img src="../../assets/Images/add-icon.png" alt="add-icon"> Pridať produkt</button>
+      }
     </div>
   </div>
   @if(isLoading){
@@ -62,11 +68,13 @@
         <table class="products-table">
           <thead>
             <tr>
-              <th style="text-align: center;">Číslo produktu</th>
+              <th style="text-align: center;">Č. produktu</th>
               <th>Názov produktu</th>
               <th>Popis produktu</th>
               <th style="text-align: center;">Cena produktu</th>
               <th style="text-align: center;">Hmotnosť produktu</th>
+              <th style="text-align: center;">Upraviť</th>
+              <th style="text-align: center;">Stav</th>
               <th>Vymazať</th>
             </tr>
           </thead>
@@ -77,6 +85,14 @@
               <td><div class="scrollable-cell">{{ product.productDescription || 'Popis produktu bol vynechaný'}}</div></td>
               <td style="width: 200px; text-align: center;">{{ product.productPrice }} €</td>
               <td style="width: 200px; text-align: center;">{{ product.productWeight }} kg</td>
+              <td>
+                  <input type="number" class="form-control stock-input"
+                  [ngModel]="isProductEdited(product.productId) ? editedProducts[product.productId].stockAmount : product.stockAmount"
+                  (ngModelChange)="onStockAmountChange(product.productId, $event)" min="0">
+              </td>
+              <td [ngClass]="product.stockAmount > 0 ? 'in-stock' : 'out-of-stock'">
+                {{ product.stockAmount > 0 ? 'Na sklade' : 'Vypredané' }}
+              </td>
               <td class="remove-column" title="Vymazať produkt" (click)="removeProduct(product.productId)"><img src="../../assets/Images/bin-icon.png" class="remove-icon"></td>
             </tr>
           </tbody>

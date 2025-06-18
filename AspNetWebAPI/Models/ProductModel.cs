@@ -21,6 +21,8 @@ namespace AspNetCoreAPI.Models
         [Required(ErrorMessage = "Váha produktu je povinná.")]
         [Range(0.01, double.MaxValue, ErrorMessage = ("Váha musí byť väčšia ako 0kg."))]
         public decimal ProductWeight { get; set; }
+        [Required(ErrorMessage = "Počet produktov na sklade je povinný.")]
+        public int StockAmount { get; set; } = 0;
         [Required(ErrorMessage = "Produkty sú povinné.")]
         public ICollection<OrderProductModel> OrderProducts { get; set; } = new List<OrderProductModel>();
         public bool IsDeleted { get; set; } = false; 

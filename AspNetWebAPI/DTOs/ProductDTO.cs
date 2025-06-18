@@ -14,6 +14,8 @@ namespace AspNetCoreAPI.DTOs
         [Required]
         public decimal ProductWeight { get; set; }
         [Required]
+        public int StockAmount { get; set; } = 0;
+        [Required]
         public int ProductAmount { get; set; }
     }
 }

@@ -39,6 +39,10 @@ export class ProductsPageComponent implements OnInit {
   pageIndex: number = 0;
   pageSize: number = 6;
 
+  editedProducts: { [productId: number]: { stockAmount: number }} = {};
+  isEditingProducts: boolean = false;
+  hasShownEditingSnackbar = false;
+
   constructor(private datePipe: DatePipe, private dialog: MatDialog, private snackBar: MatSnackBar, private productService: ProductService){}
 
   productForm = new FormGroup({
@@ -66,6 +70,62 @@ export class ProductsPageComponent implements OnInit {
     }else{
       this.isVisiblePrice = !this.isVisiblePrice;
     }
+  }
+
+  onStockAmountChange(productId: number, newValue: any){
+    this.isEditingProducts = true;
+    const stock = Number(newValue);
+    this.editedProducts[productId] = {
+      stockAmount: stock
+    }
+
+    if (!this.hasShownEditingSnackbar) {
+      this.snackBar.open('Vstúpili ste do editačného režimu zásob!', '', { duration: 1000 });
+      this.hasShownEditingSnackbar = true;
+    }
+  }
+
+  isProductEdited(productId: number): boolean {
+    return this.editedProducts.hasOwnProperty(productId);
+  }
+
+  saveAllChanges() {
+    const updates = [];
+    this.isLoading = true;
+
+    for(const productIdStr in this.editedProducts) {
+      const productId = Number(productIdStr);
+      const edited = this.editedProducts[productId];
+      updates.push({ productId, stockAmount: edited.stockAmount});
+    }
+
+    if(updates.length === 0) {
+      this.snackBar.open('Nemáte žiadne zmeny na uloženie!', '', { duration: 1000 });
+      return;
+    }
+
+    this.productService.updateProductStockAmount(updates).subscribe({
+      next: () => {
+        this.snackBar.open('Zmeny boli úspešne uložené!', '', { duration: 1000 });
+
+        for (const upd of updates) {
+          const product = this.ourFilteredProducts.find(p => p.productId === upd.productId);
+          if (product) {
+            product.stockAmount = upd.stockAmount;
+          }
+        }
+
+        this.editedProducts = {};
+        this.isEditingProducts = this.hasShownEditingSnackbar = this.isLoading = false;
+      },
+      error: (err) => console.error(err) 
+    })
+  }
+
+  cancelEditing() {
+    this.editedProducts = {};
+    this.isEditingProducts = this.hasShownEditingSnackbar = false;
+    this.snackBar.open('Úpravy boli zrušené!', '', { duration: 2000 });
   }
   
   applyFilters(criteria?: string): void {
@@ -158,7 +218,9 @@ export class ProductsPageComponent implements OnInit {
 
   openDialog(createProductDialog: TemplateRef<any>){
     this.creationSuccessful = false; 
-    this.dialogRef = this.dialog.open(createProductDialog);  
+    this.dialogRef = this.dialog.open(createProductDialog, {
+        autoFocus: false
+    });  
   
     this.dialogRef.afterClosed().subscribe((result) => {
       if(result){
@@ -238,4 +300,5 @@ export interface ProductDTO {
   productWeight: number,
   productSelected?: boolean;
   productAmount?: number;
+  stockAmount?: number;
 }

@@ -53,26 +53,41 @@
             <div class="form-group">
                 <label for="deliveryOptions" class="form-label">Spôsob dopravy*</label>
                 <div class="delivery-options-wrapper">
-                    <select formControlName="deliveryOption" id="deliveryOptions" class="form-control" [ngClass]="{'is-invalid': orderForm.get('deliveryOption').invalid && orderForm.get('deliveryOption').touched}">
+                    <select formControlName="deliveryOption" id="deliveryOptions" class="form-control" [ngClass]="{'is-invalid': orderForm.get('deliveryOption').invalid && orderForm.get('deliveryOption').touched}" (change)="onDeliveryChange()">
                         <option disabled selected value="">Zvoliť možnosť</option>
-                        <option value="Kuriér">Kuriér</option>
+                        <option value="Kuriér">Kuriér </option>
                         <option value="Osobný odber">Osobný odber</option>
                     </select>
                     <div class="delivery-price">
+                      @if(orderForm.get('deliveryOption')?.value !== 'Kuriér'){
                         <p>0€</p>
+                      }@else{
+                        <div class="delivery-price-container">
+                          <input formControlName="deliveryCost" type="number" class="form-control" min="0" step="0.10" (input)="recalculateTotalPrice()">
+                          <p>€</p>
+                        </div>
+                      }
                     </div>
                 </div>
             </div>
             <div class="form-group">
                 <label for="paymentOptions" class="form-label">Spôsob platby*</label>
                 <div class="payment-options-wrapper">
-                    <select formControlName="paymentOption" id="paymentOptions" class="form-control" [ngClass]="{'is-invalid': orderForm.get('paymentOption').invalid && orderForm.get('paymentOption').touched}">
+                    <select formControlName="paymentOption" id="paymentOptions" class="form-control" [ngClass]="{'is-invalid': orderForm.get('paymentOption').invalid && orderForm.get('paymentOption').touched}" (change)="onPaymentChange()">
                         <option disabled selected value="">Zvoliť možnosť</option>
-                        <option value="Hotovosť">Hotovosť</option>
+                        <option value="Hotovosť">Dobierka</option>
                         <option value="Bankový prevod">Bankový prevod</option>
+                        <option value="Osobný odber">Osobný odber</option>
                     </select>
                     <div class="payment-price">
-                        <p>0€</p>
+                        @if(orderForm.get('paymentOption')?.value !== 'Hotovosť'){
+                          <p>0€</p>
+                        }@else{
+                          <div class="payment-cost-container">
+                            <input formControlName="paymentCost" type="number" class="form-control" min="0" step="0.10" (input)="recalculateTotalPrice()">
+                            <p>€</p>
+                          </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -314,12 +329,18 @@
               <th style="text-align: center;">Číslo produktu</th>
               <th>Kompletný názov produktu</th>
               <th style="text-align: center;">Cena/ks</th>
+              <th style="text-align: center;">Stav</th>
+              <th style="text-align: center;">Počet</th>
             </tr>
             <tr *ngFor="let product of ourSortedProducts" class="product-row">
               <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="form-check-input" [(ngModel)]="product.productSelected" (change)="toggleProductSelection(product)" [checked]="selectedProducts.includes(product)" ></td>
               <td style="text-align: center;">{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
               <td style="width: 100px; text-align: center;">{{ product.productPrice }}€</td>
+              <td style="text-align: center;" [ngClass]="product.stockAmount > 0 ? 'in-stock' : 'out-of-stock'">
+                {{ product.stockAmount > 0 ? 'Na sklade' : 'Vypredané' }} 
+              </td>
+              <td style="text-align: center;">{{product.stockAmount}} ks</td>
             </tr>
           </tbody>
         </table>

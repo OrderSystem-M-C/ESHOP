@@ -24,4 +24,12 @@ export class ProductService {
     const url = `${this.baseUrl}/product/remove-product/${productId}`;
     return this.http.delete(url);
   }
+  updateProductStockAmount(updates: ProductStockUpdateDTO[]){
+    const url = `${this.baseUrl}/product/update-stock-batch`;
+    return this.http.put(url, updates);
+  }
+}
+export interface ProductStockUpdateDTO {
+  productId: number;
+  stockAmount: number;
 }

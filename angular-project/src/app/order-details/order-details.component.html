@@ -44,11 +44,11 @@
           </tr>
           <tr>
             <td><b>Spôsob dopravy:</b></td>
-            <td>{{ order?.deliveryOption }}</td>
+            <td>{{ order?.deliveryOption }}, ({{ order?.deliveryCost }} €)</td>
           </tr>
           <tr>
             <td><b>Spôsob platby:</b></td>
-            <td>{{ order?.paymentOption }}</td>
+            <td>{{ order?.paymentOption }}, ({{ order?.paymentCost }} €)</td>
           </tr>
           <tr>
             <td><b>Stav objednávky:</b></td>
@@ -93,10 +93,10 @@
                 </tr>
                 <tr class="product-row" *ngFor="let product of selectedProducts">
                     <td>{{product.productName}}</td>
-                    <td>{{product.productPrice}}€</td>
+                    <td>{{product.productPrice}} €</td>
                     <td>{{product.productWeight}} kg</td>
                     <td>{{product.productAmount}} ks</td>
-                    <td>{{product.productPrice * product.productAmount}}€</td>
+                    <td>{{product.productPrice * product.productAmount}} €</td>
                     <td>{{product.productWeight * product.productAmount}} kg</td>
                 </tr>
             </tbody>
@@ -104,7 +104,7 @@
               <tr class="total-row">
                   <td colspan="3"><strong>Celkovo</strong></td>
                   <td><strong>{{calculateTotalAmount()}} ks</strong></td>
-                  <td><strong>{{this.order.discountAmount ? ((this.order.totalPrice - (this.order.totalPrice * this.order?.discountAmount / 100)).toFixed(2) + '€ (-' + this.order.discountAmount + '%)') : (this.order.totalPrice.toFixed(2) + '€')}}</strong></td>
+                  <td><strong>{{this.order.discountAmount ? ((this.order.totalPrice - (this.order.totalPrice * this.order?.discountAmount / 100)).toFixed(2) + ' € (-' + this.order.discountAmount + '%)') : (this.order.totalPrice.toFixed(2) + ' €')}}</strong></td>
                   <td><strong>{{calculateTotalWeight()}} kg</strong></td>
               </tr>
           </tfoot>
@@ -117,11 +117,11 @@
           </tr>
           <tr>
             <td><b>Medzisúčet:</b></td>
-            <td>{{order.totalPrice}}€</td>
+            <td>{{order.totalPrice}} €</td>
           </tr>
           <tr>
             <td><b>Celková cena po zľave:</b></td>
-            <td>{{order.totalPrice - (order.totalPrice * order?.discountAmount / 100)}}€ (-{{order?.discountAmount}}%)</td>
+            <td>{{order.totalPrice - (order.totalPrice * order?.discountAmount / 100)}} € (-{{order?.discountAmount}}%)</td>
           </tr>
           <tr>
             <td><b>Dátum vystavenia faktúry:</b></td>

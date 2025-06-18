@@ -10,7 +10,6 @@ import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../api-authorization/authentication.service';
 import { EmailService } from '../services/email.service';
-import { pack } from 'html2canvas/dist/types/css/types/color';
 import { catchError, EMPTY, finalize, of, switchMap, tap } from 'rxjs';
 
 @Component({
@@ -173,6 +172,15 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
             switchMap(() => this.reloadOrders())
           );
         }
+        else if(orderStatus === 'Dobierka - Info k objednávke (poslať e-mail)'){
+          return this.emailService.sendOrderConfirmationEmails(emailDtos).pipe(
+            catchError((error) => {
+              console.error("An error has occurred while trying to send emails.", error?.message);
+               return of(null);
+            }),
+            switchMap(() => this.reloadOrders())
+          )
+        }
         return of(null);
       }),
       switchMap(() => this.reloadOrders()),
@@ -268,16 +276,18 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     let fromDate: Date;
     switch(this.selectedRange){
       case '1d':
-        fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1); 
+        fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
         break;
       case '7d':
-        fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+        fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         break;
       case '1m':
-        fromDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        fromDate = new Date(now);
+        fromDate.setMonth(fromDate.getMonth() - 1);
         break;
       case '1y':
-        fromDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        fromDate = new Date(now);
+        fromDate.setFullYear(fromDate.getFullYear() - 1);
         break;
       case 'all':
         default:

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -9,24 +9,6 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [RouterOutlet, CommonModule]
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'angular-project';
-  
-  isHidden: boolean = false;
-
-  acceptCookies(){
-    localStorage.setItem('cookiesAccepted', 'true');
-    this.isHidden = true;
-  }
-  declineCookies(){
-    localStorage.setItem('cookiesAccepted', 'false');
-    this.isHidden = true;
-  }
-
-  ngOnInit(): void {
-    let cookiesAccepted = JSON.parse(localStorage.getItem('cookiesAccepted'));
-    if(cookiesAccepted){
-      this.isHidden = true;
-    }
-  }
 }
