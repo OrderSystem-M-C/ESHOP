@@ -29,7 +29,7 @@
                   <div class="table-container">
                     <table class="selected-products-table">
                       <tr *ngFor="let product of selectedProducts" class="product-row">
-                        <td>{{product.productName}}</td>
+                        <td style="width: 70%;"><div class="cell-content">{{product.productName}}</div></td>
                         <td class="product-amount-control-column">
                           <input type="number" [(ngModel)]="product.productAmount" [ngModelOptions]="{standalone: true}" (change)="updateAmount(product.productId, product.productAmount)" value="1" min="1" class="form-control product-amount-control">
                         </td>
@@ -38,8 +38,9 @@
                       </tr>
                     </table>
                   </div>
-                  <div class="edit-products-button">
+                  <div class="edit-products-buttons">
                     <button class="btn btn-primary" (click)="openDialog(selectProductsDialog, true)"><img src="../../assets/Images/edit-icon.png" alt="edit-icon" class="edit-icon"> Upraviť produkty</button>
+                    <button class="btn btn-outline-danger" (click)="clearProducts()"> Zmazať všetky</button>
                   </div>
                 </div>
               }@else{

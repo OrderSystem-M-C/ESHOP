@@ -430,6 +430,8 @@ namespace AspNetCoreAPI.Controllers
                     InvoiceDIC = o.InvoiceDIC,
                     InvoiceEmail = o.InvoiceEmail,
                     InvoicePhoneNumber = o.InvoicePhoneNumber,
+                    PaymentCost = o.PaymentCost,
+                    DeliveryCost = o.DeliveryCost
                 }).ToList();
 
             if (orders == null || !orders.Any())
@@ -533,7 +535,7 @@ namespace AspNetCoreAPI.Controllers
                 new XElement(tns + "Info",
                     new XElement(tns + "ZasielkaID", order.OrderId),
                     new XElement(tns + "Hmotnost", "1"),
-                    (order.PaymentOption == "Dobierka" ? new XElement(tns + "CenaDobierky", order.TotalPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)) : null),
+                    (order.PaymentOption == "Hotovosť" ? new XElement(tns + "CenaDobierky", order.PaymentCost.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)) : null),
                     new XElement(tns + "DruhZasielky", "8"),
                     new XElement(tns + "Poznamka", order.Note),
                     new XElement(tns + "SymbolPrevodu", order.VariableSymbol)

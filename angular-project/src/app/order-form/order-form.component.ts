@@ -278,6 +278,11 @@ export class OrderFormComponent implements OnInit {
     }
   }
 
+  clearProducts(): void{
+    this.selectedProducts = [];
+    this.snackBar.open('Vaše zvolené produkty boli úspešne premazané!', '', { duration: 2000 });
+  }
+
   updateAmount(productId: number, productAmount: number) {
     const product = this.selectedProducts.find(p => p.productId === productId);
     if(product && productAmount > 0){
