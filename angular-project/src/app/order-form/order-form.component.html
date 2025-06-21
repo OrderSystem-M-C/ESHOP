@@ -56,7 +56,7 @@
                 <div class="delivery-options-wrapper">
                     <select formControlName="deliveryOption" id="deliveryOptions" class="form-control" [ngClass]="{'is-invalid': orderForm.get('deliveryOption').invalid && orderForm.get('deliveryOption').touched}" (change)="onDeliveryChange()">
                         <option disabled selected value="">Zvoliť možnosť</option>
-                        <option value="Kuriér">Kuriér </option>
+                        <option value="Kuriér">Kuriér</option>
                         <option value="Osobný odber">Osobný odber</option>
                     </select>
                     <div class="delivery-price">
@@ -211,7 +211,7 @@
             </div>
             <div class="field">
               <p>Poznámka: Faktúra bude automaticky vygenerovaná pri odoslaní objednávky. Toto tlačidlo slúži na jej náhľad a kontrolu.</p>
-              <button class="create-invoice-btn btn btn-primary" id="create-invoice-btn" (click)="createInvoice()">Vytvoriť faktúru</button>
+              <button class="create-invoice-btn btn btn-primary" id="create-invoice-btn" (click)="createInvoice()" [disabled]="invoiceCreated">Vytvoriť faktúru</button>
             </div>
             </form>
         </div>
@@ -235,54 +235,8 @@
            (click)="orderForm.get('orderStatus')?.setValue(status)">
           {{ status }}
     </div>
-</div>
     </div>
-    <!--<div class="order-summary">
-      <div class="order-summary-container">
-        <div class="order-summary-parent-container">
-          <div class="order-summary-child-container">
-            <h3>Objednávateľ</h3>
-            <p><strong>Meno:</strong> {{ orderForm.get('customerName').value || 'Nezadané' }}</p>
-            <p><strong>Firma:</strong> {{ orderForm.get('company').value || 'Nezadané' }}</p>
-            <p><strong>IČO:</strong> {{ orderForm.get('ico').value || 'Nezadané' }}</p>
-            <p><strong>DIČ:</strong> {{ orderForm.get('dic').value || 'Nezadané' }}</p>
-            <p><strong>IČ DPH:</strong> {{ orderForm.get('icDph').value || 'Nezadané' }}</p>
-            <p><strong>Adresa:</strong> {{ orderForm.get('address').value || 'Nezadané' }}, {{ orderForm.get('city').value || 'Nezadané' }}, {{ orderForm.get('postalCode').value || 'Nezadané' }}</p>
-            <p><strong>E-mailová adresa:</strong> {{ orderForm.get('email').value || 'Nezadané' }}</p>
-            <p><strong>Telefónne číslo:</strong> {{ orderForm.get('phoneNumber').value || 'Nezadané' }}</p> 
-          </div>
-          <div class="order-summary-child-container">
-            <h3>Ďaľšie podrobnosti</h3>
-            <p><strong>Spôsob dopravy:</strong> {{ orderForm.get('deliveryOption').value || 'Nezvolený' }}</p>
-            <p><strong>Spôsob platby:</strong> {{ orderForm.get('paymentOption').value || 'Nezvolený' }}</p>
-            <p><strong>Stav objednávky:</strong> {{ orderForm.get('orderStatus').value || 'Bez výberu' }}</p>
-            <p><strong>Hmotnosť objednávky: </strong>0kg</p>
-            <p><strong>Celkový počet produktov: </strong>0ks</p>
-            <p><strong>Zľava:</strong> {{orderForm.get('discountAmount').value > 0 ? 'Áno (-' + orderForm.get('discountAmount').value + '%)' : 'Nie'}}</p>
-            <p><strong>Poznámka:</strong> {{ orderForm.get('note').value ? orderForm.get('note').value : 'Nezadané' }}</p>
-            <p><strong>Celková cena:</strong> 0€ (-{{orderForm.get('discountAmount').value || 0}}%)</p> 
-          </div>
-          <div class="order-summary-child-container">
-            <h3>Dátumy a čísla faktúry</h3>
-            <p><strong>Číslo faktúry:</strong> {{ invoiceForm.get('invoiceNumber').value || 'Nezadané' }}</p>
-            <p><strong>Variabilný symbol:</strong> {{ invoiceForm.get('invoiceVariable').value || 'Nezadané' }}</p>
-            <p><strong>Typ dokladu:</strong> Faktúra</p>
-            <p><strong>Dátum vystavenia:</strong> {{ invoiceForm.get('invoiceIssueDate').value || 'Nezadané' }}</p>
-            <p><strong>Dátum splatnosti:</strong> {{ invoiceForm.get('invoiceDueDate').value || 'Nezadané' }}</p>
-            <p><strong>Dátum dodania:</strong> {{ invoiceForm.get('invoiceDeliveryDate').value || 'Nezadané' }}</p>
-          </div>
-          <div class="order-summary-child-container">
-            <h3>Fakturačné údaje</h3>
-            <p><strong>Meno a priezvisko na faktúre:</strong> {{ invoiceForm.get('invoiceName').value || 'Nezadané' }}</p>
-            <p><strong>Firma na faktúre:</strong> {{ invoiceForm.get('invoiceCompany').value || 'Nezadané' }}</p>
-            <p><strong>IČO na faktúre:</strong> {{ invoiceForm.get('invoiceICO').value || 'Nezadané' }}</p>
-            <p><strong>DIČ na faktúre:</strong> {{ invoiceForm.get('invoiceDIC').value || 'Nezadané' }}</p>
-            <p><strong>E-mailová adresa na faktúre:</strong> {{ invoiceForm.get('invoiceEmail').value || 'Nezadané' }}</p>
-            <p><strong>Telefónne číslo na faktúre:</strong> {{ invoiceForm.get('invoicePhoneNumber').value || 'Nezadané' }}</p>
-          </div>
-        </div>
-      </div>
-    </div>-->
+    </div>
     @if(!isLoading){
       @if(isEditMode){
         <div class="submit">
@@ -319,7 +273,15 @@
           <button class="btn btn-secondary" (click)="closeDialog()">Zavrieť okno</button>
         </div>
       </div>
-      <input class="search-bar form-control" [(ngModel)]="searchText" type="search" placeholder="Kliknite sem pre vyhľadávanie" (ngModelChange)="searchProducts()">
+      <div class="search">
+        <input class="search-bar form-control" [(ngModel)]="searchText" type="search" placeholder="Kliknite sem pre vyhľadávanie" (ngModelChange)="searchProducts()">
+        <select class="form-control search-select" [(ngModel)]="searchOption" (change)="searchProducts()">
+        <option selected value="auto">Automatické vyhľadávanie</option>
+        <option value="productId">Vyhľadávanie podľa čísla produktu</option>
+        <option value="productName">Vyhľadávanie podľa názvu produktu</option>
+        <option value="productPrice">Vyhľadávanie podľa ceny produktu</option>
+      </select>
+      </div>
       @if(sortedProducts.length === 0){
         <h3 class="no-products-found">Neboli nájdené žiadne produkty!</h3>
       }@else{

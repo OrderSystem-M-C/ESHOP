@@ -88,7 +88,7 @@ h1 {
   padding: 12px;
 }
 .products-table td {
-  padding: 12px;
+  padding: 6px;
   text-align: left;
   border-bottom: 1px solid #ccc;
 }
@@ -219,6 +219,11 @@ mat-paginator {
   border-radius: 10px;
   width: 100%;
   font-size: 14px;
+}
+.stock-input-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .stock-input{
   width: 80px;

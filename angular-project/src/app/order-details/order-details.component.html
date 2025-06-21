@@ -35,40 +35,24 @@
             <td>{{ order?.address }}, {{ order?.city }}, {{ order?.postalCode }}</td>
           </tr>
           <tr>
-            <td><b>Email:</b></td>
+            <td><b>E-mailová adresa:</b></td>
             <td>{{ order?.email }}</td>
           </tr>
           <tr>
-            <td><b>Telefón:</b></td>
+            <td><b>Telefónne číslo:</b></td>
             <td>{{ order?.phoneNumber }}</td>
-          </tr>
-          <tr>
-            <td><b>Spôsob dopravy:</b></td>
-            <td>{{ order?.deliveryOption }}, ({{ order?.deliveryCost }} €)</td>
-          </tr>
-          <tr>
-            <td><b>Spôsob platby:</b></td>
-            <td>{{ order?.paymentOption }}, ({{ order?.paymentCost }} €)</td>
           </tr>
           <tr>
             <td><b>Stav objednávky:</b></td>
             <td>{{ order?.orderStatus }}</td>
           </tr>
           <tr>
-            <td><b>Dátum objednávky:</b></td>
+            <td><b>Dátum vytvorenia objednávky:</b></td>
             <td>{{ order?.orderDate }}</td>
           </tr>
           <tr>
-            <td><b>Celková hmotnosť:</b></td>
-            <td>{{calculateTotalAmount()}} ks</td>
-          </tr>
-          <tr>
-            <td><b>Celkový počet produktov:</b></td>
-            <td>{{calculateTotalWeight()}} kg</td>
-          </tr>
-          <tr>
             <td><b>Zľava:</b></td>
-            <td>{{order?.discountAmount > 0 ? 'Áno (-' + order?.discountAmount + '%)' : 'Nie'}}</td>
+            <td>{{order?.discountAmount > 0 ? 'Áno (-' + order?.discountAmount + '%)' : 'Nezadané'}}</td>
           </tr>
           <tr>
             <td><b>Poznámka:</b></td>
@@ -88,24 +72,34 @@
                     <th>Cena/ks</th>
                     <th>Hmotnosť</th>
                     <th>Množstvo</th>
-                    <th>Celkom (€)</th>
                     <th>Celkom (kg)</th>
+                    <th>Celkom (€)</th>
                 </tr>
                 <tr class="product-row" *ngFor="let product of selectedProducts">
                     <td>{{product.productName}}</td>
-                    <td>{{product.productPrice}} €</td>
-                    <td>{{product.productWeight}} kg</td>
+                    <td>{{product.productPrice.toFixed(2)}} €</td>
+                    <td>{{product.productWeight.toFixed(2)}} kg</td>
                     <td>{{product.productAmount}} ks</td>
-                    <td>{{product.productPrice * product.productAmount}} €</td>
-                    <td>{{product.productWeight * product.productAmount}} kg</td>
+                    <td>{{(product.productWeight * product.productAmount).toFixed(2)}} kg</td>
+                    <td>{{(product.productPrice * product.productAmount).toFixed(2)}} €</td>
                 </tr>
             </tbody>
             <tfoot>
+              <tr>
+                <td colspan="4">Zvolený spôsob dopravy</td>
+                <td>{{order?.deliveryOption}} + cena poštovného:</td>
+                <td>{{order?.deliveryCost.toFixed(2)}} €</td>
+              </tr>
+              <tr>
+                <td colspan="4">Zvolený spôsob platby</td>
+                <td>{{order?.paymentOption}} + poplatok za platbu:</td>
+                <td>{{order?.paymentCost.toFixed(2)}} €</td>
+              </tr>
               <tr class="total-row">
-                  <td colspan="3"><strong>Celkovo</strong></td>
+                  <td colspan="3"><strong>CELKOVÝ POČET KUSOV, VÁHA A CENA OBJEDNÁVKY</strong></td>
                   <td><strong>{{calculateTotalAmount()}} ks</strong></td>
+                  <td><strong>{{calculateTotalWeight().toFixed(2)}} kg</strong></td>
                   <td><strong>{{this.order.discountAmount ? ((this.order.totalPrice - (this.order.totalPrice * this.order?.discountAmount / 100)).toFixed(2) + ' € (-' + this.order.discountAmount + '%)') : (this.order.totalPrice.toFixed(2) + ' €')}}</strong></td>
-                  <td><strong>{{calculateTotalWeight()}} kg</strong></td>
               </tr>
           </tfoot>
         </table>
@@ -113,28 +107,28 @@
       <div class="total-price-invoice">
         <table class="order-table">
           <tr>
-            <th colspan="2" class="main-title">Fakturačné informácie</th>
+            <th colspan="2" class="main-title"><b>Fakturačné údaje:</b></th>
           </tr>
           <tr>
-            <td><b>Medzisúčet:</b></td>
-            <td>{{order.totalPrice}} €</td>
+            <td><b>Číslo faktúry a variabilný symbol:</b></td>
+            <td>{{ order?.invoiceNumber }}, {{ order?.variableSymbol }}</td>
           </tr>
           <tr>
-            <td><b>Celková cena po zľave:</b></td>
-            <td>{{order.totalPrice - (order.totalPrice * order?.discountAmount / 100)}} € (-{{order?.discountAmount}}%)</td>
+            <td><b>Meno a priezvisko:</b></td>
+            <td>{{order?.invoiceName}}</td>
           </tr>
           <tr>
-            <td><b>Dátum vystavenia faktúry:</b></td>
-            <td>{{order.invoiceIssueDate}}</td>
+            <td><b>Spoločnosť, IČO, DIČ:</b></td>
+            <td>{{ order?.invoiceCompany ? order.invoiceCompany : 'Nezadané' }}, {{ order?.invoiceICO ? order.invoiceICO : 'Nezadané'}}, {{ order?.invoiceDIC ? order.invoiceDIC: 'Nezadané'}}</td>
           </tr>
           <tr>
-            <td><b>Dátum splatnosti:</b></td>
-            <td>{{order.invoiceDueDate}}</td>
+            <td><b>E-mailová adresa:</b></td>
+            <td>{{ order?.invoiceEmail }}</td>
           </tr>
           <tr>
-            <td><b>Dátum dodania:</b></td>
-            <td>{{order.invoiceDeliveryDate}}</td>
-          </tr>
+            <td><b>Telefónne číslo:</b></td>
+            <td>{{ order?.invoicePhoneNumber }}</td>
+          </tr>     
         </table>
         <table class="order-table">
           <tr>

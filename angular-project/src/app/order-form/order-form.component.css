@@ -265,8 +265,19 @@ textarea {
   padding: 20px;
   width: 800px;
 }
-.products-information input[type="search"] {
+.search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 10px;
   margin-bottom: 10px;
+}
+.search input {
+  flex: 0.65;
+}
+.search select {
+  flex: 0.35;
 }
 .title-submit {
   display: flex;
@@ -356,6 +367,6 @@ mat-paginator {
 /*Pre platné polia*/
 .form-control.ng-valid:not(:placeholder-shown):not([type="search"]):not(
     .product-amount-control
-  ) {
+  ):not(.search-select) {
   border-color: #28a745;
 }

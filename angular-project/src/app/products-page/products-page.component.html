@@ -86,11 +86,13 @@
               <td style="width: 200px; text-align: center;">{{ product.productPrice }} €</td>
               <td style="width: 200px; text-align: center;">{{ product.productWeight }} kg</td>
               <td>
+                <div class="stock-input-container">
                   <input type="number" class="form-control stock-input"
                   [ngModel]="isProductEdited(product.productId) ? editedProducts[product.productId].stockAmount : product.stockAmount"
                   (ngModelChange)="onStockAmountChange(product.productId, $event)" min="0">
+                </div>
               </td>
-              <td [ngClass]="product.stockAmount > 0 ? 'in-stock' : 'out-of-stock'">
+              <td style="text-align: center;" [ngClass]="product.stockAmount > 0 ? 'in-stock' : 'out-of-stock'">
                 {{ product.stockAmount > 0 ? 'Na sklade' : 'Vypredané' }}
               </td>
               <td class="remove-column" title="Vymazať produkt" (click)="removeProduct(product.productId)"><img src="../../assets/Images/bin-icon.png" class="remove-icon"></td>

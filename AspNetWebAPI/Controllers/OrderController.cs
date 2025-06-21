@@ -292,6 +292,16 @@ namespace AspNetCoreAPI.Controllers
 
                     foreach (var product in original.OrderProducts)
                     {
+                        var dbProduct = await _context.Products
+                            .FirstOrDefaultAsync(p => p.ProductId == product.ProductId);
+
+                        if(dbProduct == null)
+                        {
+                            continue;
+                        }
+
+                        dbProduct.StockAmount -= product.Quantity;
+
                         var newProduct = new OrderProductModel
                         {
                             ProductId = product.ProductId,
