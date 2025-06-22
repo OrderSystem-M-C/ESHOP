@@ -142,17 +142,26 @@
             <th>Meno</th>
             <th>Stav objednávky</th>
             <th>Celková cena</th>
+            <th style="text-align: center;">Náhľad</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let order of ourFilteredOrders" class="order-row" (click)="navigateToDetails(order, $event)">
-            <td class="checkbox-section" [attr.title]="order.orderStatus" [ngStyle]="{'border-left': '8px solid ' + getStatusColor(order.orderStatus)}">
+          <tr
+            *ngFor="let order of ourFilteredOrders"
+            class="order-row"
+            (click)="navigateToDetails(order, $event)">
+            <td
+              class="checkbox-section"
+              [attr.title]="order.orderStatus"
+              [ngStyle]="{'border-left': '8px solid ' + getStatusColor(order.orderStatus)}">
               <div style="display: flex; justify-content: center; align-items: center;">
-                <input type="checkbox"
-                       class="form-check-input"
-                       [(ngModel)]="order.orderSelected"
-                       (change)="selectOrder()"
-                       data-skip-navigation />
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  [(ngModel)]="order.orderSelected"
+                  (change)="selectOrder()"
+                  data-skip-navigation
+                />
               </div>
             </td>
             <td>{{ order.orderDate }}</td>
@@ -160,6 +169,20 @@
             <td>{{ order.customerName }}</td>
             <td>{{ order.orderStatus }}</td>
             <td>{{ order.totalPrice }}€</td>
+            <td>
+              <div class="preview-container"
+                  (mouseenter)="hoveredOrder = order"
+                  (mouseleave)="hoveredOrder = null"
+                  style="position: relative;">
+                <img src="../../assets/Images/preview-icon.png" class="preview-icon" style="cursor: pointer;">
+                
+                <ng-container *ngIf="hoveredOrder === order">
+                  <div class="preview-popup">
+                    <app-order-details [order]="order" [previewOrderId]="order.orderId"></app-order-details>
+                  </div>
+                </ng-container>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>

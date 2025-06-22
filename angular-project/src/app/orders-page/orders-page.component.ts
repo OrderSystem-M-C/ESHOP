@@ -9,13 +9,14 @@ import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/materi
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../api-authorization/authentication.service';
-import { EmailService } from '../services/email.service';
+import { EmailDTO, EmailService } from '../services/email.service';
 import { catchError, EMPTY, finalize, of, switchMap, tap } from 'rxjs';
+import { OrderDetailsComponent } from '../order-details/order-details.component';
 
 @Component({
   selector: 'app-orders-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, CommonModule, FormsModule, MatPaginatorModule],
+  imports: [CommonModule, RouterLink, DatePipe, CommonModule, FormsModule, MatPaginatorModule, OrderDetailsComponent],
   providers: [DatePipe, { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
   templateUrl: './orders-page.component.html',
   styleUrl: './orders-page.component.scss'
@@ -77,6 +78,8 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   selectedOrders: OrderDTO[] = [];
 
   selectedRange: '1d' | '7d' | '1m' | '1y' | 'all' = 'all';
+
+  hoveredOrder: OrderDTO = null;
 
   constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar, public authService: AuthenticationService, private emailService: EmailService){}
 
@@ -155,7 +158,17 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
       email: order.email,
       orderId: order.orderId,
       packageCode: order.packageCode
-    }))
+    }));
+
+    if (orderStatus === 'Zasielanie čísla zásielky') {
+      const hasInvalidPackageCode = this.selectedOrders.some(order => !order.packageCode || order.packageCode.trim() === '');
+
+      if (hasInvalidPackageCode) {
+        this.snackBar.open('Pre odoslanie e-mailu je potrebné zadať podacie číslo!', '', { duration: 2000 });
+        this.isLoading = false;
+        return;
+      }
+    }
     
     this.orderService.changeOrderStatus(orderIds, orderStatus).pipe(
       switchMap((response) => {

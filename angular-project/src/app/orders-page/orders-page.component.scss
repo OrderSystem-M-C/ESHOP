@@ -296,6 +296,35 @@ canvas {
   margin: 0;
   flex: 1;
 }
+.preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.preview-icon {
+  height: 30px;
+  width: 30px;
+}
+.preview-popup {
+  position: absolute;
+  top: 100%;     
+  right: -210px;
+  transform: scale(0.8);
+  transform-origin: top left;
+  min-width: 1250px;
+  background: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  z-index: 1000;
+  pointer-events: auto;
+}
+.preview-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 mat-paginator {
   background-color: #f2f2f2;
   margin-top: 15px;

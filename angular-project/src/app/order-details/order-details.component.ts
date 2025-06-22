@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, TemplateRef  } from '@angular/core';
+import { Component, Input, OnInit, TemplateRef  } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { OrderService } from '../services/order.service';
 import { OrderDTO } from '../order-form/order-form.component';
@@ -18,10 +18,11 @@ import { ProductDTO } from '../products-page/products-page.component';
   styleUrl: './order-details.component.css'
 })
 export class OrderDetailsComponent implements OnInit{
+  @Input() order: OrderDTO | null = null;
+  @Input() previewOrderId: number | null = null;
   orderId: number | null = null
   currentDate: string = '';
 
-  order: OrderDTO;
   dialogRef!: MatDialogRef<any>; //akoby pristupujeme k otvorenemu dialogovemu oknu aby sme mohli s nim komunikovať => získať samotný výsledok
 
   isLoading: boolean = true;
@@ -35,7 +36,7 @@ export class OrderDetailsComponent implements OnInit{
   }
 
   getInvoice(){
-    const hasCompanyData = this.order.company || this.order.ico || this.order.dic || this.order.icDph;
+    const hasCompanyData = this.order.company || this.order.ico || this.order.dic;
     const hasInvoiceCompanyData = this.order.invoiceCompany || this.order.invoiceICO || this.order.invoiceDIC;
 
     const companyRowHTML = hasCompanyData ? `
@@ -94,8 +95,8 @@ export class OrderDetailsComponent implements OnInit{
 
     <div style="margin-bottom: 20px;">
       <h3 style="margin-bottom: 10px; font-weight: bold;">Objednané produkty</h3>
-      <table style="width: 100%; border-collapse: collapse;">
-        <thead style="background-color: #0d6efd; color: white;">
+      <table style="width: 100%; border: 1px solid #e0e0e0;">
+        <thead style="background-color: #f8f9fa;">
           <tr>
             <th style="padding: 8px; text-align: left;">Názov produktu</th>
             <th style="padding: 8px; text-align: center; text-wrap: nowrap;">Cena/ks</th>
@@ -121,7 +122,7 @@ export class OrderDetailsComponent implements OnInit{
           </tr>
           <tr>
             <td colspan="2" style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Zvolený spôsob platby</td>
-            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">Dobierka (${this.order.paymentOption}):</td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">Poplatok za platbu (${this.order.paymentOption}):</td>
             <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${this.order.paymentCost.toFixed(2)} €</td>
           </tr>
           <tr>
@@ -141,9 +142,9 @@ export class OrderDetailsComponent implements OnInit{
 
     <div style="margin-bottom: 20px;">
       <h3 style="margin-bottom: 10px; font-weight: bold;">Objednávateľ</h3>
-      <table style="width: 100%; border-collapse: collapse;">
+      <table style="width: 100%; border: 1px solid #e0e0e0;">
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Meno a priezvisko</th>
+          <th style="padding: 8px; text-align: left; background-color:#f8f9fa;">Meno a priezvisko</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.customerName}</td>
         </tr>
         ${companyRowHTML}
@@ -164,7 +165,7 @@ export class OrderDetailsComponent implements OnInit{
 
     <div>
       <h3 style="margin-bottom: 10px; font-weight: bold;">Fakturačné údaje</h3>
-      <table style="width: 100%; border-collapse: collapse;">
+      <table style="width: 100%; border: 1px solid #e0e0e0;">
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Meno a priezvisko</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceName}</td>
@@ -231,7 +232,7 @@ export class OrderDetailsComponent implements OnInit{
 
   ngOnInit(): void {
     const orderIdParam = this.route.snapshot.paramMap.get('orderId');
-    this.orderId = orderIdParam ? parseInt(orderIdParam, 10): null;
+    this.orderId = orderIdParam ? parseInt(orderIdParam, 10): this.previewOrderId;
 
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');

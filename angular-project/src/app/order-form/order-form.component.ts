@@ -580,7 +580,7 @@ export class OrderFormComponent implements OnInit {
     const discountAmount = this.orderForm.value.discountAmount ? this.orderForm.value.discountAmount : 0;
     const formattedInvoiceIssueDate = this.invoiceForm.value.invoiceIssueDate.split('-').reverse().join('.');
     
-    const hasCompanyData = this.orderForm.value.company || this.orderForm.value.ico || this.orderForm.value.dic || this.orderForm.value.icDph;
+    const hasCompanyData = this.orderForm.value.company || this.orderForm.value.ico || this.orderForm.value.dic;
     const hasInvoiceCompanyData = this.invoiceForm.value.invoiceCompany || this.invoiceForm.value.invoiceICO || this.invoiceForm.value.invoiceDIC;
 
     const companyRowHTML = hasCompanyData ? `
@@ -639,8 +639,8 @@ export class OrderFormComponent implements OnInit {
 
     <div style="margin-bottom: 20px;">
       <h3 style="margin-bottom: 10px; font-weight: bold;">Objednané produkty</h3>
-      <table style="width: 100%; border-collapse: collapse;">
-        <thead style="background-color: #0d6efd; color: white;">
+      <table style="width: 100%; border: 1px solid #e0e0e0;">
+        <thead style="background-color: #f8f9fa;">
           <tr>
             <th style="padding: 8px; text-align: left;">Názov produktu</th>
             <th style="padding: 8px; text-align: center; text-wrap: nowrap;">Cena/ks</th>
@@ -670,7 +670,7 @@ export class OrderFormComponent implements OnInit {
 
           <tr>
             <td colspan="2" style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Zvolený spôsob platby</td>
-            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">Dobierka (${this.orderForm.get('paymentOption').value}):</td>
+            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">Poplatok za platbu (${this.orderForm.get('paymentOption').value}):</td>
             <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
               ${(this.orderForm.get('paymentCost')?.value || 0).toFixed(2)} €
             </td>
@@ -693,7 +693,7 @@ export class OrderFormComponent implements OnInit {
 
     <div style="margin-bottom: 20px;">
       <h3 style="margin-bottom: 10px; font-weight: bold;">Objednávateľ</h3>
-      <table style="width: 100%; border-collapse: collapse;">
+      <table style="width: 100%; border: 1px solid #e0e0e0;">
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Meno a priezvisko</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.customerName}</td>
@@ -716,7 +716,7 @@ export class OrderFormComponent implements OnInit {
 
     <div>
       <h3 style="margin-bottom: 10px; font-weight: bold;">Fakturačné údaje</h3>
-      <table style="width: 100%; border-collapse: collapse;">
+      <table style="width: 100%; border: 1px solid #e0e0e0;">
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Meno a priezvisko</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceName}</td>
@@ -735,9 +735,10 @@ export class OrderFormComponent implements OnInit {
   </div>
 </div>
 `
+      const orderIdForInvoice = this.isEditMode ? this.existingOrderId : this.orderId;
       const options = {
         margin: [5, 5, 5, 5],
-        filename: `Faktúra_č${this.orderId}.pdf`,
+        filename: `Faktúra_č${orderIdForInvoice}.pdf`,
         html2canvas: { scale: 2 },
         jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'}
       };
@@ -751,6 +752,7 @@ export class OrderFormComponent implements OnInit {
       }
     }else{
       this.validateAllFormFields(this.invoiceForm);
+      this.invoiceCreated = false;
       this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
     }
   }
