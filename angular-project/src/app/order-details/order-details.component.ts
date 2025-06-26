@@ -32,7 +32,16 @@ export class OrderDetailsComponent implements OnInit{
   constructor(private dialog: MatDialog, private route: ActivatedRoute, private router: Router, private datePipe: DatePipe, private orderService: OrderService, private snackBar: MatSnackBar){} /* private dialog: MatDialog => na otvaranie dialogovych okien atd */
 
   editOrder(){
+    if(this.previewOrderId != null) {
+      return;
+    }
     this.router.navigate(['order-form', this.orderId]);
+  }
+  returnHome(){
+    if(this.previewOrderId != null) {
+      return;
+    }
+    this.router.navigate(['/orders-page']);
   }
 
   getInvoice(){
@@ -202,6 +211,9 @@ export class OrderDetailsComponent implements OnInit{
   }
 
   removeOrder(confirmDialog: TemplateRef<any>){ //to vkladame ten dialog aby sme mohli s ním narábať
+    if(this.previewOrderId != null) {
+      return;
+    }
     this.dialogRef = this.dialog.open(confirmDialog);  // Otvorí dialógové okno s potvrdením to áno/nie
 
     this.dialogRef.afterClosed().subscribe((result) => {

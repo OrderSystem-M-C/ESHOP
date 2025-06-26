@@ -27,7 +27,7 @@ h1 {
   justify-content: flex-start;
   flex-direction: column;
 }
-.button-container{
+.button-container, .button-container button{
   display: flex;
   align-items: center;
   justify-content: center;
@@ -302,8 +302,8 @@ canvas {
   align-items: center;
 }
 .preview-icon {
-  height: 30px;
-  width: 30px;
+  height: 28px;
+  width: 28px;
 }
 .preview-popup {
   position: absolute;
@@ -315,7 +315,7 @@ canvas {
   background: white;
   border: 1px solid #ddd;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  padding: 8px;
+  padding: 0px 8px 0px 8px;
   z-index: 1000;
   pointer-events: auto;
 }

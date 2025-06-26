@@ -16,6 +16,7 @@ import { OrderDetailsComponent } from './app/order-details/order-details.compone
 import { ProductsPageComponent } from './app/products-page/products-page.component';
 import { loggedInGuard } from './app/api-authorization/logged-in.guard';
 import { PageNotFoundComponent } from './app/page-not-found/page-not-found.component';
+import { EphSettingsComponent } from './app/eph-settings/eph-settings.component';
 
 export function getBaseUrl() {
   return 'https://web1244125.bsite.net/api';
@@ -49,6 +50,7 @@ bootstrapApplication(AppComponent, {
         { path: 'orders-page', component: OrdersPageComponent, canActivate: [authGuard]},
         { path: 'order-details/:orderId', component: OrderDetailsComponent, canActivate: [authGuard]},
         { path: 'products-page', component: ProductsPageComponent, canActivate: [authGuard]},
+        { path: 'eph-settings', component: EphSettingsComponent, canActivate: [authGuard]},
         { path: '**', component: PageNotFoundComponent}
       ]), provideAnimationsAsync()
     ]
