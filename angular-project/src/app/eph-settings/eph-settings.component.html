@@ -1,1 +1,30 @@
-<p>eph-settings works!</p>
+<title>Nastavenia EPH</title>
+<div class="eph-settings-component">
+  <div class="title">
+    <div class="title-container-1">
+      <h1>Nastavenia EPH</h1>
+      <p>{{currentDate}}</p>
+    </div>
+    <div class="button-container">
+      <button class="btn btn-primary save-button"><img src="../../assets/Images/save-icon.png" alt="save-icon"> Uložiť nastavenia</button>
+    </div>
+  </div>
+  <div class="eph-settings-form">
+    <form [formGroup]="ephForm">
+        <div class="eph-settings-form-container">
+            <div class="form-group">
+                <label for="ephPrefix" class="form-label">Zadajte prefix a rozsah EPH*</label>
+                <input formControlName="ephPrefix" id="ephPrefix" type="text" class="form-control">
+                <div class="eph-range-container">
+                    <label class="form-label" for="ephStartingNumber">Od*</label>
+                    <input formControlName="ephStartingNumber" id="ephStartingNumber" type="text" class="form-control" placeholder="napr.: 123456789">
+                    <label class="form-label" for="ephEndingNumber">Do*</label>
+                    <input formControlName="ephEndingNumber" id="ephEndingNumber" type="text" class="form-control" placeholder="napr.: 123456790">
+                </div>
+                <label for="ephSuffix" class="form-label">Zadajte suffix EPH*</label>
+                <input formControlName="ephSuffix" id="ephSuffix" type="text" class="form-control">
+            </div>
+        </div>
+    </form>
+  </div>
+</div>

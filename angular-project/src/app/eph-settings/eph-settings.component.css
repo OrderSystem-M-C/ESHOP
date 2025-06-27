@@ -1,0 +1,63 @@
+.eph-settings-component {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 20px auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+h1 {
+  text-align: left;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+}
+.title {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  text-align: left;
+}
+.save-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.save-button img {
+  height: 17px;
+  width: 17px;
+}
+.eph-settings-form {
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+.eph-range-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 10px;
+  margin: 0.75rem 0 0.5rem 0;
+  width: 50%;
+}
+.eph-range-container label {
+  margin: 0;
+}
+.form-control {
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  transition: border-color 0.2s ease;
+}
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 5px #0d6efd;
+  outline: none;
+}
+.eph-settings-form .form-control {
+  width: 50%;
+}

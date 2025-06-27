@@ -8,7 +8,7 @@
     <div class="button-container">
       <button class="btn btn-secondary" [routerLink]="['/products-page']"><img src="../../assets/Images/products-icon.png" alt="products-icon" class="products-icon"> Moje produkty</button>
       <button class="btn btn-primary" [routerLink]="['/order-form']"><img src="../../assets/Images/create-icon.png" alt="create-icon"> Vytvoriť objednávku</button>
-      <button class="btn btn-success" [routerLink]="['/eph-settings']"><img src="./../assets/Images/settings-icon.png" alt="settings-icon"> Nastavenia EPH</button>
+      <button class="btn btn-warning" [routerLink]="['/eph-settings']"><img src="./../assets/Images/settings-icon.png" alt="settings-icon"> Nastavenia EPH</button>
       <button class="btn btn-outline-danger" (click)="authService.logout()">Odhlásiť sa</button>
     </div>
   </div>
@@ -142,8 +142,8 @@
             <th>Číslo objednávky</th>
             <th>Meno</th>
             <th>Stav objednávky</th>
-            <th>Celková cena</th>
-            <th>Podacie číslo</th>
+            <th style="text-align: center;">Celková cena</th>
+            <th style="text-align: center;">Podacie číslo</th>
             <th style="text-align: center;">Náhľad</th>
           </tr>
         </thead>
@@ -170,8 +170,8 @@
             <td>{{ order.orderId }}</td>
             <td>{{ order.customerName }}</td>
             <td>{{ order.orderStatus }}</td>
-            <td>{{ order.totalPrice }}€</td>
-            <td>{{ order.packageCode ? order.packageCode : 'Nezadané' }}</td>
+            <td style="text-align: center;">{{ order.totalPrice }}€</td>
+            <td style="text-align: center;">{{ order.packageCode ? order.packageCode : 'Nezadané' }}</td>
             <td>
               <div class="preview-container"
                   (mouseenter)="hoveredOrder = order"
