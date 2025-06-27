@@ -6,25 +6,50 @@
       <p>{{currentDate}}</p>
     </div>
     <div class="button-container">
-      <button class="btn btn-primary save-button"><img src="../../assets/Images/save-icon.png" alt="save-icon"> Uložiť nastavenia</button>
+      <button class="btn btn-primary save-button" (click)="saveEphSettings()"><img src="../../assets/Images/save-icon.png" alt="save-icon"> Uložiť nastavenia</button>
     </div>
   </div>
-  <div class="eph-settings-form">
+  @if(isLoading){
+    <div class="spinner-container">
+        <div class="spinner">
+        </div>
+        Načítava sa
+    </div>
+  }@else{
+    <div class="eph-settings-form">
     <form [formGroup]="ephForm">
         <div class="eph-settings-form-container">
+            <h3>Formulár</h3>
             <div class="form-group">
-                <label for="ephPrefix" class="form-label">Zadajte prefix a rozsah EPH*</label>
-                <input formControlName="ephPrefix" id="ephPrefix" type="text" class="form-control">
-                <div class="eph-range-container">
-                    <label class="form-label" for="ephStartingNumber">Od*</label>
-                    <input formControlName="ephStartingNumber" id="ephStartingNumber" type="text" class="form-control" placeholder="napr.: 123456789">
-                    <label class="form-label" for="ephEndingNumber">Do*</label>
-                    <input formControlName="ephEndingNumber" id="ephEndingNumber" type="text" class="form-control" placeholder="napr.: 123456790">
+              <div class="eph-prefix-suffix-container">
+                <div class="eph-prefix">
+                  <label for="ephPrefix" class="form-label">Zadajte prefix EPH*</label>
+                  <input formControlName="ephPrefix" id="ephPrefix" type="text" class="form-control" placeholder="napr.: EB" [ngClass]="{'is-invalid': ephForm.get('ephPrefix').invalid && ephForm.get('ephPrefix').touched}">
                 </div>
-                <label for="ephSuffix" class="form-label">Zadajte suffix EPH*</label>
-                <input formControlName="ephSuffix" id="ephSuffix" type="text" class="form-control">
+                <div class="eph-suffix">
+                  <label for="ephSuffix" class="form-label">Zadajte suffix EPH*</label>
+                  <input formControlName="ephSuffix" id="ephSuffix" type="text" class="form-control" placeholder="napr.: SK" [ngClass]="{'is-invalid': ephForm.get('ephSuffix').invalid && ephForm.get('ephSuffix').touched}">
+                </div>
+              </div>
+              <div class="eph-range-container">
+                  <label class="form-label" for="ephStartingNumber">Rozsah od*</label>
+                  <input formControlName="ephStartingNumber" id="ephStartingNumber" type="number" inputmode="numeric" class="form-control" placeholder="napr.: 123456789" [ngClass]="{'is-invalid': ephForm.get('ephStartingNumber').invalid && ephForm.get('ephStartingNumber').touched}">
+                  <label class="form-label" for="ephEndingNumber">Rozsah do*</label>
+                  <input formControlName="ephEndingNumber" id="ephEndingNumber" type="number" inputmode="numeric" class="form-control" placeholder="napr.: 123456790" [ngClass]="{'is-invalid': ephForm.get('ephEndingNumber').invalid && ephForm.get('ephEndingNumber').touched}">
+              </div>
             </div>
         </div>
     </form>
-  </div>
+    <div class="user-eph-settings">
+      <h3>Vaše nastavenia</h3>
+      @if(ephSettings != null){
+        <p><strong>EPH Prefix:</strong> {{ ephSettings.ephPrefix }}</p><br>
+        <p><strong>EPH rozsah (od - do):</strong> {{ ephSettings.ephStartingNumber }} - {{ ephSettings.ephEndingNumber }}</p><br>
+        <p><strong>EPH Suffix:</strong> {{ ephSettings.ephSuffix }}</p><br>
+      }@else{
+        <p>Nemáte uložené nastavenia pre EPH.</p>
+      }
+    </div>
+  </div> 
+  }
 </div>

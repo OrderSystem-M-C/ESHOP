@@ -12,6 +12,7 @@ import { HttpResponse } from '@angular/common/http';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { EmailService } from '../services/email.service';
+import { EphService } from '../services/eph.service';
 
 @Component({
   selector: 'app-order-form',
@@ -75,7 +76,7 @@ export class OrderFormComponent implements OnInit {
     'Rozbité, zničené, vrátené'
   ];
 
-  constructor(private datePipe: DatePipe, private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar, private dialog: MatDialog, private productService: ProductService, private emailService: EmailService){}
+  constructor(private datePipe: DatePipe, private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar, private dialog: MatDialog, private productService: ProductService, private emailService: EmailService, private ephService: EphService){}
 
   updatePagedProducts(): void {
     const startIndex = this.pageIndex * this.pageSize;
@@ -423,6 +424,17 @@ export class OrderFormComponent implements OnInit {
     this.orderService.getOrderDetails(orderId).subscribe((order) => {
       this.orderForm.patchValue(order); //patchValue robi ze vyplni hodnoty objednavky
 
+      if(order.packageCode === ''){
+        this.ephService.generatePackageCode().subscribe({
+          next: (response) => {
+            this.orderForm.patchValue({
+              packageCode: response.packageCode
+            })
+          },
+          error: (err) => console.error(err)
+        })
+      }
+
       this.totalPrice = order.totalPrice;
 
       this.invoiceForm.patchValue({
@@ -483,63 +495,84 @@ export class OrderFormComponent implements OnInit {
     this.charactersCount = this.userMessage.length;
   }
   
-  submitOrder(){
-    if(this.orderForm.valid && this.invoiceForm.valid && this.selectedProducts.length > 0){
+  submitOrder() {
+    if(this.orderForm.valid && this.invoiceForm.valid && this.selectedProducts.length > 0) {
       let order = this.createOrderDTO();
 
       if(order.orderStatus === 'Zasielanie čísla zásielky'){
         if(!order.packageCode || order.packageCode.trim() === ''){
-            this.snackBar.open('Pre odoslanie e-mailu je potrebné zadať podacie číslo!', '', { duration: 2000 });
-            const packageCodeControl = this.orderForm.get('packageCode');
-            packageCodeControl?.setErrors({ invalid: true });
-            packageCodeControl?.markAsTouched();
-            return;
+          this.snackBar.open('Pre odoslanie e-mailu je potrebné zadať podacie číslo!', '', { duration: 2000 });
+          this.orderForm.get('packageCode')?.setErrors({ invalid: true });
+          this.orderForm.get('packageCode')?.markAsTouched();
+          return;
         }
+
+        this.isLoading = true;
+
+        // Validujeme packageCode pred vytvorením objednávky
+        this.ephService.validatePackageCode(order.packageCode).subscribe({
+          next: () => {
+            this.snackBar.open('Podacie číslo je platné a dostupné.', '', { duration: 3000 });
+            // Ak je platné, pokračujeme v odoslaní objednávky
+            this.createOrderAfterValidation(order);
+          },
+          error: (err) => {
+            this.isLoading = false;
+            const msg = err.error && err.error.message ? err.error.message : 'Podacie číslo sa už používa alebo nie je v správnom formáte!';
+            this.orderForm.get('packageCode')?.setErrors({ invalid: true });
+            this.snackBar.open(msg, '', { duration: 3000 });
+          }
+        });
+
+      } else {
+        // Ak nie je potrebné validovať packageCode, rovno pokračujeme
+        this.isLoading = true;
+        this.createOrderAfterValidation(order);
       }
-
-      this.isLoading = true;
-
-      this.orderService.createOrder(order).subscribe((response: OrderDTO) => {
-        if(response){
-          this.orderService.addProductsToOrder(response.id, this.selectedProducts).subscribe({
-            next: (res) => {
-              if (res.status === 204) {
-                this.checkOrderStatusAndSendEmails(order);
-                this.isLoading = false;
-
-                if (!this.invoiceCreated) {
-                  this.createInvoice();
-                  this.router.navigate(['/orders-page']);
-                } else {
-                  this.snackBar.open('Objednávka bola úspešne vytvorená!', '', {duration: 1000});
-                  this.router.navigate(['/orders-page']);
-                }
-             } else {
-                 console.warn('Unexpected status:', res.status);
-              }
-            },
-            error: (error) => {
-              console.error('An error has occurred while trying to add products to order', JSON.stringify(error));
-              this.isLoading = false;
-            }
-          });
-        }else{
-          this.checkOrderStatusAndSendEmails(order);
-          this.isLoading = false;
-        }
-      }, (error) => {
-        console.error("An error occurred while trying to create order", error);
-        this.isLoading = false;
-      });
-    }else if(this.selectedProducts.length === 0) {
+    } else if(this.selectedProducts.length === 0) {
       const element = document.getElementById('selected-products-id');
       element.scrollIntoView({behavior: 'smooth', block: 'start'});
       this.snackBar.open('Nemáte zvolené produkty pre túto objednávku!', '', {duration: 2500}); 
-    }else if(this.orderForm.invalid || this.invoiceForm.invalid){
+    } else if(this.orderForm.invalid || this.invoiceForm.invalid){
       this.validateAllFormFields(this.orderForm);
       this.validateAllFormFields(this.invoiceForm);
       this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
     }
+  }
+
+  private createOrderAfterValidation(order: OrderDTO) {
+    this.orderService.createOrder(order).subscribe((response: OrderDTO) => {
+      if(response){
+        this.orderService.addProductsToOrder(response.id, this.selectedProducts).subscribe({
+          next: (res) => {
+            if (res.status === 204) {
+              this.checkOrderStatusAndSendEmails(order);
+              this.isLoading = false;
+
+              if (!this.invoiceCreated) {
+                this.createInvoice();
+                this.router.navigate(['/orders-page']);
+              } else {
+                this.snackBar.open('Objednávka bola úspešne vytvorená!', '', {duration: 1000});
+                this.router.navigate(['/orders-page']);
+              }
+            } else {
+              console.warn('Unexpected status:', res.status);
+            }
+          },
+          error: (error) => {
+            console.error('Chyba pri pridávaní produktov k objednávke', error);
+            this.isLoading = false;
+          }
+        });
+      } else {
+        this.checkOrderStatusAndSendEmails(order);
+        this.isLoading = false;
+      }
+    }, (error) => {
+      console.error("Chyba pri vytváraní objednávky", error);
+      this.isLoading = false;
+    });
   }
 
   validateAllFormFields(formGroup: FormGroup){
@@ -568,11 +601,26 @@ export class OrderFormComponent implements OnInit {
   checkPackageCode(code: string){
     const trackingPattern = /^[A-Z]{2}\d{9}[A-Z]{2}$/;
     const result = trackingPattern.test(code);
-    if(result){
-      this.snackBar.open('Zadané podacie číslo je správne!', '', {duration: 2000});
-    }else{
-      this.snackBar.open('Zadané podacie číslo nie je správne!', '', {duration: 2000});
+
+    if (!result) {
+      this.snackBar.open('Zadané podacie číslo nie je v správnom formáte!', '', { duration: 3000 });
+      return;
     }
+
+    this.validatePackageCode(code);
+  }
+
+  validatePackageCode(packageCode: string): void {
+    this.ephService.validatePackageCode(packageCode).subscribe({
+      next: (response) => {
+        this.snackBar.open('Podacie číslo je platné a dostupné.', '', { duration: 3000 });
+      },
+      error: (err) => {
+        const msg = err.error && err.error.message ? err.error.message : 'Podacie číslo sa už používa alebo nie je v správnom formáte!';
+        this.orderForm.get('packageCode')?.setErrors({ invalid: true });
+        this.snackBar.open(msg, '', { duration: 3000 });
+      }
+    })
   }
 
   createInvoice(){
@@ -768,6 +816,15 @@ export class OrderFormComponent implements OnInit {
       this.loadOrder(this.existingOrderId);
     }else{
       this.isEditMode = false;
+
+      this.ephService.generatePackageCode().subscribe({
+        next: (response) => {
+          this.orderForm.patchValue({
+            packageCode: response.packageCode
+          })
+        },
+        error: (err) => console.error(err)
+      })
     }
 
     this.onDeliveryChange();

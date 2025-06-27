@@ -2,7 +2,9 @@
 using AspNetCoreAPI.DTOs;
 using AspNetCoreAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.ServiceModel.Channels;
 using System.Text;
 using System.Xml.Linq;
 
@@ -16,7 +18,7 @@ namespace AspNetCoreAPI.Controllers
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
 
-        private readonly string _slovakPostApiUrl; 
+        private readonly string _slovakPostApiUrl;
         private readonly string _userId;
         private readonly string _apiKey;
 
@@ -295,7 +297,7 @@ namespace AspNetCoreAPI.Controllers
                         var dbProduct = await _context.Products
                             .FirstOrDefaultAsync(p => p.ProductId == product.ProductId);
 
-                        if(dbProduct == null)
+                        if (dbProduct == null)
                         {
                             continue;
                         }
@@ -334,18 +336,18 @@ namespace AspNetCoreAPI.Controllers
         [HttpPut("change-order-status")]
         public async Task<IActionResult> UpdateOrderProducts([FromBody] ChangeOrderStatusDTO changeOrderStatusDTO)
         {
-            if(changeOrderStatusDTO == null || changeOrderStatusDTO.OrderIds == null)
+            if (changeOrderStatusDTO == null || changeOrderStatusDTO.OrderIds == null)
             {
                 return NotFound("Data transfer object was not found.");
             }
             var orders = await _context.Orders
                 .Where(o => changeOrderStatusDTO.OrderIds.Contains(o.OrderId))
                 .ToListAsync();
-            if(!orders.Any())
+            if (!orders.Any())
             {
                 return NotFound("Orders with specified OrderId's were not found.");
             }
-            foreach(var order in orders)
+            foreach (var order in orders)
             {
                 order.OrderStatus = changeOrderStatusDTO.OrderStatus;
             };
@@ -362,7 +364,7 @@ namespace AspNetCoreAPI.Controllers
         [HttpDelete("remove-selected-orders")]
         public async Task<IActionResult> RemoveSelectedOrders([FromBody] RemoveSelectedOrdersDTO removeSelectedOrdersDTO)
         {
-            if(removeSelectedOrdersDTO == null || removeSelectedOrdersDTO.OrderIds == null)
+            if (removeSelectedOrdersDTO == null || removeSelectedOrdersDTO.OrderIds == null)
             {
                 return NotFound("Data transfer object was not found.");
             }
@@ -450,7 +452,7 @@ namespace AspNetCoreAPI.Controllers
             }
 
             XNamespace tns = "http://mojezasielky.posta.sk/api";
-            var zasielkyElements = new List<XElement>();    
+            var zasielkyElements = new List<XElement>();
             int pocetZasielok = 0;
 
             foreach (var order in orders)
@@ -458,7 +460,7 @@ namespace AspNetCoreAPI.Controllers
                 try
                 {
                     var zasielkaXml = await ProcessOrderAsync(order, tns);
-                    if(zasielkaXml != null)
+                    if (zasielkaXml != null)
                     {
                         zasielkyElements.Add(zasielkaXml);
                         pocetZasielok++;
@@ -563,6 +565,177 @@ namespace AspNetCoreAPI.Controllers
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"Error saving XML to disk: {ex.Message}");
+            }
+        }
+        [HttpPost("save-eph-settings")]
+        public async Task<IActionResult> SaveEphSettings([FromBody] EphSettingsDTO ephSettingsDTO)
+        {
+            try
+            {
+                if (ephSettingsDTO == null)
+                {
+                    return BadRequest("Data transfer object was not provided.");
+                }
+
+                var existingSettings = await _context.EphSettings.FirstOrDefaultAsync();
+
+                if (existingSettings != null)
+                {
+                    existingSettings.EphPrefix = ephSettingsDTO.EphPrefix;
+                    existingSettings.EphStartingNumber = ephSettingsDTO.EphStartingNumber;
+                    existingSettings.EphEndingNumber = ephSettingsDTO.EphEndingNumber;
+                    existingSettings.EphSuffix = ephSettingsDTO.EphSuffix;
+
+                    _context.EphSettings.Update(existingSettings);
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new EphSettingsDTO
+                    {
+                        EphPrefix = existingSettings.EphPrefix,
+                        EphStartingNumber = existingSettings.EphStartingNumber,
+                        EphEndingNumber = existingSettings.EphEndingNumber,
+                        EphSuffix = existingSettings.EphSuffix
+                    });
+                }
+                else
+                {
+                    var newSettings = new EphSettingsModel
+                    {
+                        EphPrefix = ephSettingsDTO.EphPrefix,
+                        EphStartingNumber = ephSettingsDTO.EphStartingNumber,
+                        EphEndingNumber = ephSettingsDTO.EphEndingNumber,
+                        EphSuffix = ephSettingsDTO.EphSuffix
+                    };
+
+                    await _context.EphSettings.AddAsync(newSettings);
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new EphSettingsDTO
+                    {
+                        EphPrefix = newSettings.EphPrefix,
+                        EphStartingNumber = newSettings.EphStartingNumber,
+                        EphEndingNumber = newSettings.EphEndingNumber,
+                        EphSuffix = newSettings.EphSuffix
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        [HttpGet("get-eph-settings")]
+        public async Task<IActionResult> GetEphSettings()
+        {
+            try
+            {
+                var ephSettings = await _context.EphSettings.FirstOrDefaultAsync();
+                if (ephSettings == null)
+                {
+                    return NotFound("Eph settings were not found. Please create them first.");
+                }
+                return Ok(ephSettings);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        [HttpGet("generate-package-code")]
+        public async Task<IActionResult> GeneratePackageCode()
+        {
+            try
+            {
+                var settings = await _context.EphSettings.FirstOrDefaultAsync();
+                if(settings == null)
+                {
+                    return NotFound("Eph settings were not found. Please create them first.");
+                };
+
+                if(settings.EphEndingNumber < settings.EphStartingNumber)
+                {
+                    return BadRequest("Ending number must be greater than or equal to starting number.");
+                }
+
+                var packageCodes = await _context.Orders
+                    .Where(o => !string.IsNullOrEmpty(o.PackageCode) &&
+                                o.PackageCode.StartsWith(settings.EphPrefix) &&
+                                o.PackageCode.EndsWith(settings.EphSuffix))
+                    .Select(o => o.PackageCode)
+                    .ToListAsync();
+
+                var usedNumbers = packageCodes
+                    .Select(code => code.Substring(settings.EphPrefix.Length, code.Length - settings.EphPrefix.Length - settings.EphSuffix.Length))
+                    .Where(numStr => int.TryParse(numStr, out _)) // out _ - hovorime kompilatoru ze nechceme vysledok, netreba vytvarat premennu typu int len nas zaujima ci je to true alebo false
+                    .Select(numStr => int.Parse(numStr))
+                    .ToList();
+
+                int nextNumber = settings.EphStartingNumber;
+
+                if(usedNumbers.Any())
+                {
+                    var maxUsed = usedNumbers.Where(n => n >= settings.EphStartingNumber && n <= settings.EphEndingNumber)
+                        .DefaultIfEmpty(settings.EphStartingNumber - 1) // ak ziadne cislo nie je v rozsahu
+                        .Max();
+
+                    if (maxUsed >= settings.EphEndingNumber)
+                    {
+                        return BadRequest("No available package codes left in the specified range.");
+                    }
+
+                    nextNumber = maxUsed + 1;
+                }
+                var next = $"{settings.EphPrefix}{nextNumber:D8}{settings.EphSuffix}";
+
+                return Ok(new { packageCode = next });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while generating package code.", error = ex.Message });
+            }
+        }
+        [HttpGet("validate-package-code/{packageCode}")]
+        public async Task<IActionResult> ValidatePackageCode([FromRoute] string packageCode)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(packageCode))
+                {
+                    return BadRequest(new { message = "Podacie číslo nemôže byť prázdne." });
+                };
+
+                var settings = await _context.EphSettings.FirstOrDefaultAsync();
+
+                if (settings == null)
+                {
+                    return NotFound(new { message = "Nastavenia pre podacie čísla neboli nájdené. Najskôr ich vytvorte." });
+                };
+
+                if (packageCode.Length != settings.EphPrefix.Length + 9 + settings.EphSuffix.Length)
+                {
+                    return BadRequest(new { message = "Podacie číslo musí mať presne 8 číslic, vrátane prefixu a suffixu." });
+                };
+
+                var middlePart = packageCode.Substring(settings.EphPrefix.Length, packageCode.Length - settings.EphPrefix.Length - settings.EphSuffix.Length);
+
+                if (!int.TryParse(middlePart, out int number) || number < settings.EphStartingNumber || number > settings.EphEndingNumber)
+                {
+                    return BadRequest(new { message = "Podacie číslo musí byť platné číslo v povolenom rozsahu." });
+                };
+
+                var existingOrder = await _context.Orders
+                    .FirstOrDefaultAsync(o => o.PackageCode == packageCode);
+
+                if(existingOrder != null)
+                {
+                    return BadRequest(new { message = "Toto podacie číslo sa už používa!" });
+                };
+
+                return Ok(new { valid = true, message = "Podacie číslo je platné." });
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, packageCode + new { message = " - Nastala chyba pri overovaní podacieho čísla. " } + ex.Message);
             }
         }
     }
