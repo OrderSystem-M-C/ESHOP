@@ -221,7 +221,7 @@
       <label for="packageCode" class="form-label">Podacie číslo vašej objednávky (Pošta)*</label>
          <div class="field">
             <input formControlName="packageCode" type="text" id="packageCode" class="form-control" placeholder="Zadajte podacie číslo o dĺžke 13 znakov a s dodržaním formátu (napr.: RR123456789SK)" maxlength="13" [ngClass]="{'is-invalid': orderForm.get('packageCode').invalid && orderForm.get('packageCode').touched}">
-            <button class="btn btn-primary" (click)="checkPackageCode(orderForm.get('packageCode').value)">Skontrolovať</button>
+            <button class="btn btn-primary" (click)="validatePackageCode(orderForm.get('packageCode').value)">Skontrolovať</button>
          </div>
     </div>
     <div class="order-status">

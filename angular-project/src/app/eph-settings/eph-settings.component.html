@@ -6,6 +6,7 @@
       <p>{{currentDate}}</p>
     </div>
     <div class="button-container">
+      <button class="btn btn-secondary return-home" [routerLink]="['/orders-page']"><img src="../../assets/Images/return-home-icon.png" alt="return-home-icon"> Vrátiť sa späť na objednávky</button>
       <button class="btn btn-primary save-button" (click)="saveEphSettings()"><img src="../../assets/Images/save-icon.png" alt="save-icon"> Uložiť nastavenia</button>
     </div>
   </div>
@@ -41,11 +42,12 @@
         </div>
     </form>
     <div class="user-eph-settings">
-      <h3>Vaše nastavenia</h3>
+      <h3>Aktuálna konfigurácia podacích čísel (EPH)</h3>
       @if(ephSettings != null){
         <p><strong>EPH Prefix:</strong> {{ ephSettings.ephPrefix }}</p><br>
         <p><strong>EPH rozsah (od - do):</strong> {{ ephSettings.ephStartingNumber }} - {{ ephSettings.ephEndingNumber }}</p><br>
         <p><strong>EPH Suffix:</strong> {{ ephSettings.ephSuffix }}</p><br>
+        <p><strong>Celkový počet dostupných podacích čísel:</strong> {{ totalPackageCodes }}</p>
       }@else{
         <p>Nemáte uložené nastavenia pre EPH.</p>
       }

@@ -87,7 +87,9 @@ namespace AspNetCoreAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message,
+                return StatusCode(500, new
+                {
+                    error = ex.Message,
                     innerException = ex.InnerException?.Message,
                     stackTrace = ex.StackTrace
                 });
@@ -632,7 +634,7 @@ namespace AspNetCoreAPI.Controllers
                 var ephSettings = await _context.EphSettings.FirstOrDefaultAsync();
                 if (ephSettings == null)
                 {
-                    return NotFound("Eph settings were not found. Please create them first.");
+                    return NotFound("EPH settings were not found. Please create them first.");
                 }
                 return Ok(ephSettings);
             }
@@ -647,12 +649,12 @@ namespace AspNetCoreAPI.Controllers
             try
             {
                 var settings = await _context.EphSettings.FirstOrDefaultAsync();
-                if(settings == null)
+                if (settings == null)
                 {
-                    return NotFound("Eph settings were not found. Please create them first.");
+                    return NotFound("EPH settings were not found. Please create them first.");
                 };
 
-                if(settings.EphEndingNumber < settings.EphStartingNumber)
+                if (settings.EphEndingNumber < settings.EphStartingNumber)
                 {
                     return BadRequest("Ending number must be greater than or equal to starting number.");
                 }
@@ -672,7 +674,7 @@ namespace AspNetCoreAPI.Controllers
 
                 int nextNumber = settings.EphStartingNumber;
 
-                if(usedNumbers.Any())
+                if (usedNumbers.Any())
                 {
                     var maxUsed = usedNumbers.Where(n => n >= settings.EphStartingNumber && n <= settings.EphEndingNumber)
                         .DefaultIfEmpty(settings.EphStartingNumber - 1) // ak ziadne cislo nie je v rozsahu
@@ -701,41 +703,81 @@ namespace AspNetCoreAPI.Controllers
             {
                 if (string.IsNullOrEmpty(packageCode))
                 {
-                    return BadRequest(new { message = "Podacie číslo nemôže byť prázdne." });
+                    return new JsonResult(new { message = "Podacie číslo nemôže byť prázdne." });
                 };
 
                 var settings = await _context.EphSettings.FirstOrDefaultAsync();
 
                 if (settings == null)
                 {
-                    return NotFound(new { message = "Nastavenia pre podacie čísla neboli nájdené. Najskôr ich vytvorte." });
+                    return new JsonResult(new { message = "Nastavenia pre podacie čísla neboli nájdené. Najskôr ich vytvorte." });
                 };
 
                 if (packageCode.Length != settings.EphPrefix.Length + 9 + settings.EphSuffix.Length)
                 {
-                    return BadRequest(new { message = "Podacie číslo musí mať presne 8 číslic, vrátane prefixu a suffixu." });
+                    return new JsonResult(new { message = "Podacie číslo musí mať presne 8 číslic, vrátane prefixu a suffixu." });
                 };
 
                 var middlePart = packageCode.Substring(settings.EphPrefix.Length, packageCode.Length - settings.EphPrefix.Length - settings.EphSuffix.Length);
 
                 if (!int.TryParse(middlePart, out int number) || number < settings.EphStartingNumber || number > settings.EphEndingNumber)
                 {
-                    return BadRequest(new { message = "Podacie číslo musí byť platné číslo v povolenom rozsahu." });
+                    return new JsonResult(new { message = "Podacie číslo musí byť platné číslo v povolenom rozsahu." });
                 };
 
                 var existingOrder = await _context.Orders
                     .FirstOrDefaultAsync(o => o.PackageCode == packageCode);
 
-                if(existingOrder != null)
+                if (existingOrder != null)
                 {
-                    return BadRequest(new { message = "Toto podacie číslo sa už používa!" });
+                    return new JsonResult(new { message = "Toto podacie číslo sa už používa!" });
                 };
 
-                return Ok(new { valid = true, message = "Podacie číslo je platné." });
+                return Ok(new { valid = true, message = "Podacie číslo je platné a dostupné." });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                return StatusCode(500, packageCode + new { message = " - Nastala chyba pri overovaní podacieho čísla. " } + ex.Message);
+                return StatusCode(500, new { message = $"Nastala chyba pri overovaní podacieho čísla: {ex.Message}" });
+            }
+        }
+        [HttpGet("count-available-package-codes")]
+        public async Task<IActionResult> CountAvailablePackageCodes()
+        {
+            try
+            {
+                var settings = await _context.EphSettings.FirstOrDefaultAsync();
+
+                if (settings == null)
+                {
+                    return NotFound("EPH settings were not found. Please create them first.");
+                }
+
+                if (settings.EphEndingNumber < settings.EphStartingNumber)
+                {
+                    return BadRequest("Ending number must be greater than or equal to starting number.");
+                }
+
+                var usedPackageCodes = await _context.Orders
+                    .Where(o => !string.IsNullOrEmpty(o.PackageCode) &&
+                                o.PackageCode.StartsWith(settings.EphPrefix) &&
+                                o.PackageCode.EndsWith(settings.EphSuffix))
+                    .Select(o => o.PackageCode)
+                    .ToListAsync();
+                var usedNumbers = usedPackageCodes
+                    .Select(code => code.Substring(settings.EphPrefix.Length, code.Length - settings.EphPrefix.Length - settings.EphSuffix.Length))
+                    .Where(numStr => int.TryParse(numStr, out _))
+                    .Select(numStr => int.Parse(numStr))
+                    .ToHashSet();
+
+                int totalPossible = settings.EphEndingNumber - settings.EphStartingNumber + 1;
+                int usedCount = usedNumbers.Count(n => n >= settings.EphStartingNumber && n <= settings.EphEndingNumber);
+                int availableCount = totalPossible - usedCount;
+
+                return Ok(new { availableCount });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"An error occurred while counting available package codes: {ex.Message}" });
             }
         }
     }

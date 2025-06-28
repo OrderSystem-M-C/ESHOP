@@ -3,11 +3,13 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EphService, EphSettingsDTO } from '../services/eph.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-eph-settings',
   standalone: true,
-  imports: [DatePipe, FormsModule, ReactiveFormsModule, CommonModule],
+  imports: [DatePipe, FormsModule, ReactiveFormsModule, CommonModule, RouterLink],
   providers: [DatePipe],
   templateUrl: './eph-settings.component.html',
   styleUrl: './eph-settings.component.css'
@@ -17,6 +19,7 @@ export class EphSettingsComponent implements OnInit {
   isLoading: boolean = false;
 
   ephSettings: EphSettingsDTO = null;
+  totalPackageCodes: number = 0;
 
   constructor(private datePipe: DatePipe, private ephService: EphService, private snackBar: MatSnackBar){}
 
@@ -70,7 +73,13 @@ export class EphSettingsComponent implements OnInit {
         next: (response) => {
           this.ephSettings = response;
 
-          this.isLoading = false;
+          this.ephService.countAvailablePackageCode().subscribe({
+            next: (response) => {
+              this.totalPackageCodes = response.availableCount;
+              this.isLoading = false;
+            },
+            error: (err) => console.error(err)
+          });
         },
         error: (err) => {
           console.error("An error has occurred while trying to fetch EPH settings.", err);

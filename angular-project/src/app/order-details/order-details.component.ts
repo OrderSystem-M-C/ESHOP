@@ -135,9 +135,9 @@ export class OrderDetailsComponent implements OnInit{
             <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${this.order.paymentCost.toFixed(2)} €</td>
           </tr>
           <tr>
-            <td colspan="2" style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Celková cena objednávky</td>
-            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0; font-weight: bold;">CELKOM:</td>
-            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0; font-weight: bold;">
+            <td colspan="2" style="padding: 8px; text-align: left;">Celková cena objednávky</td>
+            <td style="padding: 8px; text-align: center; font-weight: bold;">CELKOM:</td>
+            <td style="padding: 8px; text-align: center; font-weight: bold;">
               ${
                 this.order.discountAmount
                   ? ((this.order.totalPrice - (this.order.totalPrice * this.order.discountAmount / 100)).toFixed(2) + ' € <span style="color: #6c757d;">(-' + this.order.discountAmount + '%)</span>')
@@ -167,7 +167,7 @@ export class OrderDetailsComponent implements OnInit{
         </tr>
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Tel.č.</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.phoneNumber}</td>
+          <td style="padding: 8px;">${this.order.phoneNumber}</td>
         </tr>
       </table>
     </div>
@@ -186,7 +186,7 @@ export class OrderDetailsComponent implements OnInit{
         </tr>
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Tel.č.</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.invoicePhoneNumber}</td>
+          <td style="padding: 8px;">${this.order.invoicePhoneNumber}</td>
         </tr>
       </table>
     </div>

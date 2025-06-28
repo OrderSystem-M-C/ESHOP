@@ -25,6 +25,10 @@ export class EphService {
     const url = `${this.baseUrl}/order/validate-package-code/${packageCode}`;
     return this.http.get<any>(url);
   }
+  countAvailablePackageCode(): Observable<any>{
+    const url = `${this.baseUrl}/order/count-available-package-codes`;
+    return this.http.get<any>(url);
+  }
 }
 export interface EphSettingsDTO {
   ephPrefix: string;
