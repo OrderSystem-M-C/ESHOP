@@ -211,7 +211,7 @@
             </div>
             <div class="field">
               <p>Poznámka: Faktúra bude automaticky vygenerovaná pri odoslaní objednávky. Toto tlačidlo slúži na jej náhľad a kontrolu.</p>
-              <button class="create-invoice-btn btn btn-primary" id="create-invoice-btn" (click)="createInvoice()" [disabled]="invoiceCreated">Vytvoriť faktúru</button>
+              <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn" (click)="createInvoice()" [disabled]="invoiceCreated">Vytvoriť faktúru</button>
             </div>
             </form>
         </div>
@@ -220,22 +220,60 @@
       <h3>Podacie číslo objednávky</h3>
       <label for="packageCode" class="form-label">Podacie číslo vašej objednávky (Pošta)*</label>
          <div class="field">
-            <input formControlName="packageCode" type="text" id="packageCode" class="form-control" placeholder="Zadajte podacie číslo o dĺžke 13 znakov a s dodržaním formátu (napr.: RR123456789SK)" maxlength="13" [ngClass]="{'is-invalid': orderForm.get('packageCode').invalid && orderForm.get('packageCode').touched}">
-            <button class="btn btn-primary" (click)="validatePackageCode(orderForm.get('packageCode').value)">Skontrolovať</button>
+            @if(isLoading_packageCode){
+              <div class="spinner-container">
+                <div class="spinner">
+                </div>
+                Načítava sa
+              </div>
+            }@else{
+              <input formControlName="packageCode" type="text" id="packageCode" class="form-control" placeholder="Zadajte podacie číslo o dĺžke 13 znakov a s dodržaním formátu (napr.: RR123456789SK)" maxlength="13" [ngClass]="{'is-invalid': orderForm.get('packageCode').invalid && orderForm.get('packageCode').touched}">
+              <button class="btn btn-primary" (click)="validatePackageCode(orderForm.get('packageCode').value)">Skontrolovať</button>
+            }
          </div>
     </div>
     <div class="order-status">
-      <h3>Stav objednávky</h3>
+      <h3>Stav objednávky
+        <div class="order-status-buttons">
+          <button [class]="isEditOrderStatus ? 'btn btn-primary' : 'btn btn-secondary'" [class.is-editing]="isEditOrderStatus" (click)="toggleEditOrderStatus()">
+            @if(!isEditOrderStatus){
+              <img src="../../assets/Images/edit-icon.png" alt="edit-icon"> Upraviť poradie
+            }@else{
+              <img src="../../assets/Images/save-icon.png" alt="save-icon"> Uložiť poradie
+            }
+          </button>
+          @if(isEditOrderStatus){
+            <button class="btn btn-outline-danger" (click)="cancelEditOrderStatus()">Zrušiť</button>
+          }
+        </div>
+    </h3>
       <p class="default-status">
         Bez výberu objednávky je automaticky nastavený stav ako "Nezpracované - nová objednávka"!
       </p>
-      <div class="order-status-grid">
-        <div class="order-status-tile" *ngFor="let status of statuses"
-           [class.selected]="orderForm.get('orderStatus')?.value === status"
-           (click)="orderForm.get('orderStatus')?.setValue(status)">
-          {{ status }}
-    </div>
-    </div>
+      @if(statuses.length > 0){
+        @if(!isEditOrderStatus){
+          <div class="order-status-grid">
+            <div class="order-status-tile" *ngFor="let status of statuses"
+              [class.selected]="orderForm.get('orderStatus')?.value === status.statusName"
+              (click)="orderForm.get('orderStatus')?.setValue(status.statusName)">
+              {{ status.statusName }}
+            </div>
+          </div>
+        }
+        @if(isEditOrderStatus){
+          <div class="order-status-grid" cdkDropList (cdkDropListDropped)="drop($event)">
+            <div class="order-status-tile" *ngFor="let status of sortedStatuses; trackBy: trackByStatusId" cdkDrag>
+              {{ status.statusName }}
+            </div>
+          </div>
+        }
+      }@else{
+        <div class="spinner-container">
+          <div class="spinner">
+          </div>
+          Načítava sa
+       </div>
+      }
     </div>
     @if(!isLoading){
       @if(isEditMode){

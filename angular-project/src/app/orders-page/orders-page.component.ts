@@ -333,7 +333,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
         statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;
       });
 
-      const backgroundColors = ['#18c400', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
+      const backgroundColors = ['#18C400', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B'];
 
       const labels = this.statuses.filter(status => statusCounts[status] !== undefined);
       const data = labels.map(status => statusCounts[status]);
@@ -445,7 +445,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
 
   getStatusColor(orderStatus: string): string {
     const statusIndex = this.statuses.indexOf(orderStatus);
-    const backgroundColors = ['#18c400', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
+    const backgroundColors = ['#18C400', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B'];
     if(statusIndex !== -1 && statusIndex < backgroundColors.length){
       return backgroundColors[statusIndex];
     }
@@ -453,7 +453,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   }
 
   updateStatusChart(): void {
-    const backgroundColors = ['#18c400', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B', '#F44336'];
+    const backgroundColors = ['#18C400', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B'];
     const statusCounts: { [key: string]: number } = {};
     this.filteredOrders.forEach(order => {
       statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;

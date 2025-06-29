@@ -1,6 +1,6 @@
-import { CommonModule, DatePipe, formatCurrency, NgClass } from '@angular/common';
+import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { Form, FormControl, FormGroup, FormsModule, ReactiveFormsModule, UntypedFormBuilder, Validators } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import * as html2pdf from 'html2pdf.js';
 import { OrderService } from '../services/order.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,11 +14,12 @@ import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { EmailService } from '../services/email.service';
 import { EphService } from '../services/eph.service';
 import { catchError, map, Observable, of } from 'rxjs';
+import { CdkDrag, DragDropModule, moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-order-form',
   standalone: true,
-  imports: [DatePipe, CommonModule, FormsModule, ReactiveFormsModule, MatSnackBarModule, NgClass, MatPaginatorModule],
+  imports: [DatePipe, CommonModule, FormsModule, ReactiveFormsModule, MatSnackBarModule, NgClass, MatPaginatorModule, DragDropModule, CdkDrag],
   providers: [DatePipe, OrderService, { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
   templateUrl: './order-form.component.html',
   styleUrl: './order-form.component.css'
@@ -35,9 +36,10 @@ export class OrderFormComponent implements OnInit {
   invoiceCreated: boolean = false;
 
   isLoading: boolean = false;
-
   isEditMode: boolean = false;
   isLoading_edit: boolean = false;
+  isEditOrderStatus: boolean = false;
+  isLoading_packageCode: boolean = false;
 
   dialogRef!: MatDialogRef<any>;
   dialogClosed: boolean = true;
@@ -59,23 +61,8 @@ export class OrderFormComponent implements OnInit {
   pageIndex: number = 0;
   pageSize: number = 4;
 
-  statuses: string[] = [
-    'Nezpracované - nová objednávka',
-    'Vybaviť - Pošta',
-    'Zasielanie čísla zásielky',
-    'Uhradené - Vybaviť',
-    'Vybaviť - Odložené, osobný odber',
-    'Neuhradené - čakám na platbu',
-    'Neuhradené - 2x poslaný e-mail',
-    'Poslané, neuhradené',
-    'Neuhradené - Údaje k platbe, poslať e-mail',
-    'Dobierka - Info k objednávke (poslať e-mail)',
-    'Objednávka vybavená',
-    'Objednávka odoslaná, čakám na úhradu dobierkou',
-    'Storno',
-    'Oprava',
-    'Rozbité, zničené, vrátené'
-  ];
+  statuses: OrderStatusDTO[] = [];
+  private originalStatusesOrder: OrderStatusDTO[] = [];
 
   constructor(private datePipe: DatePipe, private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar, private dialog: MatDialog, private productService: ProductService, private emailService: EmailService, private ephService: EphService){}
 
@@ -171,6 +158,54 @@ export class OrderFormComponent implements OnInit {
       invoiceEmail: this.invoiceForm.value.invoiceEmail,
       invoicePhoneNumber: this.invoiceForm.value.invoicePhoneNumber,
     }
+  }
+
+  toggleEditOrderStatus() {
+    if(this.isEditOrderStatus){
+      if(this.hasOrderChanged()){
+        this.saveStatusOrder();
+      }else{
+        this.snackBar.open("Poradie sa nezmenilo, nič sa neuložilo!", "", { duration: 2000 });
+      }
+    }
+    this.isEditOrderStatus = !this.isEditOrderStatus;
+  }
+  drop(event: CdkDragDrop<any[]>) {
+    const sorted = [...this.sortedStatuses];
+    moveItemInArray(sorted, event.previousIndex, event.currentIndex);
+    sorted.forEach((status, index) => {
+      status.sortOrder = index;
+    });
+    this.statuses = sorted;
+  }
+  get sortedStatuses(): OrderStatusDTO[] {
+    return this.statuses.slice().sort((a, b) => a.sortOrder - b.sortOrder)
+  }
+  saveStatusOrder(){
+    this.orderService.saveOrderStatusesSortOrder(this.statuses).subscribe({
+      next: () => {
+        this.snackBar.open("Poradie stavov bolo úspešne zmenené!", "", {
+          duration: 2000
+        })
+      },
+      error: (err) => console.error(err)
+    })
+  }
+  hasOrderChanged(): boolean {
+    for(let i = 0; i < this.statuses.length; i++){
+      if(this.statuses[i].sortOrder !== i) return true;
+    }
+    return false;
+  }
+  cancelEditOrderStatus(): void {
+    this.statuses = this.originalStatusesOrder;
+    this.isEditOrderStatus = false;
+    this.snackBar.open("Úpravy poradia boli zrušené.", "", {
+      duration: 2000
+    })
+  }
+  trackByStatusId(index: number, status: OrderStatusDTO): number {
+    return status.statusId; // Predpokladáme, že OrderStatusDTO má vlastnosť 'id'
   }
 
   searchProducts() {
@@ -606,6 +641,7 @@ export class OrderFormComponent implements OnInit {
   }
 
   validatePackageCode(packageCode: string): void {
+    this.isLoading_packageCode = true;
     if (!this.checkPackageCodeFormat(packageCode)) return;
 
     this.ephService.validatePackageCode(packageCode).subscribe({
@@ -617,11 +653,13 @@ export class OrderFormComponent implements OnInit {
           this.orderForm.get('packageCode')?.setErrors({ invalid: true });
           this.snackBar.open(response.message || 'Neznáma chyba pri validácií podacieho čísla!', '', { duration: 3000 });
         }
+        this.isLoading_packageCode = false;
       },
       error: (err) => {
         const msg = err?.error?.message || 'Neznáma chyba pri validácií podacieho čísla!';
         this.orderForm.get('packageCode')?.setErrors({ invalid: true });
         this.snackBar.open(msg, '', { duration: 3000 });
+        this.isLoading_packageCode = false;
       }
     })
   }
@@ -837,6 +875,13 @@ export class OrderFormComponent implements OnInit {
     
     this.existingOrderId = Number(this.route.snapshot.paramMap.get('orderId')) ?? null;
 
+    this.orderService.getOrderStatuses().subscribe({
+      next: (response) => {
+        this.statuses = this.originalStatusesOrder = response;
+      },
+      error: (err) => console.error(err)
+    });
+
     if(this.existingOrderId){
       this.isEditMode = true;
       this.loadOrder(this.existingOrderId);
@@ -892,4 +937,10 @@ export interface OrderDTO {
   invoicePhoneNumber: string;
   orderSelected?: boolean;
   packageCode?: string;
+}
+export interface OrderStatusDTO {
+  statusId: number;
+  statusName: string;
+  sortOrder: number;
+  statusColor: string;
 }

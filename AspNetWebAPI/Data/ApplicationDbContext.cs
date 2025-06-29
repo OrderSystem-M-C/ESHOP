@@ -17,6 +17,7 @@ namespace AspNetCoreAPI.Data
         public DbSet<OrderProductModel> OrderProducts { get; set; }
         public DbSet<ProductModel> Products { get; set; }
         public DbSet<EphSettingsModel> EphSettings { get; set; }
+        public DbSet<OrderStatusModel> OrderStatuses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

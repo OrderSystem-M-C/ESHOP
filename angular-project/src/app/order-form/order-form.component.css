@@ -154,6 +154,12 @@ textarea {
   padding-bottom: 10px;
   margin-bottom: 20px;
 }
+.order-status h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+}
 .package-code .field{
   display: flex;
   align-items: center;
@@ -241,6 +247,26 @@ textarea {
   gap: 12px;
   margin-top: 20px;
 }
+.order-status-buttons{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.order-status-buttons button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.order-status-buttons img{
+  height: 17px;
+  width: 17px;
+}
+.order-status-buttons button:not(.is-editing) img { 
+  filter: invert(1) brightness(2);
+  height: 20px !important;
+  width: 20px !important;
+}
 .order-status-tile {
   padding: 10px 14px;
   background-color: #f1f1f1;
@@ -248,7 +274,7 @@ textarea {
   border: 2px solid transparent;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s ease-in-out;
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1), box-shadow 100ms ease, background-color 0.2s ease-in-out, border 0.2s ease-in-out, font-weight 1ms ease-in-out;;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   &:hover { /*& je selektor co odkazuje na rodicovsky (order-status-tile)*/
     background-color: #e0e0e0;
@@ -257,6 +283,15 @@ textarea {
     border-color: #0d6efd;
     font-weight: 600;
   }
+}
+.cdk-drag-preview {
+  border-radius: 8px;
+  border-color: #0d6efd;
+  font-weight: bold;
+  background-color: #e0e0e0;
+}
+.cdk-drag-placeholder {
+  opacity: 0;
 }
 .spinner-container {
   height: 100px !important;

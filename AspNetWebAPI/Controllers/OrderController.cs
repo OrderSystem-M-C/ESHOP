@@ -780,5 +780,52 @@ namespace AspNetCoreAPI.Controllers
                 return StatusCode(500, new { message = $"An error occurred while counting available package codes: {ex.Message}" });
             }
         }
+        [HttpGet("get-order-statuses")]
+        public async Task<ActionResult<IEnumerable<OrderStatusModel>>> GetOrderStatuses()
+        {
+            try
+            {
+                var statuses = await _context.OrderStatuses
+                    .OrderBy(s => s.SortOrder)
+                    .ToListAsync();
+
+                if(statuses == null)
+                {
+                    return NotFound("Order statuses were not found.");
+                }
+
+                return Ok(statuses);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, new { message = $"An error occurred while trying to fetch order statuses: {ex.Message}" });
+            }
+        }
+        [HttpPut("save-order-statuses-sort-order")]
+        public async Task<IActionResult> SaveOrderStatusesSortOrder([FromBody] List<OrderStatusDTO> orderStatusDTO)
+        {
+            try
+            {
+                if(orderStatusDTO == null)
+                {
+                    return BadRequest("Data transfer object was not provided.");
+                }
+                foreach(var statusDto in orderStatusDTO)
+                {
+                    var status = await _context.OrderStatuses
+                        .FirstOrDefaultAsync(s => s.StatusId == statusDto.StatusId);
+                    if(status != null)
+                    {
+                        status.SortOrder = statusDto.SortOrder;
+                    }
+                }
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"An error occurred while trying to save order statuses sort order: {ex.Message}" });
+            }
+        }
     }
 }

@@ -67,7 +67,7 @@ h1 {
 .user-eph-settings {
   display: flex;
   justify-content: flex-start;
-  align-items: flex-start;
+  align-items: top;
   flex-direction: column;
 }
 .eph-prefix-suffix-container {

@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { OrderDTO } from '../order-form/order-form.component';
+import { OrderDTO, OrderStatusDTO } from '../order-form/order-form.component';
 import { Observable } from 'rxjs';
 import { ProductDTO } from '../products-page/products-page.component';
 
@@ -85,5 +85,14 @@ export class OrderService {
       OrderIds: orderIds
     }
     return this.http.post(url, body, { responseType: 'blob' });
+  }
+  getOrderStatuses(): Observable<OrderStatusDTO[]>{
+    const url = `${this.baseUrl}/order/get-order-statuses`;
+    return this.http.get<OrderStatusDTO[]>(url);
+  }
+  saveOrderStatusesSortOrder(statuses: OrderStatusDTO[]) {
+    const url = `${this.baseUrl}/order/save-order-statuses-sort-order`;
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.put(url, statuses, { headers: headers });
   }
 }
