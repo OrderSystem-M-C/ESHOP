@@ -70,8 +70,8 @@
             <div class="dropdown-content" [ngClass]="isVisibleChangeStatus ? 'is-visible': 'is-not-visible'">
               <h3><img src="../../assets/Images/click-icon.png" alt="click-icon"> Kliknutím zmeníte stav:</h3>
               <div class="status-item" *ngFor="let status of statuses">
-                <a class="status-item-link" (click)="changeOrderStatus(status)">
-                  {{status}}
+                <a class="status-item-link" (click)="changeOrderStatus(status.statusName)">
+                  {{status.statusName}}
                 </a>
               </div>
             </div>
@@ -100,8 +100,8 @@
           <div class="dropdown-content" [ngClass]="isVisibleCheckbox ? 'is-visible': 'is-not-visible'">
             <div class="checkbox-item" *ngFor="let status of statuses">
               <label class="checkbox-label">
-                <input type="checkbox" class="form-check-input" id="checkbox" [value]="status" (change)="onCheckboxChange($event)" [checked]="selectedStatuses.includes(status)">
-                {{status}}
+                <input type="checkbox" class="form-check-input" id="checkbox" [value]="status.statusName" (change)="onCheckboxChange($event)" [checked]="selectedStatuses.includes(status.statusName)">
+                {{ status.statusName }}
               </label>
             </div>
           </div>

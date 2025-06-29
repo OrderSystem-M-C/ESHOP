@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, Injectable, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { OrderService } from '../services/order.service';
 import { CommonModule, DatePipe } from '@angular/common';
-import { OrderDTO } from '../order-form/order-form.component';
+import { OrderDTO, OrderStatusDTO } from '../order-form/order-form.component';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Chart } from 'chart.js/auto';
@@ -25,23 +25,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   public ordersData: OrderDTO[] = [];
   filteredOrders = [...this.ordersData];
   ourFilteredOrders: OrderDTO[] = [];
-  statuses: string[] = [
-    'Nezpracované - nová objednávka',
-    'Vybaviť - Pošta',
-    'Zasielanie čísla zásielky',
-    'Uhradené - Vybaviť',
-    'Vybaviť - Odložené, osobný odber',
-    'Neuhradené - čakám na platbu',
-    'Neuhradené - 2x poslaný e-mail',
-    'Poslané, neuhradené',
-    'Neuhradené - Údaje k platbe, poslať e-mail',
-    'Dobierka - Info k objednávke (poslať e-mail)',
-    'Objednávka vybavená',
-    'Objednávka odoslaná, čakám na úhradu dobierkou',
-    'Storno',
-    'Oprava',
-    'Rozbité, zničené, vrátené'
-  ];
+  statuses: OrderStatusDTO[] = [];
   
   selectedStatuses: string[] = [];
 
@@ -335,17 +319,18 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
 
       const backgroundColors = ['#18C400', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B'];
 
-      const labels = this.statuses.filter(status => statusCounts[status] !== undefined);
-      const data = labels.map(status => statusCounts[status]);
+      const activeStatusNames = Object.keys(statusCounts);
+      const labels = this.statuses.filter(status => activeStatusNames.includes(status.statusName));
+      const data = labels.map(status => statusCounts[status.statusName]);
       const colors = labels.map(status => {
-        const idx = this.statuses.indexOf(status);
+        const idx = this.statuses.findIndex(originalStatus => originalStatus.statusName === status.statusName);
         return idx !== -1 ? backgroundColors[idx] : '#ccc';
       });
 
       this.pie_chartInstance = new Chart(this.pie_ctx, {
         type: 'doughnut',
         data: {
-          labels: labels,
+          labels: labels.map(s => s.statusName),
           datasets: [
             {
               label: 'Počet objednávok',
@@ -444,7 +429,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   }
 
   getStatusColor(orderStatus: string): string {
-    const statusIndex = this.statuses.indexOf(orderStatus);
+    const statusIndex = this.statuses.findIndex(s => s.statusName === orderStatus);
     const backgroundColors = ['#18C400', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B'];
     if(statusIndex !== -1 && statusIndex < backgroundColors.length){
       return backgroundColors[statusIndex];
@@ -459,14 +444,14 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
       statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;
     });
   
-    const labels = this.statuses.filter(status => statusCounts[status] !== undefined);
-    const data = labels.map(status => statusCounts[status]);
+    const labels = this.statuses.filter(status => statusCounts[status.statusName] !== undefined);
+    const data = labels.map(status => statusCounts[status.statusName]);
     const colors = labels.map(status => {
       const idx = this.statuses.indexOf(status);
       return idx !== -1 ? backgroundColors[idx] : '#ccc'; 
     });
   
-    this.pie_chartInstance.data.labels = labels;
+    this.pie_chartInstance.data.labels = labels.map(s => s.statusName);
     this.pie_chartInstance.data.datasets[0].data = data;
     this.pie_chartInstance.data.datasets[0].backgroundColor = colors;
     this.pie_chartInstance.update();
@@ -611,6 +596,13 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   }
 
   ngOnInit(): void {
+    this.orderService.getOrderStatuses().subscribe({
+      next: (response) => {
+        this.statuses = response;
+      },
+      error: (err) => console.error(err)
+    });
+
     this.orderService.getOrders().subscribe((result) =>{
       this.ordersData = result;
       this.filteredOrders = this.ordersData;
