@@ -179,7 +179,7 @@ export class OrderFormComponent implements OnInit {
     this.statuses = sorted;
   }
   get sortedStatuses(): OrderStatusDTO[] {
-    return this.statuses.slice().sort((a, b) => a.sortOrder - b.sortOrder)
+    return this.statuses.slice().sort((a, b) => a.sortOrder - b.sortOrder);
   }
   saveStatusOrder(){
     this.orderService.saveOrderStatusesSortOrder(this.statuses).subscribe({
@@ -205,7 +205,7 @@ export class OrderFormComponent implements OnInit {
     })
   }
   trackByStatusId(index: number, status: OrderStatusDTO): number {
-    return status.statusId; // Predpokladáme, že OrderStatusDTO má vlastnosť 'id'
+    return status.statusId;
   }
 
   searchProducts() {

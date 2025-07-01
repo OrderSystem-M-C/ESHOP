@@ -10,7 +10,7 @@ import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../api-authorization/authentication.service';
 import { EmailDTO, EmailService } from '../services/email.service';
-import { catchError, EMPTY, finalize, of, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, finalize, forkJoin, of, switchMap, tap } from 'rxjs';
 import { OrderDetailsComponent } from '../order-details/order-details.component';
 
 @Component({
@@ -596,31 +596,34 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   }
 
   ngOnInit(): void {
-    this.orderService.getOrderStatuses().subscribe({
-      next: (response) => {
-        this.statuses = response;
-      },
-      error: (err) => console.error(err)
-    });
+    forkJoin({
+      orders: this.orderService.getOrders(),
+      statuses: this.orderService.getOrderStatuses()
+    }).subscribe({
+      next: ({ orders, statuses}) => {
+        this.ordersData = orders;
+        this.filteredOrders = orders;
+        this.statuses = statuses;
 
-    this.orderService.getOrders().subscribe((result) =>{
-      this.ordersData = result;
-      this.filteredOrders = this.ordersData;
-      this.isLoading = false;
-      this.createChart('status');
-      this.createChart('orders');
-      this.createChart('revenue');
-      this.totalRevenue = parseFloat(
-        (this.ordersData.reduce((total, order) => total + (order.totalPrice) || 0, 0)).toFixed(2)
-      )
-      this.totalItems = this.ordersData.length;
-      this.pageIndex = 0;
-      this.applyFilters();
-    }, (error) =>{
-      console.error("An error have occurred while trying to get data of orders", error);
-    });
-    const now = new Date();
-    this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
+        this.totalRevenue = parseFloat(
+          orders.reduce((total, order) => total + (order.totalPrice || 0), 0).toFixed(2)
+        );
+        this.totalItems = orders.length;
+        this.pageIndex = 0;
+        this.applyFilters();
+        this.createChart('status');
+        this.createChart('orders');
+        this.createChart('revenue');
+      },
+      error: (err) => {
+        console.error("An error has occurred while trying to fetch data.", err);
+      },
+      complete: () => {
+        this.isLoading = false;
+        const now = new Date();
+        this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
+      }
+    })
   }
   ngAfterViewInit(): void{
     this.updatePagedOrders();
