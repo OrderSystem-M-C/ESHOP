@@ -827,5 +827,55 @@ namespace AspNetCoreAPI.Controllers
                 return StatusCode(500, new { message = $"An error occurred while trying to save order statuses sort order: {ex.Message}" });
             }
         }
+        [HttpPost("add-order-status")]
+        public async Task<IActionResult> AddOrderStatusAsync([FromBody] OrderStatusDTO orderStatusDTO)
+        {
+            try
+            {
+                if (orderStatusDTO == null)
+                {
+                    return BadRequest("Data transfer object was not provided.");
+                }
+
+                var newStatus = new OrderStatusModel
+                {
+                    StatusName = orderStatusDTO.StatusName,
+                    SortOrder = orderStatusDTO.SortOrder
+                };
+
+                await _context.OrderStatuses.AddAsync(newStatus);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetOrderStatuses), new { id = newStatus.StatusId }, newStatus);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"An error occurred while trying to add order status: {ex.Message}" });
+            }
+        }
+        [HttpDelete("delete-order-status/{statusId}")]
+        public async Task<IActionResult> DeleteOrderStatusAsync([FromRoute] int statusId)
+        {
+            try
+            {
+                if(statusId <= 0)
+                {
+                    return BadRequest("Invalid status ID.");
+                }
+                var status = await _context.OrderStatuses.FirstOrDefaultAsync(s => s.StatusId == statusId);
+                if (status == null)
+                {
+                    return NotFound($"Order status with ID {statusId} was not found.");
+                }
+                _context.OrderStatuses.Remove(status);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = $"Successfully deleted order status with ID {statusId}." });
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, new { message = $"An error occurred while trying to delete order status: {ex.Message}" });
+            }
+        }
     }
 }

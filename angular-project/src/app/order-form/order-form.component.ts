@@ -15,6 +15,7 @@ import { EmailService } from '../services/email.service';
 import { EphService } from '../services/eph.service';
 import { catchError, map, Observable, of } from 'rxjs';
 import { CdkDrag, DragDropModule, moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { ManageStatusesDialogComponent } from '../manage-statuses-dialog/manage-statuses-dialog.component';
 
 @Component({
   selector: 'app-order-form',
@@ -159,7 +160,15 @@ export class OrderFormComponent implements OnInit {
       invoicePhoneNumber: this.invoiceForm.value.invoicePhoneNumber,
     }
   }
-
+  
+  openManageStatusesDialog(): void {
+    const dialogRef = this.dialog.open(ManageStatusesDialogComponent, {
+      width: '1200px'
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(result)
+    })
+  }
   toggleEditOrderStatus() {
     if(this.isEditOrderStatus){
       if(this.hasOrderChanged()){
@@ -243,6 +252,9 @@ export class OrderFormComponent implements OnInit {
     this.dialogClosed = false;
     this.isLoading = true;
 
+    const hadNoProductsBefore = this.selectedProducts.length === 0;
+    this.newSelectedProducts = JSON.parse(JSON.stringify(this.selectedProducts));
+
     this.dialogRef = this.dialog.open(selectProductsDialog, {
       disableClose: true
     });
@@ -267,18 +279,20 @@ export class OrderFormComponent implements OnInit {
     this.isEditingProducts = edit;
     
     this.dialogRef.afterClosed().subscribe((result) => {
-      if(result === true){
+      if (result === true) {
         this.snackBar.open('Výber produktov bol úspešne zmenený!', '', { duration: 1000 });
-      }else if(result === false){
-        this.snackBar.open('Produkty boli úspešne pridané!', '', { duration: 1000 });
-      }else{
+      } else if (result === false) {
+        if (hadNoProductsBefore && this.selectedProducts.length > 0) {
+          this.snackBar.open('Produkty boli úspešne pridané!', '', { duration: 1000 });
+        } else {
+          this.snackBar.open('Výber produktov bol upravený!', '', { duration: 1000 });
+        }
+      } else {
         this.snackBar.open('Výber produktov bol zrušený!', '', { duration: 1000 });
+        this.selectedProducts = JSON.parse(JSON.stringify(this.newSelectedProducts));
+        this.totalPrice = this.selectedProducts.reduce((sum, p) => sum + p.productPrice, 0);
       }
-
-      if (this.isEditingProducts) {
-        this.newSelectedProducts = JSON.parse(JSON.stringify(this.selectedProducts)); //aby sa predišlo problémom s referenciami, vytvorí sa tzv. hlboká kópia (deep copy), lebo keď v JavaScripte priradím premennú typu objekt alebo pole, neukladá sa jeho skutočná hodnota, ale iba referencia na ten objekt v pamäti a tak dostaneme samostatnú kópiu.
-      }
-    })
+    });
   }
   toggleProductSelection(product: ProductDTO){
     const index = this.selectedProducts.findIndex(p => p.productId === product.productId);
@@ -301,11 +315,29 @@ export class OrderFormComponent implements OnInit {
   }
   confirmSelection() {
     if(this.selectedProducts.length > 0){
-      this.dialogRef.close(this.isEditingProducts);
+      const isEdit = this.isEditingProducts === true;
+      this.dialogRef.close(isEdit); 
     }
   }
   closeDialog(){
-    this.dialogRef.close();
+    if(this.hasUnsavedChanges()) {
+      const confirmClose = window.confirm('Máte neuložené zmeny, chcete naozaj zatvoriť dialóg bez uloženia?');
+      if (!confirmClose) {
+        return;
+      }
+    }
+    this.dialogRef.close(null);
+  }
+  hasUnsavedChanges(): boolean {
+    if (this.selectedProducts.length !== this.newSelectedProducts.length) return true;
+
+    const sortedSelected = [...this.selectedProducts].sort((a,b) => a.productId - b.productId);
+    const sortedOriginal = [...this.newSelectedProducts].sort((a,b) => a.productId - b.productId);
+
+    for (let i = 0; i < sortedSelected.length; i++) {
+      if (sortedSelected[i].productId !== sortedOriginal[i].productId) return true;
+    }
+    return false;
   }
 
   checkChanges(originalProducts: ProductDTO[], newProducts: ProductDTO[]): boolean {

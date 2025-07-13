@@ -48,17 +48,6 @@ h1 {
 .field{
   margin-bottom: 10px;
 }
-.form-control {
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  padding: 8px 12px;
-  transition: border-color 0.2s ease;
-}
-.form-control:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 5px #0d6efd;
-  outline: none;
-}
 .submit{
   width: 100%;
   display: flex;

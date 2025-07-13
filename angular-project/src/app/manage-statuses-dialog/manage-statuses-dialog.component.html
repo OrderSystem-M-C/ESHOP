@@ -1,0 +1,37 @@
+<div class="manage-statuses-dialog-component">
+    <div class="title-close">
+        <h2>Spravovať stavy objednávok
+            <img src="../../assets/Images/settings-icon.png" alt="settings-icon">
+        </h2>
+        <button class="btn btn-secondary" (click)="closeDialog()">Zavrieť okno</button>
+    </div>
+    <div class="manage-statuses-dialog-content">
+        <div class="status-form">
+        <form [formGroup]="statusForm" (ngSubmit)="submitForm()">
+            <div class="field">
+                <label class="form-label" for="statusName">Zadajte názov pre stav objednávky*</label>
+                <input class="form-control" id="statusName" type="text" formControlName="statusName" placeholder="Zadajte názov stavu" [ngClass]="{'is-invalid': statusForm.get('statusName').invalid && statusForm.get('statusName').touched}">
+            </div>
+            <div class="field">
+                <label class="form-label" for="statusColor">Zadajte farbu pre stav objednávky*</label>
+                <input class="form-control" id="statusColor" type="color" formControlName="statusColor" [ngClass]="{'is-invalid': statusForm.get('statusColor').invalid && statusForm.get('statusColor').touched}">
+            </div>
+            <div class="submit">
+                <button class="btn btn-primary" type="submit">
+                {{ editingOrderStatusId !== null ? 'Uložiť zmeny' : 'Pridať stav'}}
+                </button>
+            </div>
+        </form>
+        </div>
+        <div class="status-container">
+            <div class="order-status-grid">
+                <div class="order-status-tile" *ngFor="let status of paginatedStatuses" [style.border-left]=" '10px solid ' + status.statusColor">
+                    {{ status.statusName }}
+                </div>
+            </div>
+            <div class="pagination-container">
+                <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="onPageChange($event)" showFirstLastButtons></mat-paginator>
+            </div>
+        </div>
+    </div>
+</div>

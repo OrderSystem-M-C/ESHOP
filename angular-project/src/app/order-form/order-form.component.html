@@ -235,7 +235,12 @@
     <div class="order-status">
       <h3>Stav objednávky
         <div class="order-status-buttons">
-          <button [class]="isEditOrderStatus ? 'btn btn-primary' : 'btn btn-secondary'" [class.is-editing]="isEditOrderStatus" (click)="toggleEditOrderStatus()">
+          <!-- @if(!isEditOrderStatus){
+            <button class="btn btn-primary order-status-settings-button" (click)="openManageStatusesDialog()">
+              Spravovať stavy
+            </button>
+          } -->
+          <button class="btn btn-secondary" [class.is-editing]="isEditOrderStatus" (click)="toggleEditOrderStatus()">
             @if(!isEditOrderStatus){
               <img src="../../assets/Images/edit-icon.png" alt="edit-icon"> Upraviť poradie
             }@else{
@@ -255,6 +260,7 @@
           <div class="order-status-grid">
             <div class="order-status-tile" *ngFor="let status of statuses"
               [class.selected]="orderForm.get('orderStatus')?.value === status.statusName"
+              [style.border-left]=" '10px solid ' + status.statusColor"
               (click)="orderForm.get('orderStatus')?.setValue(status.statusName)">
               {{ status.statusName }}
             </div>
@@ -262,7 +268,7 @@
         }
         @if(isEditOrderStatus){
           <div class="order-status-grid" cdkDropList (cdkDropListDropped)="drop($event)">
-            <div class="order-status-tile" *ngFor="let status of sortedStatuses; trackBy: trackByStatusId" cdkDrag>
+            <div class="order-status-tile" *ngFor="let status of sortedStatuses; trackBy: trackByStatusId" [style.border-left]=" '10px solid ' + status.statusColor" cdkDrag>
               {{ status.statusName }}
             </div>
           </div>

@@ -1,0 +1,92 @@
+.manage-statuses-dialog-component {
+  padding: 20px;
+}
+.manage-statuses-dialog-content {
+    display: flex;
+    align-items: top;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+.title-close {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.title-close h2 {
+  margin: 0;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+}
+.title-close img {
+  height: 25px;
+  width: 25px;
+  filter: brightness(0) saturate(100%) invert(0);
+}
+.status-form {
+  width: 50%;
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+.order-status-content {
+    width: 50%;
+}
+.status-form form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.field {
+  margin-bottom: 15px;
+}
+.submit {
+  display: flex;
+  justify-content: center;
+}
+.order-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+.order-status-tile {
+  padding: 10px 14px;
+  background-color: #f1f1f1;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1), box-shadow 100ms ease, background-color 0.2s ease-in-out, border 0.2s ease-in-out, font-weight 1ms ease-in-out;;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  &:hover { /*& je selektor co odkazuje na rodicovsky (order-status-tile)*/
+    background-color: #e0e0e0;
+  }
+  &.selected {
+    border-color: #0d6efd;
+    font-weight: 600;
+  }
+}
+mat-paginator {
+  background-color: #f2f2f2;
+  margin-top: 15px;
+  border-radius: 10px;
+  width: 100%;
+  font-size: 14px;
+}
+.form-control.is-invalid {
+  border-color: red !important;
+}
+.form-control.ng-invalid.ng-touched {
+  border-color: red;
+}

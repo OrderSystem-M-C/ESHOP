@@ -1,6 +1,7 @@
-﻿using AspNetCoreAPI.Authentication.dto;
+﻿using AspNetCoreAPI.Authentication.Dto;
 using AspNetCoreAPI.Models;
 using AspNetCoreAPI.Registration.dto;
+using AspNetCoreAPI.Registration.Dto;
 using AspNetCoreAPI.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -23,29 +24,11 @@ namespace AspNetCoreAPI.Registration
             _recaptchaService = recaptchaService;
         }
 
-        //[HttpPost("register")]
-        //public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDTO userRegistrationDto)
-        //{
-        //    if (userRegistrationDto == null || !ModelState.IsValid)
-        //        return BadRequest();
-
-        //    var user = new User { UserName = userRegistrationDto.Email,  Email = userRegistrationDto.Email };
-        //    var result = await _userManager.CreateAsync(user, userRegistrationDto.Password);
-        //    if (!result.Succeeded)
-        //    {
-        //        var errors = result.Errors.Select(e => e.Description);
-
-        //        return BadRequest(new UserRegistrationResponseDTO { Errors = errors });
-        //    }
-            
-        //    return StatusCode(201);
-        //}
-
         [HttpPost("add-claim")]
         public async Task<IActionResult> AddClaim([FromBody] ClaimDTO claimDto)
         {
-            var user = await _userManager.FindByNameAsync(claimDto.userEmail);
-            var result = await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim(claimDto.type, claimDto.value));
+            var user = await _userManager.FindByNameAsync(claimDto.UserEmail);
+            var result = await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim(claimDto.Type, claimDto.Value));
 
             return Ok(result.Succeeded);
         }
