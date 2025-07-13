@@ -837,10 +837,16 @@ namespace AspNetCoreAPI.Controllers
                     return BadRequest("Data transfer object was not provided.");
                 }
 
+                int maxSortOrder = await _context.OrderStatuses
+                    .OrderByDescending(s => s.SortOrder)
+                    .Select(s => s.SortOrder)
+                    .FirstOrDefaultAsync();
+
                 var newStatus = new OrderStatusModel
                 {
                     StatusName = orderStatusDTO.StatusName,
-                    SortOrder = orderStatusDTO.SortOrder
+                    StatusColor = orderStatusDTO.StatusColor,
+                    SortOrder = maxSortOrder + 1
                 };
 
                 await _context.OrderStatuses.AddAsync(newStatus);

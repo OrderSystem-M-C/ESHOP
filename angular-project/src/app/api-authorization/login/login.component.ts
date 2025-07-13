@@ -48,7 +48,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error(err?.errorMessage || err);
-          this.snackBar.open("E-mailová adresa alebo heslo nie sú správne!", "", { duration: 3000, panelClass: ['custom-snackbar'] });
+          this.snackBar.open("E-mailová adresa alebo heslo nie sú správne!", "", { duration: 3000 });
           this.loginForm.reset();
           this.validateAllFormFields(this.loginForm);
           this.isLogging = false;
@@ -58,9 +58,9 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.validateAllFormFields(this.loginForm);
       
       if(!this.loginForm.get('recaptcha')?.value){
-        this.snackBar.open("Zabudli ste na overenie reCAPTCHA!", "", { duration: 3000, panelClass: ['custom-snackbar'] });
+        this.snackBar.open("Zabudli ste na overenie reCAPTCHA!", "", { duration: 3000 });
       }else{
-        this.snackBar.open("Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!", "", { duration: 3000, panelClass: ['custom-snackbar'] });
+        this.snackBar.open("Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!", "", { duration: 3000 });
       }
     }
   }

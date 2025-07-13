@@ -95,4 +95,12 @@ export class OrderService {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.put(url, statuses, { headers: headers });
   }
+  addOrderStatus(status: OrderStatusDTO) {
+    const url = `${this.baseUrl}/order/add-order-status`;
+    return this.http.post(url, status);
+  }
+  deleteOrderStatus(statusId: number) {
+    const url = `${this.baseUrl}/order/delete-order-status/${statusId}`;
+    return this.http.delete(url);
+  }
 }

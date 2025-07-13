@@ -2,12 +2,12 @@
   padding: 20px;
 }
 .manage-statuses-dialog-content {
-    display: flex;
-    align-items: top;
-    flex-direction: row;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
+  display: flex;
+  align-items: top;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
 }
 .title-close {
   display: flex;
@@ -36,7 +36,7 @@
   background-color: #f9f9f9;
 }
 .order-status-content {
-    width: 50%;
+  width: 100%;
 }
 .status-form form {
   width: 100%;
@@ -45,7 +45,7 @@
   gap: 10px;
 }
 .field {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 .submit {
   display: flex;
@@ -59,23 +59,71 @@
   padding: 20px;
   border-radius: 10px;
   background-color: #f9f9f9;
+  width: 100%;
 }
 .order-status-tile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
   padding: 10px 14px;
   background-color: #f1f1f1;
   border-radius: 8px;
   border: 2px solid transparent;
   cursor: pointer;
   font-size: 14px;
-  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1), box-shadow 100ms ease, background-color 0.2s ease-in-out, border 0.2s ease-in-out, font-weight 1ms ease-in-out;;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  &:hover { /*& je selektor co odkazuje na rodicovsky (order-status-tile)*/
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1), box-shadow 100ms ease,
+    background-color 0.2s ease-in-out, border 0.2s ease-in-out,
+    font-weight 1ms ease-in-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  &:hover {
+    /*& je selektor co odkazuje na rodicovsky (order-status-tile)*/
     background-color: #e0e0e0;
   }
   &.selected {
     border-color: #0d6efd;
     font-weight: 600;
   }
+}
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+.three-dots-icon img {
+  height: 25px;
+  width: 25px;
+  cursor: pointer;
+}
+.dropdown-menu {
+  display: none;
+  background-color: #f9f9f9;
+  padding: 10px;
+  position: absolute;
+  top: 20px;
+  right: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  z-index: 100;
+  border: 1px solid #ccc;
+  min-width: 150px;
+}
+.dropdown-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 5px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  text-align: center;
+}
+.dropdown-menu button:hover {
+  background-color: #f0f0f0;
+}
+.dropdown-container:hover .dropdown-menu,
+.dropdown-container:focus-within .dropdown-menu {
+  display: block;
 }
 mat-paginator {
   background-color: #f2f2f2;

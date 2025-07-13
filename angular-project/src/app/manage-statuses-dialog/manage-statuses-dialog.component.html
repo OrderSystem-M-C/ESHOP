@@ -1,32 +1,47 @@
 <div class="manage-statuses-dialog-component">
     <div class="title-close">
-        <h2>Spravovať stavy objednávok
+        <h2>Nastavenia stavov objednávky
             <img src="../../assets/Images/settings-icon.png" alt="settings-icon">
         </h2>
         <button class="btn btn-secondary" (click)="closeDialog()">Zavrieť okno</button>
     </div>
-    <div class="manage-statuses-dialog-content">
-        <div class="status-form">
-        <form [formGroup]="statusForm" (ngSubmit)="submitForm()">
-            <div class="field">
-                <label class="form-label" for="statusName">Zadajte názov pre stav objednávky*</label>
-                <input class="form-control" id="statusName" type="text" formControlName="statusName" placeholder="Zadajte názov stavu" [ngClass]="{'is-invalid': statusForm.get('statusName').invalid && statusForm.get('statusName').touched}">
-            </div>
-            <div class="field">
-                <label class="form-label" for="statusColor">Zadajte farbu pre stav objednávky*</label>
-                <input class="form-control" id="statusColor" type="color" formControlName="statusColor" [ngClass]="{'is-invalid': statusForm.get('statusColor').invalid && statusForm.get('statusColor').touched}">
-            </div>
-            <div class="submit">
-                <button class="btn btn-primary" type="submit">
-                {{ editingOrderStatusId !== null ? 'Uložiť zmeny' : 'Pridať stav'}}
-                </button>
-            </div>
-        </form>
+    @if(isLoading){
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            Načítava sa
         </div>
-        <div class="status-container">
+    }@else{
+        <div class="manage-statuses-dialog-content">
+          <div class="status-form">
+            <form [formGroup]="statusForm" (ngSubmit)="addOrderStatus()">
+                <div class="field">
+                    <label class="form-label" for="statusName">Zadajte názov stavu*</label>
+                    <input class="form-control" id="statusName" type="text" formControlName="statusName" placeholder="Zadajte názov stavu" [ngClass]="{'is-invalid': statusForm.get('statusName').invalid && statusForm.get('statusName').touched}">
+                </div>
+                <div class="field">
+                    <label class="form-label" for="statusColor">Zadajte farbu pre stav*</label>
+                    <input class="form-control" id="statusColor" type="color" formControlName="statusColor" [ngClass]="{'is-invalid': statusForm.get('statusColor').invalid && statusForm.get('statusColor').touched}">
+                </div>
+                <div class="submit">
+                    <button class="btn btn-primary" type="submit">
+                    {{ editingOrderStatusId !== null ? 'Uložiť zmeny' : 'Pridať stav'}}
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="order-status-content">
             <div class="order-status-grid">
                 <div class="order-status-tile" *ngFor="let status of paginatedStatuses" [style.border-left]=" '10px solid ' + status.statusColor">
                     {{ status.statusName }}
+                    <div class="dropdown-container">
+                        <span class="three-dots-icon">
+                            <img src="../../assets/Images/three-dots-icon.png" alt="three-dots-icon">
+                        </span> 
+                        <div class="dropdown-menu">
+                            <button>Upraviť stav</button>
+                            <button (click)="deleteOrderStatus(status.statusId)">Vymazať stav</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="pagination-container">
@@ -34,4 +49,5 @@
             </div>
         </div>
     </div>
+    }
 </div>

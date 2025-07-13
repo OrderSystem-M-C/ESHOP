@@ -21,7 +21,7 @@ export class ManageStatusesDialogComponent implements OnInit {
   
   statusForm = new FormGroup({
     statusName: new FormControl('', [ Validators.required ]),
-    statusColor: new FormControl('#cccccc', [Validators.required])
+    statusColor: new FormControl('', [Validators.required])
   });
 
   editingOrderStatusId: number | null = null;
@@ -29,6 +29,8 @@ export class ManageStatusesDialogComponent implements OnInit {
   totalItems: number = 0;
   pageIndex: number = 0;
   pageSize: number = 6;
+
+  isLoading: boolean = true;
 
   constructor(private dialogRef: MatDialogRef<ManageStatusesDialogComponent>, private orderService: OrderService, private snackBar: MatSnackBar){}
 
@@ -43,15 +45,43 @@ export class ManageStatusesDialogComponent implements OnInit {
     this.pageIndex = pageEvent.pageIndex;
   }
 
-  submitForm(): void {
-
-  }
-
   loadOrderStatuses(): void {
     this.orderService.getOrderStatuses().subscribe({
       next: (response) => {
         this.statuses = response;
         this.totalItems = response.length;
+        this.isLoading = false;
+      },
+      error: (err) => console.error(err)
+    })
+  }
+  addOrderStatus(): void {
+    if(this.statusForm.valid){
+      this.isLoading = true;
+      const status = {
+        statusName: this.statusForm.value.statusName,
+        statusColor: this.statusForm.value.statusColor
+      }
+      this.orderService.addOrderStatus(status).subscribe({
+        next: () => {
+          this.snackBar.open("Stav objednávky bol úspešne pridaný!", "", { duration: 2000 });
+          this.statusForm.reset();
+          this.statusForm.get('statusColor')?.setValue('#cccccc');
+          this.loadOrderStatuses();
+        },
+        error: (err) => console.error(err)
+      })
+    }else{
+      this.snackBar.open("Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!", "", { duration: 3000 });
+      Object.values(this.statusForm.controls).forEach(control => control.markAsTouched());
+    }
+  }
+  deleteOrderStatus(statusId: number): void {
+    this.isLoading = true;
+    this.orderService.deleteOrderStatus(statusId).subscribe({
+      next: () => {
+        this.snackBar.open("Stav objednávky bol úspešne vymazaný!", "", { duration: 2000 });
+        this.loadOrderStatuses();
       },
       error: (err) => console.error(err)
     })

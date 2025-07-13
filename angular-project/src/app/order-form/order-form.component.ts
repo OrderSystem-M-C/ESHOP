@@ -160,13 +160,24 @@ export class OrderFormComponent implements OnInit {
       invoicePhoneNumber: this.invoiceForm.value.invoicePhoneNumber,
     }
   }
-  
+
+  loadOrderStatuses(): void {
+    this.orderService.getOrderStatuses().subscribe({
+      next: (response) => {
+        this.statuses = this.originalStatusesOrder = response;
+      },
+      error: (err) => console.error(err)
+    })
+  }
   openManageStatusesDialog(): void {
     const dialogRef = this.dialog.open(ManageStatusesDialogComponent, {
-      width: '1200px'
+      width: '1000px'
     });
     dialogRef.afterClosed().subscribe(result => {
-      console.log(result)
+      if(result === true){
+        this.statuses = this.originalStatusesOrder = [];
+        this.loadOrderStatuses();
+      }
     })
   }
   toggleEditOrderStatus() {
@@ -907,12 +918,7 @@ export class OrderFormComponent implements OnInit {
     
     this.existingOrderId = Number(this.route.snapshot.paramMap.get('orderId')) ?? null;
 
-    this.orderService.getOrderStatuses().subscribe({
-      next: (response) => {
-        this.statuses = this.originalStatusesOrder = response;
-      },
-      error: (err) => console.error(err)
-    });
+    this.loadOrderStatuses();
 
     if(this.existingOrderId){
       this.isEditMode = true;
@@ -971,8 +977,8 @@ export interface OrderDTO {
   packageCode?: string;
 }
 export interface OrderStatusDTO {
-  statusId: number;
+  statusId?: number;
   statusName: string;
-  sortOrder: number;
+  sortOrder?: number;
   statusColor: string;
 }
