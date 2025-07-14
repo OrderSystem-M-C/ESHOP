@@ -69,6 +69,10 @@ h1 {
   justify-content: flex-start;
   align-items: top;
   flex-direction: column;
+  gap: 5px;
+}
+.user-eph-settings p {
+  margin: 0;
 }
 .eph-prefix-suffix-container {
   margin-bottom: 15px;

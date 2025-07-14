@@ -58,19 +58,31 @@ export class ManageStatusesDialogComponent implements OnInit {
   addOrderStatus(): void {
     if(this.statusForm.valid){
       this.isLoading = true;
-      const status = {
+      const status: OrderStatusDTO = {
         statusName: this.statusForm.value.statusName,
         statusColor: this.statusForm.value.statusColor
       }
-      this.orderService.addOrderStatus(status).subscribe({
-        next: () => {
-          this.snackBar.open("Stav objednávky bol úspešne pridaný!", "", { duration: 2000 });
-          this.statusForm.reset();
-          this.statusForm.get('statusColor')?.setValue('#cccccc');
-          this.loadOrderStatuses();
-        },
-        error: (err) => console.error(err)
-      })
+      if (this.editingOrderStatusId !== null) {
+        status.statusId = this.editingOrderStatusId;
+        this.orderService.updateOrderStatus(status).subscribe({
+          next: () => {
+            this.snackBar.open("Stav objednávky bol úspešne upravený!", "", { duration: 2000 });
+            this.statusForm.reset();
+            this.editingOrderStatusId = null;
+            this.loadOrderStatuses();
+          },
+          error: (err) => console.error(err)
+        });
+      } else {
+        this.orderService.addOrderStatus(status).subscribe({
+          next: () => {
+            this.snackBar.open("Stav objednávky bol úspešne pridaný!", "", { duration: 2000 });
+            this.statusForm.reset();
+            this.loadOrderStatuses();
+          },
+          error: (err) => console.error(err)
+        });
+      }
     }else{
       this.snackBar.open("Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!", "", { duration: 3000 });
       Object.values(this.statusForm.controls).forEach(control => control.markAsTouched());
@@ -85,6 +97,13 @@ export class ManageStatusesDialogComponent implements OnInit {
       },
       error: (err) => console.error(err)
     })
+  }
+  editOrderStatus(status: OrderStatusDTO): void {
+    this.statusForm.patchValue({
+      statusName: status.statusName,
+      statusColor: status.statusColor
+    });
+    this.editingOrderStatusId = status.statusId;
   }
 
   closeDialog() {

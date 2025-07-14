@@ -1,5 +1,6 @@
 .manage-statuses-dialog-component {
   padding: 20px;
+  width: 1000px;
 }
 .manage-statuses-dialog-content {
   display: flex;
@@ -45,7 +46,7 @@
   gap: 10px;
 }
 .field {
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 .submit {
   display: flex;
@@ -104,11 +105,13 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   z-index: 100;
-  border: 1px solid #ccc;
-  min-width: 150px;
+  border: 1px solid black;
+  min-width: 175px;
 }
 .dropdown-menu button {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   padding: 8px 12px;
   border-radius: 5px;
@@ -118,6 +121,11 @@
   cursor: pointer;
   text-align: center;
 }
+.dropdown-menu button img {
+  height: 20px;
+  width: 20px;
+  filter: brightness(0) saturate(100%) invert(0);
+}
 .dropdown-menu button:hover {
   background-color: #f0f0f0;
 }
@@ -126,7 +134,8 @@
   display: block;
 }
 mat-paginator {
-  background-color: #f2f2f2;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
   margin-top: 15px;
   border-radius: 10px;
   width: 100%;

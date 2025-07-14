@@ -22,6 +22,9 @@
                     <label class="form-label" for="statusColor">Zadajte farbu pre stav*</label>
                     <input class="form-control" id="statusColor" type="color" formControlName="statusColor" [ngClass]="{'is-invalid': statusForm.get('statusColor').invalid && statusForm.get('statusColor').touched}">
                 </div>
+                <div class="field">
+                    <p>Poznámka: Poradie vytvoreného stavu bude automaticky zvolené ako posledné.</p>
+                </div>
                 <div class="submit">
                     <button class="btn btn-primary" type="submit">
                     {{ editingOrderStatusId !== null ? 'Uložiť zmeny' : 'Pridať stav'}}
@@ -38,8 +41,8 @@
                             <img src="../../assets/Images/three-dots-icon.png" alt="three-dots-icon">
                         </span> 
                         <div class="dropdown-menu">
-                            <button>Upraviť stav</button>
-                            <button (click)="deleteOrderStatus(status.statusId)">Vymazať stav</button>
+                            <button (click)="editOrderStatus(status)"><img src="../../assets/Images/edit-icon.png" alt="edit-icon"> Upraviť stav</button>
+                            <button (click)="deleteOrderStatus(status.statusId)"><img src="../../assets/Images/bin-icon.png" alt="bin-icon">Vymazať stav</button>
                         </div>
                     </div>
                 </div>

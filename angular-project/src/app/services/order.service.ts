@@ -103,4 +103,8 @@ export class OrderService {
     const url = `${this.baseUrl}/order/delete-order-status/${statusId}`;
     return this.http.delete(url);
   }
+  updateOrderStatus(status: OrderStatusDTO) {
+    const url = `${this.baseUrl}/order/update-order-status`;
+    return this.http.put(url, status);
+  }
 }

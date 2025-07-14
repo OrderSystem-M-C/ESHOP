@@ -789,14 +789,14 @@ namespace AspNetCoreAPI.Controllers
                     .OrderBy(s => s.SortOrder)
                     .ToListAsync();
 
-                if(statuses == null)
+                if (statuses == null)
                 {
                     return NotFound("Order statuses were not found.");
                 }
 
                 return Ok(statuses);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"An error occurred while trying to fetch order statuses: {ex.Message}" });
             }
@@ -806,15 +806,15 @@ namespace AspNetCoreAPI.Controllers
         {
             try
             {
-                if(orderStatusDTO == null)
+                if (orderStatusDTO == null)
                 {
                     return BadRequest("Data transfer object was not provided.");
                 }
-                foreach(var statusDto in orderStatusDTO)
+                foreach (var statusDto in orderStatusDTO)
                 {
                     var status = await _context.OrderStatuses
                         .FirstOrDefaultAsync(s => s.StatusId == statusDto.StatusId);
-                    if(status != null)
+                    if (status != null)
                     {
                         status.SortOrder = statusDto.SortOrder;
                     }
@@ -864,7 +864,7 @@ namespace AspNetCoreAPI.Controllers
         {
             try
             {
-                if(statusId <= 0)
+                if (statusId <= 0)
                 {
                     return BadRequest("Invalid status ID.");
                 }
@@ -878,9 +878,37 @@ namespace AspNetCoreAPI.Controllers
 
                 return Ok(new { message = $"Successfully deleted order status with ID {statusId}." });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"An error occurred while trying to delete order status: {ex.Message}" });
+            }
+        }
+        [HttpPut("update-order-status")]
+        public async Task<IActionResult> UpdateOrderStatusAsync([FromBody] OrderStatusDTO orderStatusDTO)
+        {
+            try
+            {
+                if(orderStatusDTO == null)
+                {
+                    return BadRequest("Data transfer object was not provided.");
+                }
+                var status = await _context.OrderStatuses
+                    .FirstOrDefaultAsync(s => s.StatusId == orderStatusDTO.StatusId);
+                if (status == null)
+                {
+                    return NotFound($"Order status with ID {orderStatusDTO.StatusId} was not found.");
+                }
+                status.StatusName = orderStatusDTO.StatusName;
+                status.StatusColor = orderStatusDTO.StatusColor;
+
+                _context.OrderStatuses.Update(status);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Order status updated successfully.", statusId = status.StatusId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"An error occurred while trying to update order status: {ex.Message}" });
             }
         }
     }
