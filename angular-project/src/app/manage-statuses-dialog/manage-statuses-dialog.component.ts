@@ -104,6 +104,11 @@ export class ManageStatusesDialogComponent implements OnInit {
       statusColor: status.statusColor
     });
     this.editingOrderStatusId = status.statusId;
+    if (status.statusName === 'Nezpracované - nová objednávka') {
+      this.statusForm.get('statusName')?.disable();
+    } else {
+      this.statusForm.get('statusName')?.enable();
+    }
   }
 
   closeDialog() {
