@@ -1,8 +1,6 @@
 <div class="manage-statuses-dialog-component">
     <div class="title-close">
-        <h2>Nastavenia stavov objednávky
-            <img src="../../assets/Images/settings-icon.png" alt="settings-icon">
-        </h2>
+        <h2>Nastavenia stavov objednávky</h2>
         <button class="btn btn-secondary" (click)="closeDialog()">Zavrieť okno</button>
     </div>
     @if(isLoading){
@@ -20,15 +18,17 @@
                 </div>
                 <div class="field">
                     <label class="form-label" for="statusColor">Zadajte farbu pre stav*</label>
-                    <input class="form-control" id="statusColor" type="color" formControlName="statusColor" [ngClass]="{'is-invalid': statusForm.get('statusColor').invalid && statusForm.get('statusColor').touched}">
+                    <input class="form-control status-color" id="statusColor" type="color" formControlName="statusColor" [ngClass]="{'is-invalid': statusForm.get('statusColor').invalid && statusForm.get('statusColor').touched}">
                 </div>
                 <div class="field">
                     <p>Poznámka: Poradie vytvoreného stavu bude automaticky zvolené ako posledné.</p>
                 </div>
                 <div class="submit">
-                    <button class="btn btn-primary" type="submit">
-                    {{ editingOrderStatusId !== null ? 'Uložiť zmeny' : 'Pridať stav'}}
-                    </button>
+                    @if(editingOrderStatusId !== null){
+                        <button class="btn btn-primary" type="submit"><img src="../../assets/Images/save-icon.png" alt="save-icon"> Uložiť zmeny</button>
+                    }@else{
+                        <button class="btn btn-primary" type="submit">Pridať stav</button>
+                    }
                 </div>
             </form>
         </div>

@@ -235,12 +235,6 @@
     <div class="order-status">
       <h3>Stav objednávky
         <div class="order-status-buttons">
-          @if(!isEditOrderStatus){
-            <button class="btn btn-primary order-status-settings-button" (click)="openManageStatusesDialog()">
-              <img src="../../assets/Images/settings-icon.png" alt="settings-icon">
-              Spravovať stavy
-            </button>
-          }
           <button class="btn btn-secondary" [class.is-editing]="isEditOrderStatus" (click)="toggleEditOrderStatus()">
             @if(!isEditOrderStatus){
               <img src="../../assets/Images/edit-icon.png" alt="edit-icon"> Upraviť poradie
@@ -250,6 +244,12 @@
           </button>
           @if(isEditOrderStatus){
             <button class="btn btn-outline-danger" (click)="cancelEditOrderStatus()">Zrušiť</button>
+          }
+          @if(!isEditOrderStatus){
+            <button class="btn btn-primary order-status-settings-button" (click)="openManageStatusesDialog()">
+              <img src="../../assets/Images/settings-icon.png" alt="settings-icon">
+              Spravovať stavy
+            </button>
           }
         </div>
     </h3>

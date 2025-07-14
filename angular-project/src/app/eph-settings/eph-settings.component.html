@@ -44,9 +44,9 @@
     <div class="user-eph-settings">
       <h3>Aktuálna konfigurácia podacích čísel (EPH)</h3>
       @if(ephSettings != null){
-        <p><strong>EPH Prefix:</strong> {{ ephSettings.ephPrefix }}</p><br>
-        <p><strong>EPH rozsah (od - do):</strong> {{ ephSettings.ephStartingNumber }} - {{ ephSettings.ephEndingNumber }}</p><br>
-        <p><strong>EPH Suffix:</strong> {{ ephSettings.ephSuffix }}</p><br>
+        <p><strong>EPH Prefix:</strong> {{ ephSettings.ephPrefix }}</p>
+        <p><strong>EPH rozsah (od - do):</strong> {{ ephSettings.ephStartingNumber }} - {{ ephSettings.ephEndingNumber }}</p>
+        <p><strong>EPH Suffix:</strong> {{ ephSettings.ephSuffix }}</p>
         <p><strong>Celkový počet dostupných podacích čísel:</strong> {{ totalPackageCodes }}</p>
       }@else{
         <p>Nemáte uložené nastavenia pre EPH.</p>

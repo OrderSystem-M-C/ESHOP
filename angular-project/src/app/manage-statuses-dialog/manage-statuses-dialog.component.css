@@ -4,7 +4,7 @@
 }
 .manage-statuses-dialog-content {
   display: flex;
-  align-items: top;
+  align-items: flex-start;
   flex-direction: row;
   justify-content: flex-start;
   gap: 10px;
@@ -45,12 +45,25 @@
   flex-direction: column;
   gap: 10px;
 }
+.status-color {
+  padding: 5px;
+}
 .field {
   margin-bottom: 5px;
 }
 .submit {
   display: flex;
   justify-content: center;
+}
+.submit button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.submit button img {
+  height: 17px;
+  width: 17px;
+  margin-bottom: 1px;
 }
 .order-status-grid {
   display: grid;
