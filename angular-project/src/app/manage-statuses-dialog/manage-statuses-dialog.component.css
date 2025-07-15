@@ -51,6 +51,9 @@
 .field {
   margin-bottom: 5px;
 }
+.field p {
+  margin: 0;
+}
 .submit {
   display: flex;
   justify-content: center;
@@ -133,6 +136,7 @@
   text-align: left;
   cursor: pointer;
   text-align: center;
+  color: black;
 }
 .dropdown-menu button img {
   height: 20px;
