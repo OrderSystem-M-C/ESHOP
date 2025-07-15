@@ -21,6 +21,31 @@ export class OrderService {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.get<OrderDTO[]>(url, {headers});
   }
+  // getSortedOrders(
+  //   pageIndex: number,
+  //   pageSize: number,
+  //   searchText: string,
+  //   searchOption: string,
+  //   selectedStatuses: string[],
+  //   dateSortOrder: string
+  // ): Observable<PaginatedOrdersDTO> {
+  //   const url = `${this.baseUrl}/order/get-sorted-orders`;
+  //   let params = new HttpParams()
+  //   .set('pageIndex', pageIndex.toString())
+  //   .set('pageSize', pageSize.toString());
+  //   if(searchText) {
+  //     params = params.set('searchText', searchText);
+  //     params = params.set('searchOption', searchOption);
+  //   }
+  //   if(selectedStatuses.length > 0) {
+  //     params = params.set('selectedStatuses', selectedStatuses.join(','));
+  //   }
+  //   if(dateSortOrder){
+  //     params = params.set('dateSortOrder', dateSortOrder);
+  //   }
+  //   const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+  //   return this.http.get<PaginatedOrdersDTO>(url, { headers, params });
+  // }
   getOrderDetails(orderId: number){
     const url = `${this.baseUrl}/order/get-order-details/${orderId}`;
     return this.http.get<OrderDTO>(url);
@@ -75,9 +100,7 @@ export class OrderService {
     let body = {
       OrderIds: orderIds
     };
-    return this.http.delete(url, {
-      body: body
-    });
+    return this.http.delete(url, { body: body });
   }
   getOrdersXmlFile(orderIds: number[]){
     const url = `${this.baseUrl}/order/export-orders-to-xml`;
@@ -108,3 +131,7 @@ export class OrderService {
     return this.http.put(url, status);
   }
 }
+// export interface PaginatedOrdersDTO {
+//   orders: OrderDTO[];
+//   totalCount: number;
+// }

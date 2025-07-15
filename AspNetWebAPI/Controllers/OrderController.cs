@@ -121,6 +121,112 @@ namespace AspNetCoreAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+        [HttpGet("get-sorted-orders")]
+        public async Task<ActionResult<PaginatedOrdersDTO<OrderDTO>>> GetSortedOrdersAsync(
+            [FromQuery] int pageIndex = 0,
+            [FromQuery] int pageSize = 6,
+            [FromQuery] string searchText = null,
+            [FromQuery] string searchOption = "auto",
+            [FromQuery] string statuses = null,
+            [FromQuery] string dateSortOrder = null
+            )
+        {
+            try
+            {
+                IQueryable<OrderModel> query = _context.Orders;
+
+                if (!string.IsNullOrWhiteSpace(searchText))
+                {
+                    string lowerSearchText = searchText.ToLower();
+                    switch (searchOption.ToLower())
+                    {
+                        case "customername":
+                            query = query.Where(o => o.CustomerName.ToLower().Contains(lowerSearchText));
+                            break;
+                        case "orderId":
+                            if (int.TryParse(searchText, out int orderId))
+                            {
+                                query = query.Where(o => o.OrderId.ToString().StartsWith(searchText));
+                            }
+                            break;
+                        case "email":
+                            query = query.Where(o => o.Email.ToLower().Contains(lowerSearchText));
+                            break;
+                        case "note":
+                            query = query.Where(o => o.Note != null && o.Note.ToLower().Contains(lowerSearchText));
+                            break;
+                        case "auto":
+                        default:
+                            query = query.Where(o =>
+                                o.CustomerName.ToLower().Contains(lowerSearchText) ||
+                                o.OrderId.ToString().StartsWith(searchText) ||
+                                o.Email.ToLower().Contains(lowerSearchText) ||
+                                (o.Note != null && o.Note.ToLower().Contains(lowerSearchText))
+                            );
+                            break;
+                    }
+                }
+                if (!string.IsNullOrWhiteSpace(statuses))
+                {
+                    var statusList = statuses.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim())
+                        .ToList();
+                    if (statusList.Any())
+                    {
+                        query = query.Where(o => statusList.Contains(o.OrderStatus));
+                    }
+                }
+                int totalCount = await query.CountAsync();
+                if (totalCount == 0)
+                {
+                    return NotFound(new { message = "No orders found matching the criteria." });
+                }
+                if (!string.IsNullOrWhiteSpace(dateSortOrder))
+                {
+                    switch (dateSortOrder.ToLower())
+                    {
+                        case "newest":
+                            query = query.OrderByDescending(o => DateTime.ParseExact(o.OrderDate, "dd.MM.yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture));
+                            break;
+                        case "oldest":
+                            query = query.OrderBy(o => DateTime.ParseExact(o.OrderDate, "dd.MM.yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture));
+                            break;
+                        default:
+                            query = query.OrderByDescending(o => DateTime.ParseExact(o.OrderDate, "dd.MM.yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture));
+                            break;
+                    }
+                }
+                else
+                {
+                    query = query.OrderByDescending(o => o.OrderDate);
+                }
+                var orders = await query
+                    .Skip(pageIndex * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+                var orderDTOs = orders.Select(o => new OrderDTO
+                {
+                    OrderId = o.OrderId,
+                    CustomerName = o.CustomerName,
+                    Email = o.Email,
+                    OrderDate = o.OrderDate,
+                    OrderStatus = o.OrderStatus,
+                    TotalPrice = o.TotalPrice,
+                    Note = o.Note,
+                    PackageCode = o.PackageCode,
+                }).ToList();
+
+                return Ok(new PaginatedOrdersDTO<OrderDTO>
+                {
+                    Orders = orderDTOs,
+                    TotalCount = totalCount
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
         [HttpGet("get-order-details/{orderId}")]
         public async Task<ActionResult<OrderDTO>> GetOrderDetails([FromRoute] int orderId)
         {
