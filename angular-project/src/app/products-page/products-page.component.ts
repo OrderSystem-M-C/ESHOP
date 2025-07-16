@@ -49,7 +49,8 @@ export class ProductsPageComponent implements OnInit {
     productName: new FormControl('', Validators.required),
     productDescription: new FormControl(''),
     productPrice: new FormControl('', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
-    productWeight: new FormControl('', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/) ])
+    productWeight: new FormControl('', [Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
+    stockAmount: new FormControl('', [Validators.pattern(/^\d+(\.\d{1,2})?$/)])
   })
 
   updatePagedProducts(): void {
@@ -185,7 +186,8 @@ export class ProductsPageComponent implements OnInit {
         productName: this.productForm.value.productName,
         productDescription: this.productForm.value.productDescription || '',
         productPrice: Number(this.productForm.value.productPrice),
-        productWeight: Number(this.productForm.value.productWeight)
+        productWeight: Number(this.productForm.value.productWeight),
+        stockAmount: Number(this.productForm.value.stockAmount)
       }
 
       this.isLoadingForm = true;

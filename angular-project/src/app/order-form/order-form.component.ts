@@ -62,6 +62,8 @@ export class OrderFormComponent implements OnInit {
   pageIndex: number = 0;
   pageSize: number = 4;
 
+  originalPackageCode: string = '';
+
   statuses: OrderStatusDTO[] = [];
   private originalStatusesOrder: OrderStatusDTO[] = [];
 
@@ -510,6 +512,7 @@ export class OrderFormComponent implements OnInit {
     this.isLoading_edit = true;
     this.orderService.getOrderDetails(orderId).subscribe((order) => {
       this.orderForm.patchValue(order); //patchValue robi ze vyplni hodnoty objednavky
+      this.originalPackageCode = order.packageCode;
 
       if(order.packageCode === ''){
         this.ephService.generatePackageCode().subscribe({
@@ -685,6 +688,12 @@ export class OrderFormComponent implements OnInit {
 
   validatePackageCode(packageCode: string): void {
     this.isLoading_packageCode = true;
+    if (this.isEditMode && packageCode === this.originalPackageCode) {
+      this.orderForm.get('packageCode')?.setErrors(null);
+      this.snackBar.open('Podacie číslo ostáva nezmenené a je platné.', '', { duration: 3000 });
+      this.isLoading_packageCode = false;
+      return;
+    }
     if (!this.checkPackageCodeFormat(packageCode)) return;
 
     this.ephService.validatePackageCode(packageCode).subscribe({
@@ -919,6 +928,12 @@ export class OrderFormComponent implements OnInit {
   ngOnInit(): void {
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
+
+    const invoiceIssueDate = now.toISOString().split('T')[0];
+
+    this.invoiceForm.patchValue({
+      invoiceIssueDate: invoiceIssueDate
+    })
     
     this.existingOrderId = Number(this.route.snapshot.paramMap.get('orderId')) ?? null;
 

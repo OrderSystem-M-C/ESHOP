@@ -174,7 +174,7 @@ h1 {
   margin: 0 auto;
 }
 .orders-table thead {
-  border-left: 8px solid #084298;
+  border-right: 8px solid #084298;
 }
 .orders-table th {
   padding: 12px;
@@ -297,7 +297,7 @@ canvas {
 .preview-popup {
   position: absolute;
   top: 100%;     
-  right: -210px;
+  left: 40px;
   transform: scale(0.8);
   transform-origin: top left;
   min-width: 1250px;

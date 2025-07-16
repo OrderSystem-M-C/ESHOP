@@ -24,9 +24,8 @@ namespace AspNetCoreAPI.Models
         [Required(ErrorMessage = "Cena produktu je povinná.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Cena produktu musí byť väčšia ako 0.")]
         public decimal ProductPriceSnapshot { get; set; }
-        [Required(ErrorMessage = "Váha produktu je povinná.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Váha produktu musí byť väčšia ako 0.")]
-        public decimal ProductWeightSnapshot { get; set; }
+        public decimal? ProductWeightSnapshot { get; set; }
         public string? ProductDescriptionSnapshot { get; set; }
     }
 }

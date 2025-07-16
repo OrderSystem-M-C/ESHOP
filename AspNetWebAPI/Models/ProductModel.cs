@@ -18,9 +18,8 @@ namespace AspNetCoreAPI.Models
         [Required(ErrorMessage = "Cena produktu je povinná.")]
         [Range(0.01, double.MaxValue, ErrorMessage = ("Cena musí byť väčšia ako 0€."))]
         public decimal ProductPrice { get; set; }
-        [Required(ErrorMessage = "Váha produktu je povinná.")]
         [Range(0.01, double.MaxValue, ErrorMessage = ("Váha musí byť väčšia ako 0kg."))]
-        public decimal ProductWeight { get; set; }
+        public decimal? ProductWeight { get; set; }
         [Required(ErrorMessage = "Počet produktov na sklade je povinný.")]
         public int StockAmount { get; set; } = 0;
         [Required(ErrorMessage = "Produkty sú povinné.")]

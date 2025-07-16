@@ -18,7 +18,7 @@ namespace AspNetCoreAPI.Controllers
         }
 
         [HttpPost("create-product")]
-        public async Task<IActionResult> CreateProduct([FromBody] ProductDTO productDTO)
+        public async Task<IActionResult> CreateProductAsync([FromBody] ProductDTO productDTO)
         {
             if (productDTO == null)
             {
@@ -30,13 +30,14 @@ namespace AspNetCoreAPI.Controllers
                 ProductDescription = productDTO.ProductDescription,
                 ProductPrice = productDTO.ProductPrice,
                 ProductWeight = productDTO.ProductWeight,
+                StockAmount = productDTO.StockAmount
             };
 
             try
             {
                 await _context.Products.AddAsync(product);
                 await _context.SaveChangesAsync();
-                return CreatedAtAction(nameof(CreateProduct), product);
+                return Created($"product/{product.ProductId}", product);
             }
             catch (Exception ex)
             {
@@ -44,7 +45,7 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpGet("get-products")]
-        public async Task<ActionResult<IEnumerable<ProductDTO[]>>> getOrders()
+        public async Task<ActionResult<IEnumerable<ProductDTO[]>>> GetProductsAsync()
         {
             try
             {
@@ -240,7 +241,7 @@ namespace AspNetCoreAPI.Controllers
                         ProductNameSnapshot = product.ProductName,
                         ProductDescriptionSnapshot = product.ProductDescription ?? string.Empty,
                         ProductPriceSnapshot = product.ProductPrice,
-                        ProductWeightSnapshot = product.ProductWeight
+                        ProductWeightSnapshot = product.ProductWeight ?? 0
                     };
                     await _context.OrderProducts.AddAsync(newOrderProduct);
                 }

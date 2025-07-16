@@ -84,7 +84,9 @@
               <td><div class="scrollable-cell">{{ product.productName }}</div></td>
               <td><div class="scrollable-cell">{{ product.productDescription || 'Popis produktu bol vynechaný'}}</div></td>
               <td style="width: 200px; text-align: center;">{{ product.productPrice }} €</td>
-              <td style="width: 200px; text-align: center;">{{ product.productWeight }} kg</td>
+              <td style="width: 200px; text-align: center;">
+                {{ product.productWeight != 0 ? (product.productWeight + ' kg') : 'Nezadané' }} 
+              </td>
               <td>
                 <div class="stock-input-container">
                   <input type="number" class="form-control stock-input"
@@ -136,12 +138,21 @@
               <p>€</p>
             </div>
         </div>
-        <div class="field">
-            <label for="product-weight" class="form-label">Hmotnosť produktu*</label>
+        <div class="custom-field">
+          <div class="product-weight-container">
+            <label for="product-weight" class="form-label">Hmotnosť produktu</label>
             <div class="product-weight">
               <input type="number" formControlName="productWeight" id="product-weight" class="form-control" placeholder="Zadajte hmotnosť produktu" [ngClass]="{'is-invalid': productForm.get('productWeight').invalid && productForm.get('productWeight').touched}">
               <p>kg</p>
             </div>
+          </div>
+          <div class="product-stock-amount-container">
+            <label for="stock-amount" class="form-label">Počet kusov na sklade</label>
+            <div class="stock-amount">
+              <input type="number" formControlName="stockAmount" id="stock-amount" class="form-control" placeholder="Zadajte počet kusov na sklade" [ngClass]="{'is-invalid': productForm.get('stockAmount').invalid && productForm.get('stockAmount').touched}">
+              <p>ks</p>
+            </div>
+          </div>
         </div>
         @if(!isLoadingForm){
           <div class="submit">

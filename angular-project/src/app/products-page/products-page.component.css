@@ -42,11 +42,16 @@ h1 {
   width: 15px;
 }
 .product-form{
-  width: 500px;
+  width: 525px;
   padding: 20px;
 }
-.field{
+.field, .custom-field {
   margin-bottom: 10px;
+}
+.custom-field {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
 .submit{
   width: 100%;
@@ -57,14 +62,18 @@ h1 {
 .submit button{
   margin-top: 5px;
 }
-.product-price, .product-weight{
+.product-price, .product-weight, .stock-amount {
   display: flex;
   flex-direction: row;
   justify-content: center;
   gap: 10px;
   align-items: center;
 }
-.product-price p, .product-weight p{
+.product-weight-stock-amount {
+  display: flex;
+  flex-direction: row;
+}
+.product-price p, .product-weight p, .stock-amount p{
   margin: 0;
 }
 .products-table {

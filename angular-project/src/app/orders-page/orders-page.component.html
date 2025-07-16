@@ -137,14 +137,14 @@
       <table class="orders-table">
         <thead>
           <tr>
-            <th style="width: 100px !important; text-align: center;">Zvoliť</th>
+            <th style="text-align: center;">Náhľad</th>
             <th>Dátum</th>
             <th>Číslo objednávky</th>
             <th>Meno</th>
-            <th>Stav objednávky</th>
             <th style="text-align: center;">Celková cena</th>
+            <th>Stav objednávky</th>
             <th style="text-align: center;">Podacie číslo</th>
-            <th style="text-align: center;">Náhľad</th>
+            <th style="width: 100px !important; text-align: center;">Zvoliť</th>
           </tr>
         </thead>
         <tbody>
@@ -152,26 +152,6 @@
             *ngFor="let order of ourFilteredOrders"
             class="order-row"
             (click)="navigateToDetails(order, $event)">
-            <td
-              class="checkbox-section"
-              [attr.title]="order.orderStatus"
-              [ngStyle]="{'border-left': '8px solid ' + getStatusColor(order.orderStatus)}">
-              <div style="display: flex; justify-content: center; align-items: center;">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  [(ngModel)]="order.orderSelected"
-                  (change)="selectOrder()"
-                  data-skip-navigation
-                />
-              </div>
-            </td>
-            <td>{{ order.orderDate }}</td>
-            <td>{{ order.orderId }}</td>
-            <td>{{ order.customerName }}</td>
-            <td>{{ order.orderStatus }}</td>
-            <td style="text-align: center;">{{ order.totalPrice }}€</td>
-            <td style="text-align: center;">{{ order.packageCode ? order.packageCode : 'Nezadané' }}</td>
             <td>
               <div class="preview-container"
                   (mouseenter)="hoveredOrder = order"
@@ -184,6 +164,26 @@
                     <app-order-details [order]="order" [previewOrderId]="order.orderId"></app-order-details>
                   </div>
                 </ng-container>
+              </div>
+            </td>
+            <td>{{ order.orderDate }}</td>
+            <td>{{ order.orderId }}</td>
+            <td>{{ order.customerName }}</td>
+            <td style="text-align: center;">{{ order.totalPrice }}€</td>
+            <td>{{ order.orderStatus }}</td>
+            <td style="text-align: center;">{{ order.packageCode ? order.packageCode : 'Nezadané' }}</td>
+            <td
+              class="checkbox-section"
+              [attr.title]="order.orderStatus"
+              [ngStyle]="{'border-right': '8px solid ' + getStatusColor(order.orderStatus)}">
+              <div style="display: flex; justify-content: center; align-items: center;">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  [(ngModel)]="order.orderSelected"
+                  (change)="selectOrder()"
+                  data-skip-navigation
+                />
               </div>
             </td>
           </tr>
