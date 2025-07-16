@@ -2,9 +2,7 @@
 using AspNetCoreAPI.DTOs;
 using AspNetCoreAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using System.ServiceModel.Channels;
 using System.Text;
 using System.Xml.Linq;
 
@@ -122,7 +120,7 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpGet("get-sorted-orders")]
-        public async Task<ActionResult<PaginatedOrdersDTO<OrderDTO>>> GetSortedOrdersAsync(
+        public async Task<ActionResult<SortedOrdersDTO<OrderDTO>>> GetSortedOrdersAsync(
             [FromQuery] int pageIndex = 0,
             [FromQuery] int pageSize = 6,
             [FromQuery] string searchText = null,
@@ -216,7 +214,7 @@ namespace AspNetCoreAPI.Controllers
                     PackageCode = o.PackageCode,
                 }).ToList();
 
-                return Ok(new PaginatedOrdersDTO<OrderDTO>
+                return Ok(new SortedOrdersDTO<OrderDTO>
                 {
                     Orders = orderDTOs,
                     TotalCount = totalCount

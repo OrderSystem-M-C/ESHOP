@@ -147,11 +147,11 @@ namespace AspNetCoreAPI.Controllers
             <h3>Objednaný tovar</h3>
             <table cellpadding='5' cellspacing='0' style='border-style: solid; border-color: #e0e0e0; border-width: 1px 1px 0px 1px; width:100%'>
                 <thead>
-                    <tr style='background-color: #f8f9fa;'>
-                        <th style='background-color: #f8f9fa;'>Názov produktu</th>
-                        <th style='background-color: #f8f9fa;'>Množstvo</th>
-                        <th style='background-color: #f8f9fa;'>Cena/ks</th>
-                        <th style='background-color: #f8f9fa;'>Celkovo</th>
+                    <tr style='background-color: #e4e4e4ff;'>
+                        <th style='background-color: #e4e4e4ff;'>Názov produktu</th>
+                        <th style='background-color: #e4e4e4ff;'>Množstvo</th>
+                        <th style='background-color: #e4e4e4ff;'>Cena/ks</th>
+                        <th style='background-color: #e4e4e4ff;'>Celkovo</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -181,61 +181,61 @@ namespace AspNetCoreAPI.Controllers
             </table>
             <h3>Objednávateľ</h3>
             <table cellpadding='5' cellspacing='0' style='border-style: solid; border-color: #e0e0e0; border-width: 1px 1px 1px 1px; width:100%'>
-                <tr><th style='background-color:#f8f9fa;'>Meno zákazníka</th><td style='border-bottom:1px solid #e0e0e0;'>{order.CustomerName}</td></tr>");
+                <tr><th style='background-color:#e4e4e4ff;'>Meno zákazníka</th><td style='border-bottom:1px solid #e0e0e0;'>{order.CustomerName}</td></tr>");
 
                         if (!string.IsNullOrWhiteSpace(order.Company))
                         {
                             sb.Append(@$"
-                <tr><th style='background-color:#f8f9fa;'>Firma</th><td style='border-bottom:1px solid #e0e0e0;'>{order.Company}</td></tr>");
+                <tr><th style='background-color:#e4e4e4ff;'>Firma</th><td style='border-bottom:1px solid #e0e0e0;'>{order.Company}</td></tr>");
                         }
                         if (!string.IsNullOrWhiteSpace(order.ICO))
                         {
                             sb.Append(@$"
-                <tr><th style='background-color:#f8f9fa;'>IČO (v prípade firmy)</th><td style='border-bottom:1px solid #e0e0e0;'>{order.ICO}</td></tr>");
+                <tr><th style='background-color:#e4e4e4ff;'>IČO (v prípade firmy)</th><td style='border-bottom:1px solid #e0e0e0;'>{order.ICO}</td></tr>");
                         }
                         if (!string.IsNullOrWhiteSpace(order.DIC))
                         {
                             sb.Append(@$"
-                <tr><th style='background-color:#f8f9fa;'>DIČ (v prípade firmy)</th><td style='border-bottom:1px solid #e0e0e0;'>{order.DIC}</td></tr>");
+                <tr><th style='background-color:#e4e4e4ff;'>DIČ (v prípade firmy)</th><td style='border-bottom:1px solid #e0e0e0;'>{order.DIC}</td></tr>");
                         }
                         if (!string.IsNullOrWhiteSpace(order.ICDPH))
                         {
                             sb.Append(@$"
-                <tr><th style='background-color:#f8f9fa;'>IČ DPH (v prípade firmy)</th><td style='border-bottom:1px solid #e0e0e0;'>{order.ICDPH}</td></tr>");
+                <tr><th style='background-color:#e4e4e4ff;'>IČ DPH (v prípade firmy)</th><td style='border-bottom:1px solid #e0e0e0;'>{order.ICDPH}</td></tr>");
                         }
 
                         sb.Append(@$"
-                <tr><th style='background-color:#f8f9fa;'>Adresa</th><td style='border-bottom:1px solid #e0e0e0;'>{order.Address}</td></tr>
-                <tr><th style='background-color:#f8f9fa;'>Mesto</th><td style='border-bottom:1px solid #e0e0e0;'>{order.City}</td></tr>
-                <tr><th style='background-color:#f8f9fa;'>PSČ</th><td style='border-bottom:1px solid #e0e0e0;'>{order.PostalCode}</td></tr>
-                <tr><th style='background-color:#f8f9fa;'>Email</th><td style='border-bottom:1px solid #e0e0e0;'>{order.Email}</td></tr>
-                <tr><th style='background-color:#f8f9fa;'>Telefón</th><td style='border-bottom:1px solid #e0e0e0;'>{order.PhoneNumber}</td></tr>
-                <tr><th style='background-color:#f8f9fa;'>Poznámka</th><td>{(string.IsNullOrWhiteSpace(order.Note) ? "Nezadané" : order.Note)}</td></tr>
+                <tr><th style='background-color:#e4e4e4ff;'>Adresa</th><td style='border-bottom:1px solid #e0e0e0;'>{order.Address}</td></tr>
+                <tr><th style='background-color:#e4e4e4ff;'>Mesto</th><td style='border-bottom:1px solid #e0e0e0;'>{order.City}</td></tr>
+                <tr><th style='background-color:#e4e4e4ff;'>PSČ</th><td style='border-bottom:1px solid #e0e0e0;'>{order.PostalCode}</td></tr>
+                <tr><th style='background-color:#e4e4e4ff;'>Email</th><td style='border-bottom:1px solid #e0e0e0;'>{order.Email}</td></tr>
+                <tr><th style='background-color:#e4e4e4ff;'>Telefón</th><td style='border-bottom:1px solid #e0e0e0;'>{order.PhoneNumber}</td></tr>
+                <tr><th style='background-color:#e4e4e4ff;'>Poznámka</th><td>{(string.IsNullOrWhiteSpace(order.Note) ? "Nezadané" : order.Note)}</td></tr>
             </table>
 
             <h3>Fakturačné údaje</h3>
             <table cellpadding='5' cellspacing='0' style='border-style: solid; border-color: #e0e0e0; border-width: 1px 1px 1px 1px; width:100%'>
-                <tr><th style='background-color:#f8f9fa;'>Meno a priezvisko</th><td style='border-bottom:1px solid #e0e0e0;'>{order.CustomerName}</td></tr>");
+                <tr><th style='background-color:#e4e4e4ff;'>Meno a priezvisko</th><td style='border-bottom:1px solid #e0e0e0;'>{order.CustomerName}</td></tr>");
 
                         if (!string.IsNullOrWhiteSpace(order.InvoiceCompany))
                         {
                             sb.Append(@$"
-                <tr><th style='background-color:#f8f9fa;'>Firma</th><td style='border-bottom:1px solid #e0e0e0;'>{order.InvoiceCompany}</td></tr>");
+                <tr><th style='background-color:#e4e4e4ff;'>Firma</th><td style='border-bottom:1px solid #e0e0e0;'>{order.InvoiceCompany}</td></tr>");
                         }
                         if (!string.IsNullOrWhiteSpace(order.InvoiceICO))
                         {
                             sb.Append(@$"
-                <tr><th style='background-color:#f8f9fa;'>IČO (v prípade firmy)</th><td style='border-bottom:1px solid #e0e0e0;'>{order.InvoiceICO}</td></tr>");
+                <tr><th style='background-color:#e4e4e4ff;'>IČO (v prípade firmy)</th><td style='border-bottom:1px solid #e0e0e0;'>{order.InvoiceICO}</td></tr>");
                         }
                         if (!string.IsNullOrWhiteSpace(order.InvoiceDIC))
                         {
                             sb.Append(@$"
-                <tr><th style='background-color:#f8f9fa;'>DIČ (v prípade firmy)</th><td style='border-bottom:1px solid #e0e0e0;'>{order.InvoiceDIC}</td></tr>");
+                <tr><th style='background-color:#e4e4e4ff;'>DIČ (v prípade firmy)</th><td style='border-bottom:1px solid #e0e0e0;'>{order.InvoiceDIC}</td></tr>");
                         }
 
                         sb.Append(@$"
-                <tr><th style='background-color:#f8f9fa;'>Email</th><td style='border-bottom:1px solid #e0e0e0;'>{order.InvoiceEmail}</td></tr>
-                <tr><th style='background-color:#f8f9fa;'>Telefón</th><td>{order.InvoicePhoneNumber}</td></tr>
+                <tr><th style='background-color:#e4e4e4ff;'>Email</th><td style='border-bottom:1px solid #e0e0e0;'>{order.InvoiceEmail}</td></tr>
+                <tr><th style='background-color:#e4e4e4ff;'>Telefón</th><td>{order.InvoicePhoneNumber}</td></tr>
             </table>");
 
             return sb.ToString();

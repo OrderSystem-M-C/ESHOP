@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AspNetCoreAPI.Models
 {
-    public class PaginatedOrdersDTO<T>
+    public class SortedOrdersDTO<T>
     {
         [Required]
         public IEnumerable<T> Orders { get; set; } = new List<T>();

@@ -3,7 +3,7 @@
   height: 100%;
   padding: 0;
   margin: 0;
-  background-image: url(https://cdn.pixabay.com/photo/2024/01/27/05/06/blue-8535270_960_720.jpg);
+  background-image: url(../../../assets/Images/login-background.png);
   background-position: center;
   background-size: cover;
   display: flex;
@@ -17,20 +17,17 @@
   justify-content: center;
   flex-direction: column;
   background-color: white;
+  opacity: 0.95;
   border: none;
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   padding: 25px 25px 17px 25px;
   width: 350px;
 }
 .login-form input {
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  padding: 8px 12px;
-  transition: border-color 0.2s ease;
   flex: 1;
 }
-.login-form h1{
+.login-form h1 {
   text-align: center;
   font-weight: bold;
   margin-bottom: 10px;

@@ -190,7 +190,7 @@ textarea {
   align-items: center;
   flex-direction: row;
   margin-top: 10px;
-  background-color: #0d6efd;
+  background-color: #084298;
   padding: 10px;
   color: white;
   border-radius: 10px;
@@ -269,13 +269,13 @@ textarea {
     background-color: #e0e0e0;
   }
   &.selected {
-    border-color: #0d6efd;
+    border-color: #084298;
     font-weight: 600;
   }
 }
 .cdk-drag-preview {
   border-radius: 8px;
-  border-color: #0d6efd;
+  border-color: #084298;
   font-weight: bold;
   background-color: #e0e0e0;
 }
@@ -337,7 +337,7 @@ textarea {
   border-bottom: 1px solid #ccc;
 }
 .products-table th {
-  background-color: #0d6efd;
+  background-color: #084298;
   font-weight: bold;
   color: white;
 }

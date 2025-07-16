@@ -730,13 +730,15 @@ export class OrderFormComponent implements OnInit {
     )
   }
 
-  createInvoice(){
+  async createInvoice(){
     this.invoiceCreated = true;
     const discountAmount = this.orderForm.value.discountAmount ? this.orderForm.value.discountAmount : 0;
     const formattedInvoiceIssueDate = this.invoiceForm.value.invoiceIssueDate.split('-').reverse().join('.');
     
     const hasCompanyData = this.orderForm.value.company || this.orderForm.value.ico || this.orderForm.value.dic;
     const hasInvoiceCompanyData = this.invoiceForm.value.invoiceCompany || this.invoiceForm.value.invoiceICO || this.invoiceForm.value.invoiceDIC;
+
+    const loadingSnack = this.snackBar.open('Sťahuje sa faktúra...', '', { duration: undefined });
 
     const companyRowHTML = hasCompanyData ? `
       <tr>
@@ -767,7 +769,7 @@ export class OrderFormComponent implements OnInit {
     if(this.invoiceForm.valid && this.orderForm.valid && this.selectedProducts.length > 0){
       const invoiceHTML = `
 <div style="width: 100%; margin: 10px auto; box-sizing: border-box; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333;">
-  <div style="background-color: #f8f9fa; padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
+  <div style="background-color: #e4e4e4ff; padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
     <h2 style="margin-top: 14px;">Číslo objednávky: <strong>${this.isEditMode ? this.existingOrderId : this.orderId}</strong></h2>
   </div>
   <div style="padding: 20px;">
@@ -795,7 +797,7 @@ export class OrderFormComponent implements OnInit {
     <div style="margin-bottom: 20px;">
       <h3 style="margin-bottom: 10px; font-weight: bold;">Objednané produkty</h3>
       <table style="width: 100%; border: 1px solid #e0e0e0;">
-        <thead style="background-color: #f8f9fa;">
+        <thead style="background-color: #e4e4e4ff;">
           <tr>
             <th style="padding: 8px; text-align: left;">Názov produktu</th>
             <th style="padding: 8px; text-align: center; text-wrap: nowrap;">Cena/ks</th>
@@ -850,20 +852,20 @@ export class OrderFormComponent implements OnInit {
       <h3 style="margin-bottom: 10px; font-weight: bold;">Objednávateľ</h3>
       <table style="width: 100%; border: 1px solid #e0e0e0;">
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Meno a priezvisko</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.customerName}</td>
         </tr>
         ${companyRowHTML}
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Adresa</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Adresa</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.address}, ${this.orderForm.value.postalCode}, ${this.orderForm.value.city}</td>
         </tr>
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">E-mail</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.email}</td>
         </tr>
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Tel.č.</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
           <td style="padding: 8px;">${this.orderForm.value.phoneNumber}</td>
         </tr>
       </table>
@@ -873,16 +875,16 @@ export class OrderFormComponent implements OnInit {
       <h3 style="margin-bottom: 10px; font-weight: bold;">Fakturačné údaje</h3>
       <table style="width: 100%; border: 1px solid #e0e0e0;">
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Meno a priezvisko</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceName}</td>
         </tr>
         ${invoiceCompanyRowHTML}
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">E-mail</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceEmail}</td>
         </tr>
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Tel.č.</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
           <td style="padding: 8px;">${this.invoiceForm.value.invoicePhoneNumber}</td>
         </tr>
       </table>
@@ -899,15 +901,17 @@ export class OrderFormComponent implements OnInit {
       };
 
       if(invoiceHTML){
-        html2pdf().set(options).from(invoiceHTML).save();
+        await html2pdf().set(options).from(invoiceHTML).save();
         setTimeout(() => {
           this.invoiceCreated = false;
         }, 2000);
+        loadingSnack.dismiss();
         this.snackBar.open('Faktúra bola úspešne stiahnutá!', '', {duration: 2000});
       }
     }else{
       this.validateAllFormFields(this.invoiceForm);
       this.invoiceCreated = false;
+      loadingSnack.dismiss();
       this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
     }
   }

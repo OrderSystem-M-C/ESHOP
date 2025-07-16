@@ -226,6 +226,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     }
 
     const orderIds = this.selectedOrders.map(o => o.orderId);
+    const loadingRef = this.snackBar.open("Sťahuje sa XML súbor...", "", { duration: undefined });
 
     this.orderService.getOrdersXmlFile(orderIds).subscribe({
       next: (blob) => {
@@ -235,7 +236,8 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
         a.download = `Zasielky_${new Date().toLocaleDateString("sk").replace(/\s/g, "").replace(/\./g, "")}.xml`;
         a.click();
         URL.revokeObjectURL(objectUrl);
-
+        
+        loadingRef.dismiss();
         this.snackBar.open("XML súbor bol úspešne stiahnutý!", "", { duration: 1500 });
         this.clearSelection();
       },
@@ -358,7 +360,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
           datasets: [{
             label: 'Počet objednávok',
             data: orderCounts, 
-            backgroundColor: '#0d6efd',
+            backgroundColor: '#084298',
             borderColor: '#1e88e5',
             borderWidth: 1
           }]
@@ -402,7 +404,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
           datasets: [{
             label: 'Denná tržba (€)',
             data: [0, ...data], 
-            backgroundColor: '#0d6efd',
+            backgroundColor: '#084298',
             borderColor: '#1e88e5',
             borderWidth: 1
           }]

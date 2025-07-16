@@ -28,7 +28,7 @@ export class OrderService {
   //   searchOption: string,
   //   selectedStatuses: string[],
   //   dateSortOrder: string
-  // ): Observable<PaginatedOrdersDTO> {
+  // ): Observable<SortedOrdersDTO> {
   //   const url = `${this.baseUrl}/order/get-sorted-orders`;
   //   let params = new HttpParams()
   //   .set('pageIndex', pageIndex.toString())
@@ -44,7 +44,7 @@ export class OrderService {
   //     params = params.set('dateSortOrder', dateSortOrder);
   //   }
   //   const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-  //   return this.http.get<PaginatedOrdersDTO>(url, { headers, params });
+  //   return this.http.get<SortedOrdersDTO>(url, { headers, params });
   // }
   getOrderDetails(orderId: number){
     const url = `${this.baseUrl}/order/get-order-details/${orderId}`;
@@ -131,7 +131,7 @@ export class OrderService {
     return this.http.put(url, status);
   }
 }
-// export interface PaginatedOrdersDTO {
+// export interface SortedOrdersDTO {
 //   orders: OrderDTO[];
 //   totalCount: number;
 // }

@@ -44,9 +44,11 @@ export class OrderDetailsComponent implements OnInit{
     this.router.navigate(['/orders-page']);
   }
 
-  getInvoice(){
+  async getInvoice(){
     const hasCompanyData = this.order.company || this.order.ico || this.order.dic;
     const hasInvoiceCompanyData = this.order.invoiceCompany || this.order.invoiceICO || this.order.invoiceDIC;
+
+    const loadingSnack = this.snackBar.open('Sťahuje sa faktúra...', '', { duration: undefined });
 
     const companyRowHTML = hasCompanyData ? `
       <tr>
@@ -77,7 +79,7 @@ export class OrderDetailsComponent implements OnInit{
 
     if(this.order){
       const invoiceHTML = `<div style="width: 100%; margin: 10px auto; box-sizing: border-box; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333;">
-  <div style="background-color: #f8f9fa; padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
+  <div style="background-color: #e4e4e4ff; padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
     <h2 style="margin-top: 14px;">Číslo objednávky: <strong>${this.order.orderId}</strong></h2>
   </div>
   <div style="padding: 20px;">
@@ -105,7 +107,7 @@ export class OrderDetailsComponent implements OnInit{
     <div style="margin-bottom: 20px;">
       <h3 style="margin-bottom: 10px; font-weight: bold;">Objednané produkty</h3>
       <table style="width: 100%; border: 1px solid #e0e0e0;">
-        <thead style="background-color: #f8f9fa;">
+        <thead style="background-color: #e4e4e4ff;">
           <tr>
             <th style="padding: 8px; text-align: left;">Názov produktu</th>
             <th style="padding: 8px; text-align: center; text-wrap: nowrap;">Cena/ks</th>
@@ -153,20 +155,20 @@ export class OrderDetailsComponent implements OnInit{
       <h3 style="margin-bottom: 10px; font-weight: bold;">Objednávateľ</h3>
       <table style="width: 100%; border: 1px solid #e0e0e0;">
         <tr>
-          <th style="padding: 8px; text-align: left; background-color:#f8f9fa;">Meno a priezvisko</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.customerName}</td>
         </tr>
         ${companyRowHTML}
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Adresa</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Adresa</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.address}, ${this.order.postalCode}, ${this.order.city}</td>
         </tr>
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">E-mail</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.email}</td>
         </tr>
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Tel.č.</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
           <td style="padding: 8px;">${this.order.phoneNumber}</td>
         </tr>
       </table>
@@ -176,16 +178,16 @@ export class OrderDetailsComponent implements OnInit{
       <h3 style="margin-bottom: 10px; font-weight: bold;">Fakturačné údaje</h3>
       <table style="width: 100%; border: 1px solid #e0e0e0;">
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Meno a priezvisko</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceName}</td>
         </tr>
         ${invoiceCompanyRowHTML}
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">E-mail</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.invoiceEmail}</td>
         </tr>
         <tr>
-          <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">Tel.č.</th>
+          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
           <td style="padding: 8px;">${this.order.invoicePhoneNumber}</td>
         </tr>
       </table>
@@ -202,10 +204,12 @@ export class OrderDetailsComponent implements OnInit{
      };
 
      if(invoiceHTML){
-        html2pdf().set(options).from(invoiceHTML).save();
+        await html2pdf().set(options).from(invoiceHTML).save();
+        loadingSnack.dismiss();
         this.snackBar.open('Faktúra bola úspešne stiahnutá!', '', {duration: 2000});
      }
     }else{
+      loadingSnack.dismiss();
       this.snackBar.open('Nastala chyba pri sťahovaní faktúry!', '', {duration: 2000});
     }
   }
