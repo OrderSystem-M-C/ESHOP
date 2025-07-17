@@ -122,7 +122,7 @@ export class OrderDetailsComponent implements OnInit{
             <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${product.productPrice} €</td>
             <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${product.productAmount} ks</td>
             <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
-              ${(product.productAmount * (product.productPrice - ((product.productPrice / 100) * this.order.discountAmount))).toFixed(2)} €
+              ${product.productPrice * product.productAmount} €
             </td>
           </tr>
           `).join('')}
@@ -141,8 +141,8 @@ export class OrderDetailsComponent implements OnInit{
             <td style="padding: 8px; text-align: center; font-weight: bold;">CELKOM:</td>
             <td style="padding: 8px; text-align: center; font-weight: bold;">
               ${
-                this.order.discountAmount
-                  ? ((this.order.totalPrice - (this.order.totalPrice * this.order.discountAmount / 100)).toFixed(2) + ' € <span style="color: #6c757d;">(-' + this.order.discountAmount + '%)</span>')
+                this.order.discountAmount > 0
+                  ? (this.order.totalPrice.toFixed(2) + ' € <span style="color: #6c757d;">(zľava: -' + (this.order.discountAmount || 0) + '%)</span>')
                   : (this.order.totalPrice.toFixed(2) + ' €')
               }
             </td>

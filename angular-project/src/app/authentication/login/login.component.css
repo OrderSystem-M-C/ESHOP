@@ -66,7 +66,9 @@
 }
 .form-control.is-invalid {
   border-color: red !important;
+  box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.25);
 }
 .form-control.ng-invalid.ng-touched {
   border-color: red !important;
+  box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.25);
 }

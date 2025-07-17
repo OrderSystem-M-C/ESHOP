@@ -72,12 +72,8 @@ namespace AspNetCoreAPI.Models
 
         [Required(ErrorMessage = "Dátum vystavenia faktúry je povinný.")]
         public string InvoiceIssueDate { get; set; } 
-
-        [Required(ErrorMessage = "Dátum splatnosti je povinný.")]
-        public string InvoiceDueDate { get; set; }
-
-        [Required(ErrorMessage = "Dátum dodania je povinný.")]
-        public string InvoiceDeliveryDate { get; set; }
+        public string? InvoiceDueDate { get; set; }
+        public string? InvoiceDeliveryDate { get; set; }
 
         [Required(ErrorMessage = "Meno a priezvisko je povinné.")]
         [MaxLength(100, ErrorMessage = "Meno a priezvisko nemôže byť dlhšie ako 100 znakov.")]

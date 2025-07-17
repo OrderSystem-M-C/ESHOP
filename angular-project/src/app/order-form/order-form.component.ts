@@ -57,6 +57,10 @@ export class OrderFormComponent implements OnInit {
   isEditingProducts: boolean = false;
 
   totalPrice: number = 0;
+  productsTotalPrice: number = 0; 
+  calculatedDiscountAmount: number = 0; 
+  deliveryCost: number = 0;
+  paymentCost: number = 0;
 
   totalItems: number = 0;
   pageIndex: number = 0;
@@ -116,15 +120,15 @@ export class OrderFormComponent implements OnInit {
     invoiceNumber: new FormControl(`${this.orderId}`, Validators.required),
     invoiceVariable: new FormControl(`${this.orderId}`, Validators.required),
     invoiceIssueDate: new FormControl('', Validators.required),
-    invoiceDueDate: new FormControl('', Validators.required),
-    invoiceDeliveryDate: new FormControl('', Validators.required),
+    invoiceDueDate: new FormControl(''),
+    invoiceDeliveryDate: new FormControl(''),
     invoiceName: new FormControl('', Validators.required),
     invoiceCompany: new FormControl(''),
     invoiceICO: new FormControl(''),
     invoiceDIC: new FormControl(''),
     invoiceEmail: new FormControl('', [Validators.required, this.emailValidator]),
     invoicePhoneNumber: new FormControl('', [Validators.required, this.phoneValidator]),
-  })
+  });
 
   createOrderDTO(): OrderDTO{
     return {
@@ -305,6 +309,7 @@ export class OrderFormComponent implements OnInit {
         this.selectedProducts = JSON.parse(JSON.stringify(this.newSelectedProducts));
         this.totalPrice = this.selectedProducts.reduce((sum, p) => sum + p.productPrice, 0);
       }
+      this.recalculateTotalPrice();
     });
   }
   toggleProductSelection(product: ProductDTO){
@@ -380,6 +385,7 @@ export class OrderFormComponent implements OnInit {
 
   clearProducts(): void{
     this.selectedProducts = [];
+    this.totalPrice = 0;
     this.snackBar.open('Vaše zvolené produkty boli úspešne premazané!', '', { duration: 2000 });
   }
 
@@ -396,18 +402,26 @@ export class OrderFormComponent implements OnInit {
       }
     }
   }
-  recalculateTotalPrice(){
-    const products = this.isEditingProducts ? this.newSelectedProducts : this.selectedProducts;
-    let total = products.reduce((acc, product) => {
-      return acc + (product.productPrice * product.productAmount);
-    }, 0)    
+  recalculateTotalPrice(): void {
+    let productsTotal = 0;
+    this.selectedProducts.forEach(product => {
+      productsTotal += (product.productPrice * product.productAmount);
+    });
+    this.productsTotalPrice = productsTotal; 
 
-    const deliveryCost = Number(this.orderForm.get('deliveryCost')?.value || 0);
-    const paymentCost = Number(this.orderForm.get('paymentCost')?.value || 0);
+    this.deliveryCost = this.orderForm.get('deliveryCost')?.value || 0;
+    this.paymentCost = this.orderForm.get('paymentCost')?.value || 0;
+    const discountPercentage = this.orderForm.get('discountAmount')?.value || 0;
 
-    total += deliveryCost + paymentCost;
+    let currentTotal = this.productsTotalPrice + this.deliveryCost + this.paymentCost;
 
-    this.totalPrice = Number(total.toFixed(2));
+    this.calculatedDiscountAmount = (currentTotal * discountPercentage) / 100;
+
+    this.totalPrice = currentTotal - this.calculatedDiscountAmount;
+
+    if (this.totalPrice < 0) {
+      this.totalPrice = 0;
+    }
   }
   onDeliveryChange() {
     const deliveryOption = this.orderForm.get('deliveryOption')?.value;
@@ -434,9 +448,10 @@ export class OrderFormComponent implements OnInit {
 
   async updateOrder(){
     this.isLoading = true;
-    if(this.orderForm.value.packageCode?.trim()){
+    if (this.isEditMode && this.orderForm.value.packageCode === this.originalPackageCode) {
+    } else if (this.orderForm.value.packageCode?.trim()) {
       const isValid = await this.validatePackageCodeForSubmit(this.orderForm.value.packageCode).toPromise();
-      if(!isValid){
+      if (!isValid) {
         this.isLoading = false;
         return;
       }
@@ -513,6 +528,7 @@ export class OrderFormComponent implements OnInit {
     this.orderService.getOrderDetails(orderId).subscribe((order) => {
       this.orderForm.patchValue(order); //patchValue robi ze vyplni hodnoty objednavky
       this.originalPackageCode = order.packageCode;
+      this.recalculateTotalPrice();
 
       if(order.packageCode === ''){
         this.ephService.generatePackageCode().subscribe({
@@ -531,8 +547,8 @@ export class OrderFormComponent implements OnInit {
         invoiceNumber: order.invoiceNumber,
         invoiceVariable: order.variableSymbol,
         invoiceIssueDate: order.invoiceIssueDate,
-        invoiceDueDate: order.invoiceDueDate,
-        invoiceDeliveryDate: order.invoiceDeliveryDate,
+        invoiceDueDate: order.invoiceDueDate === '' ? undefined : order.invoiceDueDate,
+        invoiceDeliveryDate: order.invoiceDeliveryDate === '' ? undefined : order.invoiceDeliveryDate,
         invoiceName: order.invoiceName,
         invoiceCompany: order.invoiceCompany,
         invoiceICO: order.invoiceICO,
@@ -821,7 +837,7 @@ export class OrderFormComponent implements OnInit {
               <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${product.productPrice} €</td>
               <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${product.productAmount} ks</td>
               <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
-                ${(product.productAmount * (product.productPrice - ((product.productPrice / 100) * discountAmount))).toFixed(2)} €
+                ${product.productPrice * product.productAmount} €
               </td>
             </tr>
           `).join('')}
@@ -847,8 +863,8 @@ export class OrderFormComponent implements OnInit {
             <td style="padding: 8px; font-weight: bold; text-align: center;">CELKOM:</td>
             <td style="padding: 8px; font-weight: bold; text-align: center;">
               ${
-                discountAmount
-                  ? ((this.totalPrice - (this.totalPrice * discountAmount / 100)).toFixed(2) + ' € <span style="color: #6c757d;">(-' + discountAmount + '%)</span>')
+                this.orderForm.get('discountAmount')?.value > 0
+                  ? (this.totalPrice.toFixed(2) + ' € <span style="color: #6c757d;">(zľava: -' + (this.orderForm.get('discountAmount')?.value || 0) + '%)</span>')
                   : (this.totalPrice.toFixed(2) + ' €')
               }
             </td>

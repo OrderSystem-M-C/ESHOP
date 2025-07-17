@@ -22,6 +22,8 @@ namespace AspNetCoreAPI.Models
         public decimal? ProductWeight { get; set; }
         [Required(ErrorMessage = "Počet produktov na sklade je povinný.")]
         public int StockAmount { get; set; } = 0;
+        [Range(1, int.MaxValue, ErrorMessage = "Kód produktu musí byť číslo medzi 1 a 2147483647.")]
+        public int? ProductCode { get; set; }
         [Required(ErrorMessage = "Produkty sú povinné.")]
         public ICollection<OrderProductModel> OrderProducts { get; set; } = new List<OrderProductModel>();
         public bool IsDeleted { get; set; } = false; 

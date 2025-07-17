@@ -4,7 +4,7 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
-import { ProductService } from '../services/product.service';
+import { ProductService, ProductUpdateDTO } from '../services/product.service';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 
@@ -39,7 +39,7 @@ export class ProductsPageComponent implements OnInit {
   pageIndex: number = 0;
   pageSize: number = 6;
 
-  editedProducts: { [productId: number]: { stockAmount: number }} = {};
+  editedProducts: { [productId: number]: { stockAmount?: number; productCode?: number }} = {};
   isEditingProducts: boolean = false;
   hasShownEditingSnackbar = false;
 
@@ -50,7 +50,8 @@ export class ProductsPageComponent implements OnInit {
     productDescription: new FormControl(''),
     productPrice: new FormControl('', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
     productWeight: new FormControl('', [Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
-    stockAmount: new FormControl('', [Validators.pattern(/^\d+(\.\d{1,2})?$/)])
+    stockAmount: new FormControl('', [Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
+    productCode: new FormControl('', [Validators.pattern(/^\d+(\.\d{1,2})?$/)])
   })
 
   updatePagedProducts(): void {
@@ -73,53 +74,87 @@ export class ProductsPageComponent implements OnInit {
     }
   }
 
-  onStockAmountChange(productId: number, newValue: any){
+  onProductFieldChange(productId: number, field: 'stockAmount' | 'productCode', newValue: any) {
     this.isEditingProducts = true;
-    const stock = Number(newValue);
-    this.editedProducts[productId] = {
-      stockAmount: stock
+    const value = Number(newValue);
+
+    if (!this.editedProducts[productId]) {
+      this.editedProducts[productId] = {};
     }
+    this.editedProducts[productId][field] = value;
 
     if (!this.hasShownEditingSnackbar) {
-      this.snackBar.open('Vstúpili ste do editačného režimu zásob!', '', { duration: 1000 });
+      this.snackBar.open('Vstúpili ste do editačného režimu!', '', { duration: 1000 });
       this.hasShownEditingSnackbar = true;
     }
   }
 
-  isProductEdited(productId: number): boolean {
-    return this.editedProducts.hasOwnProperty(productId);
+  isProductEdited(productId: number, field: 'stockAmount' | 'productCode'): boolean {
+    return this.editedProducts.hasOwnProperty(productId) && this.editedProducts[productId].hasOwnProperty(field);
   }
 
   saveAllChanges() {
-    const updates = [];
+    const updates: ProductUpdateDTO[] = [];
     this.isLoading = true;
 
     for(const productIdStr in this.editedProducts) {
       const productId = Number(productIdStr);
       const edited = this.editedProducts[productId];
-      updates.push({ productId, stockAmount: edited.stockAmount});
+      const originalProduct = this.productsData.find(p => p.productId === productId);
+
+      if(originalProduct){
+        let update: ProductUpdateDTO = { productId };
+        if (edited.stockAmount !== undefined && edited.stockAmount !== originalProduct.stockAmount) {
+          update.stockAmount = edited.stockAmount;
+        }
+        if (edited.productCode !== undefined && edited.productCode !== originalProduct.productCode) {
+          update.productCode = edited.productCode;
+        }
+        if (update.stockAmount !== undefined || update.productCode !== undefined) {
+          updates.push(update);
+        }
+      }
     }
 
     if(updates.length === 0) {
       this.snackBar.open('Nemáte žiadne zmeny na uloženie!', '', { duration: 1000 });
+      this.isLoading = false;
       return;
     }
 
-    this.productService.updateProductStockAmount(updates).subscribe({
+    this.productService.updateProduct(updates).subscribe({
       next: () => {
         this.snackBar.open('Zmeny boli úspešne uložené!', '', { duration: 1000 });
 
         for (const upd of updates) {
-          const product = this.ourFilteredProducts.find(p => p.productId === upd.productId);
-          if (product) {
-            product.stockAmount = upd.stockAmount;
+          const productInMainData = this.productsData.find(p => p.productId === upd.productId);
+          const productInFilteredData = this.ourFilteredProducts.find(p => p.productId === upd.productId);
+          if (productInMainData) {
+            if (upd.stockAmount !== undefined) {
+              productInMainData.stockAmount = upd.stockAmount;
+            }
+            if (upd.productCode !== undefined) {
+              productInMainData.productCode = upd.productCode;
+            }
+          }
+          if (productInFilteredData) { 
+            if (upd.stockAmount !== undefined) {
+              productInFilteredData.stockAmount = upd.stockAmount;
+            }
+            if (upd.productCode !== undefined) {
+              productInFilteredData.productCode = upd.productCode;
+            }
           }
         }
 
         this.editedProducts = {};
         this.isEditingProducts = this.hasShownEditingSnackbar = this.isLoading = false;
       },
-      error: (err) => console.error(err) 
+      error: (err) => {
+        console.error("Error saving changes:", err);
+        this.snackBar.open('Chyba pri ukladaní zmien!', '', { duration: 2000 });
+        this.isLoading = false; 
+      }
     })
   }
 
@@ -139,6 +174,8 @@ export class ProductsPageComponent implements OnInit {
             return product.productName.toLowerCase().includes(this.searchText.toLowerCase());
           case 'productId':
             return product.productId.toString().startsWith(this.searchText);
+          case 'productCode':
+            return product.productCode.toString().startsWith(this.searchText);
           case 'productPrice':
             return product.productPrice.toString().startsWith(this.searchText);
           case 'auto':
@@ -187,7 +224,8 @@ export class ProductsPageComponent implements OnInit {
         productDescription: this.productForm.value.productDescription || '',
         productPrice: Number(this.productForm.value.productPrice),
         productWeight: Number(this.productForm.value.productWeight),
-        stockAmount: Number(this.productForm.value.stockAmount)
+        stockAmount: Number(this.productForm.value.stockAmount),
+        productCode: Number(this.productForm.value.productCode) 
       }
 
       this.isLoadingForm = true;
@@ -299,8 +337,9 @@ export interface ProductDTO {
   productName: string,
   productDescription?: string,
   productPrice: number,
-  productWeight: number,
+  productWeight?: number,
   productSelected?: boolean;
   productAmount?: number;
   stockAmount?: number;
+  productCode?: number;
 }

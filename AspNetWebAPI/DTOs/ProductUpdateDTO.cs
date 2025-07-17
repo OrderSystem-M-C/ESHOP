@@ -2,11 +2,11 @@
 
 namespace AspNetCoreAPI.DTOs
 {
-    public class ProductStockUpdateDTO
+    public class ProductUpdateDTO
     {
         [Required]
         public int ProductId { get; set; }
-        [Required]
-        public int StockAmount { get; set; }
+        public int? StockAmount { get; set; }
+        public int? ProductCode { get; set; }
     }
 }

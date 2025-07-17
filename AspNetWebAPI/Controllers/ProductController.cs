@@ -30,7 +30,8 @@ namespace AspNetCoreAPI.Controllers
                 ProductDescription = productDTO.ProductDescription,
                 ProductPrice = productDTO.ProductPrice,
                 ProductWeight = productDTO.ProductWeight,
-                StockAmount = productDTO.StockAmount
+                StockAmount = productDTO.StockAmount,
+                ProductCode = productDTO.ProductCode
             };
 
             try
@@ -58,6 +59,7 @@ namespace AspNetCoreAPI.Controllers
                         ProductPrice = p.ProductPrice,
                         ProductWeight = p.ProductWeight,
                         StockAmount = p.StockAmount,
+                        ProductCode = p.ProductCode 
                     }).ToListAsync();
                 return Ok(products);
             }
@@ -85,8 +87,8 @@ namespace AspNetCoreAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-        [HttpPut("update-stock-batch")]
-        public async Task<IActionResult> UpdateStockBatch([FromBody] List<ProductStockUpdateDTO> updates)
+        [HttpPut("update-product")]
+        public async Task<IActionResult> UpdateProductAsync([FromBody] List<ProductUpdateDTO> updates)
         {
             try
             {
@@ -102,7 +104,14 @@ namespace AspNetCoreAPI.Controllers
                         return NotFound($"Product with ID {update.ProductId} not found.");
                     }
 
-                    product.StockAmount = update.StockAmount;
+                    if (update.StockAmount.HasValue)
+                    {
+                        product.StockAmount = update.StockAmount.Value;
+                    }
+                    if (update.ProductCode.HasValue)
+                    {
+                        product.ProductCode = update.ProductCode.Value;
+                    }
                 }
                 await _context.SaveChangesAsync();
 
@@ -110,7 +119,7 @@ namespace AspNetCoreAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = "An internal server error occurred.", details = ex.Message });
             }
         }
         [HttpPost("add-products")]
@@ -227,8 +236,11 @@ namespace AspNetCoreAPI.Controllers
 
                 if (orderProduct != null)
                 {
-                    int difference = updatedProduct.ProductAmount - orderProduct.Quantity;
-                    product.StockAmount -= difference; 
+                    if (product != null) 
+                    {
+                        int difference = updatedProduct.ProductAmount - orderProduct.Quantity;
+                        product.StockAmount -= difference;
+                    }
                     orderProduct.Quantity = updatedProduct.ProductAmount;
                 }
                 else if(product != null)

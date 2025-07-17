@@ -87,6 +87,11 @@
             <button class="btn btn-light" (click)="downloadXmlFile()"><img src="../../assets/Images/xml-icon.png" alt="xml-icon"> Vygenerovať XML súbor</button>
           </div>
         </div>
+        <div class="cancel-selection">
+          <div class="cancel-selection-button">
+            <button class="btn btn-outline-danger" (click)="clearSelection(true)">Zrušiť výber</button>
+          </div>
+        </div>
       </div>
     }@else{
       <div class="title-orders">

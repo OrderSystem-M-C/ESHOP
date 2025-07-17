@@ -95,14 +95,33 @@
             <div class="form-group">
                 <label for="discountAmount" class="form-label">Zľava (%)</label>
                 <div class="discount-input">
-                  <input formControlName="discountAmount" [value]="orderForm.get('discountAmount')?.value || ''" type="number" id="discountAmount" class="form-control" min="0" max="100" placeholder="Zadajte zľavu" [ngClass]="{'is-invalid': orderForm.get('discountAmount').invalid}">
+                  <input formControlName="discountAmount" [value]="orderForm.get('discountAmount')?.value || ''" type="number" id="discountAmount" class="form-control" min="0" max="100" placeholder="Zadajte zľavu" [ngClass]="{'is-invalid': orderForm.get('discountAmount').invalid}" (input)="recalculateTotalPrice()">
                   <p>% (-0€)</p>
                 </div>
             </div>
         </div>
         <div class="total-price">
-            <p>CELKOM</p>
-            <p>{{ totalPrice }}€</p>
+            @if(selectedProducts.length > 0){
+              <p><b>Súčet produktov:</b></p>
+              <p>{{ productsTotalPrice | number : '1.2-2' }}€</p> 
+            }
+            @if(deliveryCost > 0) {
+              <p><b>Doprava:</b></p>
+              <p>{{ deliveryCost | number : '1.2-2' }}€</p>
+            }
+
+            @if(paymentCost > 0) {
+              <p><b>Platba:</b></p>
+              <p>{{ paymentCost | number : '1.2-2' }}€</p>
+            }
+
+            @if(calculatedDiscountAmount > 0) {
+              <p><b>Zľava:</b></p>
+              <p>-{{ calculatedDiscountAmount | number : '1.2-2' }}€</p>
+            }
+
+            <p><b>CELKOM:</b></p>
+            <p>{{ totalPrice | number : '1.2-2' }}€</p>
         </div>
         <div class="form-grid">
         <div class="customer-info">
@@ -176,14 +195,6 @@
             <div class="field">
                 <label for="invoiceIssueDate" class="form-label">Dátum vystavenia faktúry*</label>
                 <input type="date" id="invoiceIssueDate" class="form-control" placeholder="Vyberte dátum splatnosti" formControlName="invoiceIssueDate">
-            </div>
-            <div class="field">
-                <label for="dueDate" class="form-label">Dátum splatnosti*</label>
-                <input type="date" id="dueDate" class="form-control" placeholder="Vyberte dátum splatnosti" formControlName="invoiceDueDate">
-            </div>
-            <div class="field">
-                <label for="deliveryDate" class="form-label">Dátum dodania*</label>
-                <input type="date" id="deliveryDate" class="form-control" placeholder="Vyberte dátum dodania" formControlName="invoiceDeliveryDate">
             </div>
             <div class="field">
               <label for="invoiceName" class="form-label">Meno a priezvisko*</label>

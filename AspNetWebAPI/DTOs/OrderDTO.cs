@@ -45,10 +45,8 @@ namespace AspNetCoreAPI.DTOs
         public string VariableSymbol { get; set; }
         [Required]
         public string InvoiceIssueDate { get; set; }
-        [Required]
-        public string InvoiceDueDate { get; set; }
-        [Required]
-        public string InvoiceDeliveryDate { get; set; }
+        public string? InvoiceDueDate { get; set; }
+        public string? InvoiceDeliveryDate { get; set; }
         [Required]
         public string InvoiceName { get; set; }
         public string InvoiceCompany { get; set; }

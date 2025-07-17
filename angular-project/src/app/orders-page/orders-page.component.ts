@@ -8,7 +8,7 @@ import { Chart } from 'chart.js/auto';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AuthenticationService } from '../api-authorization/authentication.service';
+import { AuthenticationService } from '../authentication/authentication.service';
 import { EmailDTO, EmailService } from '../services/email.service';
 import { catchError, EMPTY, finalize, forkJoin, of, switchMap, tap } from 'rxjs';
 import { OrderDetailsComponent } from '../order-details/order-details.component';
@@ -265,9 +265,12 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     )
   }
 
-  private clearSelection() {
+  clearSelection(showSnackbar: boolean = false) {
     this.selectedOrders = [];
     this.filteredOrders.forEach(order => order.orderSelected = false);
+    if (showSnackbar) {
+      this.snackBar.open('Výber bol zrušený.', '', { duration: 3000 });
+    }
   }
 
   filterOrdersByRange(): any[] {
