@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Injectable, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { OrderService } from '../services/order.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { OrderDTO, OrderStatusDTO } from '../order-form/order-form.component';
@@ -9,9 +9,10 @@ import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/materi
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../authentication/authentication.service';
-import { EmailDTO, EmailService } from '../services/email.service';
+import { EmailService } from '../services/email.service';
 import { catchError, EMPTY, finalize, forkJoin, of, switchMap, tap } from 'rxjs';
 import { OrderDetailsComponent } from '../order-details/order-details.component';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-orders-page',
@@ -117,14 +118,20 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     const orderIds = this.selectedOrders.map(o => o.orderId);
 
     this.orderService.copyOrders(orderIds, this.currentDate).pipe(
-      switchMap(() => {
+      switchMap((response: any) => {
+        if (response?.message?.includes("dostupných podacích čísiel")) {
+          this.snackBar.open(response.message, "", { duration: 3000 });
+          this.isLoading = false;
+          this.clearSelection();
+          return EMPTY; 
+        }
         this.snackBar.open("Objednávka/y bola/i úspešne skopírované!", "", { duration: 1000 });
         this.clearSelection();
         return this.reloadOrders();
       })
     ).subscribe({
       next: () => this.isLoading = false,
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
         console.error("An error has occurred while trying to copy order/orders.", err);
         this.isLoading = false;
       }
@@ -322,7 +329,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
         statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;
       });
 
-      const backgroundColors = ['#18C400', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B'];
+      const backgroundColors = this.statuses.map(s => s.statusColor);
 
       const activeStatusNames = Object.keys(statusCounts);
       const labels = this.statuses.filter(status => activeStatusNames.includes(status.statusName));
@@ -435,7 +442,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
 
   getStatusColor(orderStatus: string): string {
     const statusIndex = this.statuses.findIndex(s => s.statusName === orderStatus);
-    const backgroundColors = ['#18C400', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B'];
+    const backgroundColors = this.statuses.map(s => s.statusColor);
     if(statusIndex !== -1 && statusIndex < backgroundColors.length){
       return backgroundColors[statusIndex];
     }
@@ -443,7 +450,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
   }
 
   updateStatusChart(): void {
-    const backgroundColors = ['#18C400', '#FF9800', '#2196F3', '#FF5722', '#8BC34A', '#03A9F4', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63', '#673AB7', '#CDDC39', '#FFC107', '#009688', '#607D8B'];
+    const backgroundColors = this.statuses.map(s => s.statusColor);
     const statusCounts: { [key: string]: number } = {};
     this.filteredOrders.forEach(order => {
       statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;

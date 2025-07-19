@@ -20,7 +20,7 @@
     <div class="eph-settings-form">
     <form [formGroup]="ephForm">
         <div class="eph-settings-form-container">
-            <h3>Formulár</h3>
+            <h3>EPH formulár</h3>
             <div class="form-group">
               <div class="eph-prefix-suffix-container">
                 <div class="eph-prefix">
@@ -34,20 +34,23 @@
               </div>
               <div class="eph-range-container">
                   <label class="form-label" for="ephStartingNumber">Rozsah od*</label>
-                  <input formControlName="ephStartingNumber" id="ephStartingNumber" type="number" inputmode="numeric" class="form-control" placeholder="napr.: 123456789" [ngClass]="{'is-invalid': ephForm.get('ephStartingNumber').invalid && ephForm.get('ephStartingNumber').touched}">
+                  <input formControlName="ephStartingNumber" id="ephStartingNumber" type="number" inputmode="numeric" class="form-control" placeholder="napr.: 12345678" [ngClass]="{'is-invalid': ephForm.get('ephStartingNumber').invalid && ephForm.get('ephStartingNumber').touched}">
                   <label class="form-label" for="ephEndingNumber">Rozsah do*</label>
-                  <input formControlName="ephEndingNumber" id="ephEndingNumber" type="number" inputmode="numeric" class="form-control" placeholder="napr.: 123456790" [ngClass]="{'is-invalid': ephForm.get('ephEndingNumber').invalid && ephForm.get('ephEndingNumber').touched}">
+                  <input formControlName="ephEndingNumber" id="ephEndingNumber" type="number" inputmode="numeric" class="form-control" placeholder="napr.: 12345690" [ngClass]="{'is-invalid': ephForm.get('ephEndingNumber').invalid && ephForm.get('ephEndingNumber').touched}">
               </div>
             </div>
+            <p>Poznámka: Kontrolné číslo „x“ dopočíta program automaticky.</p>
         </div>
     </form>
     <div class="user-eph-settings">
       <h3>Aktuálna konfigurácia podacích čísel (EPH)</h3>
       @if(ephSettings != null){
-        <p><strong>EPH Prefix:</strong> {{ ephSettings.ephPrefix }}</p>
-        <p><strong>EPH rozsah (od - do):</strong> {{ ephSettings.ephStartingNumber }} - {{ ephSettings.ephEndingNumber }}</p>
-        <p><strong>EPH Suffix:</strong> {{ ephSettings.ephSuffix }}</p>
-        <p><strong>Celkový počet dostupných podacích čísel:</strong> {{ totalPackageCodes }}</p>
+        <p class="info-text"><strong>EPH Prefix:</strong> {{ ephSettings.ephPrefix }}</p>
+        <p class="info-text"><strong>EPH rozsah (od - do):</strong> {{ ephSettings.ephStartingNumber }} - {{ ephSettings.ephEndingNumber }}</p>
+        <p class="info-text"><strong>EPH Suffix:</strong> {{ ephSettings.ephSuffix }}</p>
+        <p [ngClass]="{ 'warning-text': totalPackageCodes === 0, 'info-text': true }">
+          <strong>Celkový počet dostupných podacích čísel:</strong> {{ totalPackageCodes }}
+        </p>
       }@else{
         <p>Nemáte uložené nastavenia pre EPH.</p>
       }

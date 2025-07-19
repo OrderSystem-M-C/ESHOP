@@ -4,7 +4,6 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { EphService, EphSettingsDTO } from '../services/eph.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-eph-settings',
@@ -24,11 +23,37 @@ export class EphSettingsComponent implements OnInit {
   constructor(private datePipe: DatePipe, private ephService: EphService, private snackBar: MatSnackBar){}
 
   ephForm = new FormGroup({
-    ephPrefix: new FormControl('EB', Validators.required),
-    ephStartingNumber: new FormControl('', [Validators.required, Validators.pattern(/^\d{9}$/)]),
-    ephEndingNumber: new FormControl('', [Validators.required, Validators.pattern(/^\d{9}$/)]),
-    ephSuffix: new FormControl('SK', Validators.required)
-  })
+    ephPrefix: new FormControl('EB', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)]),
+    ephStartingNumber: new FormControl('', [Validators.required, Validators.pattern(/^\d{8}$/)]),
+    ephEndingNumber: new FormControl('', [Validators.required, Validators.pattern(/^\d{8}$/)]),
+    ephSuffix: new FormControl('SK', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)])
+  }, {
+    validators: this.endingNumberGreaterThanStarting
+  });
+
+  private endingNumberGreaterThanStarting(control: FormGroup){
+    const startCtrl = control.get('ephStartingNumber');
+    const endCtrl = control.get('ephEndingNumber');
+
+    if (!startCtrl || !endCtrl) return null;
+
+    const start = startCtrl.value;
+    const end = endCtrl.value;
+
+    if (startCtrl.invalid || endCtrl.invalid) {
+      return null;
+    }
+    if (+end <= +start) {
+      endCtrl.setErrors({ ...endCtrl.errors, endingNotGreater: true });
+      return { endingNotGreater: true };
+    } else {
+      if (endCtrl.errors) {
+        const { endingNotGreater, ...otherErrors } = endCtrl.errors;
+        endCtrl.setErrors(Object.keys(otherErrors).length ? otherErrors : null);
+      }
+      return null;
+    }
+  }
 
   saveEphSettings(): void {
     if(this.ephForm.valid){
@@ -48,6 +73,11 @@ export class EphSettingsComponent implements OnInit {
           this.ephSettings = response;
 
           this.ephForm.reset();
+
+          this.ephForm.patchValue({
+            ephPrefix: 'EB',
+            ephSuffix: 'SK'
+          })
 
           this.isLoading = false;
         },

@@ -8,7 +8,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ProductDTO } from '../products-page/products-page.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ProductService } from '../services/product.service';
-import { HttpResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { EmailService } from '../services/email.service';
@@ -710,7 +710,10 @@ export class OrderFormComponent implements OnInit {
       this.isLoading_packageCode = false;
       return;
     }
-    if (!this.checkPackageCodeFormat(packageCode)) return;
+    if (!this.checkPackageCodeFormat(packageCode)) {
+      this.isLoading_packageCode = false;
+      return;
+    }
 
     this.ephService.validatePackageCode(packageCode).subscribe({
       next: (response) => {
@@ -733,6 +736,7 @@ export class OrderFormComponent implements OnInit {
   }
   validatePackageCodeForSubmit(packageCode: string): Observable<boolean> {
     if (!this.checkPackageCodeFormat(packageCode)) {
+      this.isLoading_packageCode = false;
       return of(false);
     }
     return this.ephService.validatePackageCode(packageCode).pipe(
@@ -967,7 +971,17 @@ export class OrderFormComponent implements OnInit {
             packageCode: response.packageCode
           })
         },
-        error: (err) => console.error(err)
+        error: (err: HttpErrorResponse) => {
+          let errorMsg = "Nebolo možné vygenerovať podacie číslo: V zadanom rozsahu nie sú k dispozícii žiadne ďalšie podacie čísla!";
+
+          this.snackBar.open(errorMsg, "", { duration: 3000 });
+
+          this.orderForm.patchValue({
+            packageCode: null
+          });
+
+          console.error("Package code generation error:", err);
+        }
       })
     }
 

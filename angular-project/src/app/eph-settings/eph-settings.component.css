@@ -57,6 +57,9 @@ h1 {
   font-weight: 600;
   color: #333;
 }
+.eph-settings-form-container p {
+  margin: 1rem 0 0 0;
+}
 .eph-range-container, .eph-prefix-suffix-container {
   display: flex;
   align-items: center;
@@ -85,6 +88,16 @@ h1 {
 }
 .eph-range-container .form-control {
   width: 50%;
+}
+.info-text {
+  padding-left: 8px;
+}
+.warning-text {
+  color: red;
+  font-weight: bold;
+  background-color: #fee2e2; 
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 .form-control.is-invalid {
   border-color: red !important;

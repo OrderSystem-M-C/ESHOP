@@ -1,6 +1,7 @@
 ﻿using AspNetCoreAPI.Data;
 using AspNetCoreAPI.DTOs;
 using AspNetCoreAPI.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
@@ -344,6 +345,51 @@ namespace AspNetCoreAPI.Controllers
                 {
                     return BadRequest("Data transfer object was not found.");
                 }
+                var settings = await _context.EphSettings.FirstOrDefaultAsync();
+                if(settings == null)
+                {
+                    return NotFound(new { message = "EPH settings were not found." });
+                }
+                if(settings.EphEndingNumber < settings.EphStartingNumber)
+                {
+                    return BadRequest(new { message = "Ending number must be greater than starting number." });
+                }
+
+                var generatedPackageCodesIn = new List<string>();
+
+                var ordersToCopyDetails = await _context.Orders
+                    .Where(o => orderCopyDTO.OrderIds.Contains(o.OrderId))
+                    .Select(o => new { o.OrderId, NeedsNewPackageCode = !string.IsNullOrEmpty(o.PackageCode) }) 
+                    .ToListAsync();
+
+                int numberOfCodesNeeded = ordersToCopyDetails.Count(o => o.NeedsNewPackageCode);
+
+                var packageCodesFromDb = await _context.Orders
+                    .Where(o => !string.IsNullOrEmpty(o.PackageCode) &&
+                                o.PackageCode.StartsWith(settings.EphPrefix) &&
+                                o.PackageCode.EndsWith(settings.EphSuffix))
+                    .Select(o => o.PackageCode)
+                    .ToListAsync();
+
+                var usedNumbersFromDb = packageCodesFromDb
+                    .Select(code =>
+                    {
+                        int numLength = code.Length - settings.EphPrefix.Length - settings.EphSuffix.Length;
+                        return code.Substring(settings.EphPrefix.Length, Math.Min(8, numLength)); ;
+                    })
+                    .Where(numStr => int.TryParse(numStr, out _))
+                    .Select(int.Parse)
+                    .ToHashSet();
+
+                var validUsedNumbersCount = usedNumbersFromDb.Count(n => n >= settings.EphStartingNumber && n <= settings.EphEndingNumber);
+                int totalPossibleNumbers = settings.EphEndingNumber - settings.EphStartingNumber + 1;
+                int availableNumbers = totalPossibleNumbers - validUsedNumbersCount;
+
+                if (availableNumbers < numberOfCodesNeeded)
+                {
+                    return new JsonResult(new { message = $"V rozsahu nie je dostatok dostupných podacích čísiel pre objednávky, ktoré ho vyžadujú! K dispozícii: {availableNumbers}, požadovaných: {numberOfCodesNeeded}." });
+                }
+
                 foreach (var orderId in orderCopyDTO.OrderIds)
                 {
                     var original = await _context.Orders
@@ -354,6 +400,27 @@ namespace AspNetCoreAPI.Controllers
                     {
                         return NotFound($"Order with ID {orderId} not found.");
                     };
+
+                    var packageCodeResult = await GeneratePackageCodeAsync();
+                    string newPackageCode = null;
+
+                    if (packageCodeResult is OkObjectResult okResult)
+                    {
+                        var packageCodeObject = okResult.Value as dynamic;
+                        if (packageCodeObject != null)
+                        {
+                            newPackageCode = packageCodeObject.packageCode;
+                        }
+                    }
+                    else
+                    {
+                        return packageCodeResult;
+                    }
+
+                    if (string.IsNullOrEmpty(newPackageCode))
+                    {
+                        return StatusCode(500, "Failed to generate package code for order copy.");
+                    }
 
                     int newOrderId = await GetNewOrderId();
 
@@ -388,7 +455,7 @@ namespace AspNetCoreAPI.Controllers
                         InvoiceDIC = original.InvoiceDIC,
                         InvoiceEmail = original.InvoiceEmail,
                         InvoicePhoneNumber = original.InvoicePhoneNumber,
-                        PackageCode = original.PackageCode ?? string.Empty,
+                        PackageCode = newPackageCode,
                         DeliveryCost = original.DeliveryCost,
                         PaymentCost = original.PaymentCost
                     };
@@ -750,6 +817,10 @@ namespace AspNetCoreAPI.Controllers
         [HttpGet("generate-package-code")]
         public async Task<IActionResult> GeneratePackageCode()
         {
+            return await GeneratePackageCodeAsync();
+        }
+        private async Task<IActionResult> GeneratePackageCodeAsync()
+        {
             try
             {
                 var settings = await _context.EphSettings.FirstOrDefaultAsync();
@@ -771,7 +842,7 @@ namespace AspNetCoreAPI.Controllers
                     .ToListAsync();
 
                 var usedNumbers = packageCodes
-                    .Select(code => code.Substring(settings.EphPrefix.Length, code.Length - settings.EphPrefix.Length - settings.EphSuffix.Length))
+                    .Select(code => code.Substring(settings.EphPrefix.Length, 8))
                     .Where(numStr => int.TryParse(numStr, out _)) // out _ - hovorime kompilatoru ze nechceme vysledok, netreba vytvarat premennu typu int len nas zaujima ci je to true alebo false
                     .Select(numStr => int.Parse(numStr))
                     .ToList();
@@ -791,7 +862,28 @@ namespace AspNetCoreAPI.Controllers
 
                     nextNumber = maxUsed + 1;
                 }
-                var next = $"{settings.EphPrefix}{nextNumber:D8}{settings.EphSuffix}";
+                int[] nextNumberDigits = nextNumber.ToString().Select(d => int.Parse(d.ToString())).ToArray();
+                int[] controlWeights = { 8, 6, 4, 2, 3, 5, 9, 7 };
+
+                for(int i = 0; i < controlWeights.Length; i++)
+                {
+                    nextNumberDigits[i] *= controlWeights[i];   
+                };
+
+                int nextNumberDigitsSum = nextNumberDigits.Sum();
+                int controlDiv = nextNumberDigitsSum % 11;
+
+                int checkDigit = 11 - controlDiv;
+
+                if(checkDigit == 10)
+                {
+                    checkDigit = 0;
+                }else if(checkDigit == 11)
+                {
+                    checkDigit = 5;
+                }
+
+                var next = $"{settings.EphPrefix}{nextNumber:D8}{checkDigit}{settings.EphSuffix}";
 
                 return Ok(new { packageCode = next });
             }
@@ -822,11 +914,44 @@ namespace AspNetCoreAPI.Controllers
                     return new JsonResult(new { message = "Podacie číslo musí mať presne 8 číslic, vrátane prefixu a suffixu." });
                 };
 
-                var middlePart = packageCode.Substring(settings.EphPrefix.Length, packageCode.Length - settings.EphPrefix.Length - settings.EphSuffix.Length);
+                var middlePart = packageCode.Substring(settings.EphPrefix.Length, 9);
+                var sequencePart = middlePart.Substring(0, 8);
+                var controlDigitChar = middlePart[8];
 
-                if (!int.TryParse(middlePart, out int number) || number < settings.EphStartingNumber || number > settings.EphEndingNumber)
+                if (!int.TryParse(sequencePart, out int sequenceNumber))
                 {
-                    return new JsonResult(new { message = "Podacie číslo musí byť platné číslo v povolenom rozsahu." });
+                    return new JsonResult(new { message = "Podacie číslo musí obsahovať platné čísla v poradovom čísle." });
+                };
+                if (sequenceNumber < settings.EphStartingNumber || sequenceNumber > settings.EphEndingNumber)
+                {
+                    return new JsonResult(new { message = "Poradové číslo podacieho čísla nie je v povolenom rozsahu." });
+                };
+
+                int[] digits = sequencePart.Select(c => int.Parse(c.ToString())).ToArray();
+                int[] controlWeights = { 8, 6, 4, 2, 3, 5, 9, 7 };
+
+                for (int i = 0; i < digits.Length; i++)
+                {
+                    digits[i] *= controlWeights[i];
+                };
+
+                int sum = digits.Sum();
+                int controlDiv = sum % 11;
+                
+                int checkDigit = 11 - controlDiv;
+
+                if (checkDigit == 10)
+                {
+                    checkDigit = 0;
+                }
+                else if (checkDigit == 11)
+                {
+                    checkDigit = 5;
+                }
+
+                if (controlDigitChar != checkDigit.ToString()[0])
+                {
+                    return new JsonResult(new { message = "Kontrolné číslo podacieho čísla nie je správne." });
                 };
 
                 var existingOrder = await _context.Orders
@@ -868,7 +993,8 @@ namespace AspNetCoreAPI.Controllers
                     .Select(o => o.PackageCode)
                     .ToListAsync();
                 var usedNumbers = usedPackageCodes
-                    .Select(code => code.Substring(settings.EphPrefix.Length, code.Length - settings.EphPrefix.Length - settings.EphSuffix.Length))
+                    .Where(code => code.Length == settings.EphPrefix.Length + 9 + settings.EphSuffix.Length)
+                    .Select(code => code.Substring(settings.EphPrefix.Length, 8))
                     .Where(numStr => int.TryParse(numStr, out _))
                     .Select(numStr => int.Parse(numStr))
                     .ToHashSet();
