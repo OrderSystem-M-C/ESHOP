@@ -67,10 +67,10 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   private setDefaultFeesInLocalStorage(): void {
     if (!localStorage.getItem('deliveryFee')) {
-      localStorage.setItem('deliveryFee', '5.00');
+      localStorage.setItem('deliveryFee', '5');
     }
     if (!localStorage.getItem('paymentFee')) {
-      localStorage.setItem('paymentFee', '2.00');
+      localStorage.setItem('paymentFee', '2');
     }
   }
 
@@ -96,7 +96,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.setDefaultFeesInLocalStorage();
   }
-  
+
   ngOnDestroy() {
     document.body.style.maxWidth = '1200px';
     document.body.style.width = '100%';

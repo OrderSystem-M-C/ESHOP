@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EphService, EphSettingsDTO } from '../services/eph.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -17,12 +17,12 @@ export class EphSettingsComponent implements OnInit {
   currentDate: string = '';
   isLoading: boolean = false;
 
-  ephSettings: EphSettingsDTO = null;
+  ephSettings: EphSettingsDTO | null = null;
 
   totalPackageCodes: number = 0;
 
-  deliveryFeeFromStorage: number | null = null;
-  paymentFeeFromStorage: number | null = null;
+  deliveryFeeFromStorage = signal<number | null>(null);
+  paymentFeeFromStorage = signal<number | null>(null);
 
   constructor(private datePipe: DatePipe, private ephService: EphService, private snackBar: MatSnackBar){}
 
@@ -82,8 +82,11 @@ export class EphSettingsComponent implements OnInit {
           this.ephSettings = response;
 
           const { deliveryFee, paymentFee } = this.settingsForm.value;
-          localStorage.setItem('deliveryFee', (Number(deliveryFee).toFixed(2)).toString());
-          localStorage.setItem('paymentFee', (Number(paymentFee).toFixed(2)).toString());
+          localStorage.setItem('deliveryFee', (deliveryFee).toString());
+          localStorage.setItem('paymentFee', (paymentFee).toString());
+
+          this.deliveryFeeFromStorage.update(value => Number(deliveryFee));
+          this.paymentFeeFromStorage.update(value => Number(paymentFee));
 
           this.ephService.countAvailablePackageCode().subscribe({
             next: (response) => {
@@ -126,12 +129,12 @@ export class EphSettingsComponent implements OnInit {
             ephSuffix: this.ephSettings.ephSuffix
           })
 
-          this.deliveryFeeFromStorage = Number(localStorage.getItem('deliveryFee'));
-          this.paymentFeeFromStorage = Number(localStorage.getItem('paymentFee'));
+          this.deliveryFeeFromStorage.set(Number(localStorage.getItem('deliveryFee')));
+          this.paymentFeeFromStorage.set(Number(localStorage.getItem('paymentFee')));
 
           this.settingsForm.patchValue({
-            deliveryFee: String(this.deliveryFeeFromStorage.toFixed(2)) || '',
-            paymentFee: String(this.paymentFeeFromStorage.toFixed(2)) || ''
+            deliveryFee: String(this.deliveryFeeFromStorage()) || '',
+            paymentFee: String(this.paymentFeeFromStorage()) || ''
           })
 
           this.ephService.countAvailablePackageCode().subscribe({

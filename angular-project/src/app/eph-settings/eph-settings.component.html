@@ -47,14 +47,14 @@
                 <div class="field">
                   <label for="deliveryFee" class="form-label">Poplatok za doručenie*</label>
                   <div class="delivery-fee">
-                    <input formControlName="deliveryFee" id="deliveryFee" type="number" class="form-control" placeholder="Zadajte sumu, napr. 3.50" [ngClass]="{'is-invalid': settingsForm.get('deliveryFee').invalid && settingsForm.get('deliveryFee').touched}">
+                    <input formControlName="deliveryFee" id="deliveryFee" type="number" class="form-control" min="0" step="0.10" placeholder="Zadajte sumu, napr. 3.50" [ngClass]="{'is-invalid': settingsForm.get('deliveryFee').invalid && settingsForm.get('deliveryFee').touched}">
                     <p>€</p>
                   </div>
                 </div>
                 <div class="field">
                   <label for="paymentFee" class="form-label">Poplatok za dobierku*</label>
                   <div class="payment-fee">
-                    <input formControlName="paymentFee" id="paymentFee" type="number" class="form-control" placeholder="Zadajte sumu, napr. 1.20" [ngClass]="{'is-invalid': settingsForm.get('paymentFee').invalid && settingsForm.get('paymentFee').touched}">
+                    <input formControlName="paymentFee" id="paymentFee" type="number" class="form-control" min="0" step="0.10" placeholder="Zadajte sumu, napr. 1.20" [ngClass]="{'is-invalid': settingsForm.get('paymentFee').invalid && settingsForm.get('paymentFee').touched}">
                     <p>€</p>
                   </div>
                 </div>
@@ -70,8 +70,8 @@
         <p [ngClass]="{ 'warning-text': totalPackageCodes === 0, 'info-text': true }">
           <strong>Celkový počet dostupných podacích čísel:</strong> {{ totalPackageCodes }}
         </p>
-        <p class="info-text"><strong>Poplatok za dopravu:</strong> {{ deliveryFeeFromStorage.toFixed(2) || 'neuvedený' }} €</p>
-        <p class="info-text"><strong>Poplatok za dobierku:</strong> {{ paymentFeeFromStorage.toFixed(2) || 'neuvedený' }} €</p>
+        <p class="info-text"><strong>Poplatok za dopravu:</strong> {{ deliveryFeeFromStorage().toFixed(2) || 'neuvedený' }} €</p>
+        <p class="info-text"><strong>Poplatok za dobierku:</strong> {{ paymentFeeFromStorage().toFixed(2) || 'neuvedený' }} €</p>
       }@else{
          <p>Systém nenašiel žiadne uložené nastavenia pre EPH a poplatky!</p>
       }
