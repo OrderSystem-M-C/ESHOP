@@ -36,8 +36,8 @@ export class EphSettingsComponent implements OnInit {
   });
   
   settingsForm = new FormGroup({
-    deliveryFee: new FormControl('', [Validators.required, Validators.min(0), Validators.pattern(/^\d+([.,]\d{1,2})?$/)]),
-    paymentFee: new FormControl('', [Validators.required, Validators.min(0), Validators.pattern(/^\d+([.,]\d{1,2})?$/)])
+    deliveryFee: new FormControl(0, [Validators.required, Validators.min(0)]),
+    paymentFee: new FormControl(0, [Validators.required, Validators.min(0)])
   });
 
   private endingNumberGreaterThanStarting(control: FormGroup){
@@ -133,8 +133,8 @@ export class EphSettingsComponent implements OnInit {
           this.paymentFeeFromStorage.set(Number(localStorage.getItem('paymentFee')));
 
           this.settingsForm.patchValue({
-            deliveryFee: String(this.deliveryFeeFromStorage()) || '',
-            paymentFee: String(this.paymentFeeFromStorage()) || ''
+            deliveryFee: this.deliveryFeeFromStorage() || 0,
+            paymentFee: this.paymentFeeFromStorage() || 0
           })
 
           this.ephService.countAvailablePackageCode().subscribe({

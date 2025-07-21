@@ -108,9 +108,9 @@ export class OrderFormComponent implements OnInit {
     phoneNumber: new FormControl('', [Validators.required, this.phoneValidator]),
     note: new FormControl(''),
     deliveryOption: new FormControl('', Validators.required),
-    deliveryCost: new FormControl(0, Validators.required),
+    deliveryCost: new FormControl(0, [Validators.required, Validators.min(0)]),
     paymentOption: new FormControl('', Validators.required),
-    paymentCost: new FormControl(0, Validators.required),
+    paymentCost: new FormControl(0, [Validators.required, Validators.min(0)]),
     discountAmount: new FormControl(null, Validators.pattern('^[0-9]*$')),
     orderStatus: new FormControl('Nezpracované - nová objednávka'),
     packageCode: new FormControl('', Validators.pattern('^[A-Z]{2}\\d{9}[A-Z]{2}$'))

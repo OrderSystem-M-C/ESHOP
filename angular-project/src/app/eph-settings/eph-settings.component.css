@@ -77,9 +77,6 @@ h1 {
 .field p {
   margin: 0;
 }
-.field:nth-child(1) {
-  margin-bottom: 15px;
-}
 .user-eph-settings {
   display: flex;
   justify-content: flex-start;
@@ -90,7 +87,7 @@ h1 {
 .user-eph-settings p {
   margin: 0;
 }
-.eph-prefix-suffix-container {
+.eph-prefix-suffix-container, .field:nth-child(1) {
   margin-bottom: 15px;
 }
 .eph-prefix, .eph-suffix {
