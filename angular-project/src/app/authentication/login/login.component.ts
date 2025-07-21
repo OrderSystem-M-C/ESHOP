@@ -65,6 +65,15 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
   }
 
+  private setDefaultFeesInLocalStorage(): void {
+    if (!localStorage.getItem('deliveryFee')) {
+      localStorage.setItem('deliveryFee', '5.00');
+    }
+    if (!localStorage.getItem('paymentFee')) {
+      localStorage.setItem('paymentFee', '2.00');
+    }
+  }
+
   validateAllFormFields(formGroup: FormGroup){
     Object.keys(formGroup.controls).forEach(field => {
       const control = formGroup.get(field);
@@ -80,10 +89,14 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
     return null;
   }
+
   ngOnInit(): void {
     document.body.style.maxWidth = 'unset';
     document.body.style.width = 'auto';
+
+    this.setDefaultFeesInLocalStorage();
   }
+  
   ngOnDestroy() {
     document.body.style.maxWidth = '1200px';
     document.body.style.width = '100%';

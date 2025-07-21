@@ -18,7 +18,11 @@ export class EphSettingsComponent implements OnInit {
   isLoading: boolean = false;
 
   ephSettings: EphSettingsDTO = null;
+
   totalPackageCodes: number = 0;
+
+  deliveryFeeFromStorage: number | null = null;
+  paymentFeeFromStorage: number | null = null;
 
   constructor(private datePipe: DatePipe, private ephService: EphService, private snackBar: MatSnackBar){}
 
@@ -26,9 +30,14 @@ export class EphSettingsComponent implements OnInit {
     ephPrefix: new FormControl('EB', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)]),
     ephStartingNumber: new FormControl('', [Validators.required, Validators.pattern(/^\d{8}$/)]),
     ephEndingNumber: new FormControl('', [Validators.required, Validators.pattern(/^\d{8}$/)]),
-    ephSuffix: new FormControl('SK', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)])
+    ephSuffix: new FormControl('SK', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)]),
   }, {
     validators: this.endingNumberGreaterThanStarting
+  });
+  
+  settingsForm = new FormGroup({
+    deliveryFee: new FormControl('', [Validators.required, Validators.min(0), Validators.pattern(/^\d+([.,]\d{1,2})?$/)]),
+    paymentFee: new FormControl('', [Validators.required, Validators.min(0), Validators.pattern(/^\d+([.,]\d{1,2})?$/)])
   });
 
   private endingNumberGreaterThanStarting(control: FormGroup){
@@ -55,8 +64,8 @@ export class EphSettingsComponent implements OnInit {
     }
   }
 
-  saveEphSettings(): void {
-    if(this.ephForm.valid){
+  saveSettings(): void {
+    if(this.ephForm.valid && this.settingsForm.valid){
       this.isLoading = true;
       const ephSettings: EphSettingsDTO = {
          ephPrefix: this.ephForm.value.ephPrefix,
@@ -72,14 +81,20 @@ export class EphSettingsComponent implements OnInit {
 
           this.ephSettings = response;
 
-          this.ephForm.reset();
+          const { deliveryFee, paymentFee } = this.settingsForm.value;
+          localStorage.setItem('deliveryFee', (Number(deliveryFee).toFixed(2)).toString());
+          localStorage.setItem('paymentFee', (Number(paymentFee).toFixed(2)).toString());
 
-          this.ephForm.patchValue({
-            ephPrefix: 'EB',
-            ephSuffix: 'SK'
+          this.ephService.countAvailablePackageCode().subscribe({
+            next: (response) => {
+              this.totalPackageCodes = response.availableCount;
+              this.isLoading = false;
+            },
+            error: (err) => {
+              console.error(err);
+              this.isLoading = false;
+            }
           })
-
-          this.isLoading = false;
         },
         error: (err) => {
           console.error("An error has occurred while trying to save EPH settings.", err);
@@ -93,6 +108,7 @@ export class EphSettingsComponent implements OnInit {
       this.ephForm.markAllAsTouched();
     }
   }
+  
   ngOnInit(): void {
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
@@ -102,6 +118,21 @@ export class EphSettingsComponent implements OnInit {
       this.ephService.getEphSettings().subscribe({
         next: (response) => {
           this.ephSettings = response;
+
+          this.ephForm.patchValue({
+            ephPrefix: this.ephSettings.ephPrefix,
+            ephStartingNumber: String(this.ephSettings.ephStartingNumber),
+            ephEndingNumber: String(this.ephSettings.ephEndingNumber),
+            ephSuffix: this.ephSettings.ephSuffix
+          })
+
+          this.deliveryFeeFromStorage = Number(localStorage.getItem('deliveryFee'));
+          this.paymentFeeFromStorage = Number(localStorage.getItem('paymentFee'));
+
+          this.settingsForm.patchValue({
+            deliveryFee: String(this.deliveryFeeFromStorage.toFixed(2)) || '',
+            paymentFee: String(this.paymentFeeFromStorage.toFixed(2)) || ''
+          })
 
           this.ephService.countAvailablePackageCode().subscribe({
             next: (response) => {

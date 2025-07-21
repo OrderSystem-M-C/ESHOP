@@ -115,7 +115,7 @@
           </tr>
           <tr>
             <td><b>Meno a priezvisko:</b></td>
-            <td>{{order?.invoiceName}}</td>
+            <td>{{order?.invoiceName ? order.invoiceName : 'Nezadané'}}</td>
           </tr>
           <tr>
             <td><b>Spoločnosť, IČO, DIČ:</b></td>
@@ -123,11 +123,11 @@
           </tr>
           <tr>
             <td><b>E-mailová adresa:</b></td>
-            <td>{{ order?.invoiceEmail }}</td>
+            <td>{{ order?.invoiceEmail ? order.invoiceEmail : 'Nezadané' }}</td>
           </tr>
           <tr>
             <td><b>Telefónne číslo:</b></td>
-            <td>{{ order?.invoicePhoneNumber }}</td>
+            <td>{{ order?.invoicePhoneNumber ? order.invoicePhoneNumber : 'Nezadané' }}</td>
           </tr>     
         </table>
         <table class="order-table">

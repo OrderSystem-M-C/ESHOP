@@ -120,14 +120,12 @@ export class OrderFormComponent implements OnInit {
     invoiceNumber: new FormControl(`${this.orderId}`, Validators.required),
     invoiceVariable: new FormControl(`${this.orderId}`, Validators.required),
     invoiceIssueDate: new FormControl('', Validators.required),
-    invoiceDueDate: new FormControl(''),
-    invoiceDeliveryDate: new FormControl(''),
-    invoiceName: new FormControl('', Validators.required),
+    invoiceName: new FormControl(''),
     invoiceCompany: new FormControl(''),
     invoiceICO: new FormControl(''),
     invoiceDIC: new FormControl(''),
-    invoiceEmail: new FormControl('', [Validators.required, this.emailValidator]),
-    invoicePhoneNumber: new FormControl('', [Validators.required, this.phoneValidator]),
+    invoiceEmail: new FormControl('', [this.emailValidator]),
+    invoicePhoneNumber: new FormControl('', [this.phoneValidator]),
   });
 
   createOrderDTO(): OrderDTO{
@@ -156,8 +154,6 @@ export class OrderFormComponent implements OnInit {
       invoiceNumber: this.invoiceForm.value.invoiceNumber,
       variableSymbol: this.invoiceForm.value.invoiceVariable,
       invoiceIssueDate: this.invoiceForm.value.invoiceIssueDate,
-      invoiceDueDate: this.invoiceForm.value.invoiceDueDate,
-      invoiceDeliveryDate: this.invoiceForm.value.invoiceDeliveryDate,
       invoiceName: this.invoiceForm.value.invoiceName,
       invoiceCompany: this.invoiceForm.value.invoiceCompany || '',
       invoiceICO: this.invoiceForm.value.invoiceICO || '',
@@ -423,28 +419,6 @@ export class OrderFormComponent implements OnInit {
       this.totalPrice = 0;
     }
   }
-  onDeliveryChange() {
-    const deliveryOption = this.orderForm.get('deliveryOption')?.value;
-
-    if (deliveryOption === 'Kuriér') {
-      this.orderForm.get('deliveryCost')?.setValue(5);
-    } else {
-      this.orderForm.get('deliveryCost')?.setValue(0);
-    }
-
-    this.recalculateTotalPrice();
-  }
-  onPaymentChange() {
-    const paymentOption = this.orderForm.get('paymentOption')?.value;
-
-    if (paymentOption === 'Hotovosť') {
-      this.orderForm.get('paymentCost')?.setValue(2);
-    } else {
-      this.orderForm.get('paymentCost')?.setValue(0);
-    }
-
-    this.recalculateTotalPrice();
-  }
 
   async updateOrder(){
     this.isLoading = true;
@@ -547,8 +521,6 @@ export class OrderFormComponent implements OnInit {
         invoiceNumber: order.invoiceNumber,
         invoiceVariable: order.variableSymbol,
         invoiceIssueDate: order.invoiceIssueDate,
-        invoiceDueDate: order.invoiceDueDate === '' ? undefined : order.invoiceDueDate,
-        invoiceDeliveryDate: order.invoiceDeliveryDate === '' ? undefined : order.invoiceDeliveryDate,
         invoiceName: order.invoiceName,
         invoiceCompany: order.invoiceCompany,
         invoiceICO: order.invoiceICO,
@@ -761,11 +733,16 @@ export class OrderFormComponent implements OnInit {
 
   async createInvoice(){
     this.invoiceCreated = true;
-    const discountAmount = this.orderForm.value.discountAmount ? this.orderForm.value.discountAmount : 0;
     const formattedInvoiceIssueDate = this.invoiceForm.value.invoiceIssueDate.split('-').reverse().join('.');
     
     const hasCompanyData = this.orderForm.value.company || this.orderForm.value.ico || this.orderForm.value.dic;
     const hasInvoiceCompanyData = this.invoiceForm.value.invoiceCompany || this.invoiceForm.value.invoiceICO || this.invoiceForm.value.invoiceDIC;
+
+    const invoiceName = this.invoiceForm.value.invoiceName;
+    const invoiceEmail = this.invoiceForm.value.invoiceEmail;
+    const invoicePhoneNumber = this.invoiceForm.value.invoicePhoneNumber;
+
+    const hasInvoiceBasicData = invoiceName && invoiceEmail && invoicePhoneNumber;  
 
     const loadingSnack = this.snackBar.open('Sťahuje sa faktúra...', '', { duration: undefined });
 
@@ -795,6 +772,28 @@ export class OrderFormComponent implements OnInit {
         </td>
       </tr>
 ` : '';
+
+    const invoiceDataHTML = hasInvoiceBasicData ? `
+      <div>
+        <h3 style="margin-bottom: 10px; font-weight: bold;">Fakturačné údaje</h3>
+        <table style="width: 100%; border: 1px solid #e0e0e0;">
+          <tr>
+            <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
+            <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${invoiceName}</td>
+          </tr>
+          ${invoiceCompanyRowHTML}
+          <tr>
+            <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
+            <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${invoiceEmail}</td>
+          </tr>
+          <tr>
+            <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
+            <td style="padding: 8px;">${invoicePhoneNumber}</td>
+          </tr>
+        </table>
+      </div>
+    ` : '';
+
     if(this.invoiceForm.valid && this.orderForm.valid && this.selectedProducts.length > 0){
       const invoiceHTML = `
 <div style="width: 100%; margin: 10px auto; box-sizing: border-box; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333;">
@@ -899,25 +898,7 @@ export class OrderFormComponent implements OnInit {
         </tr>
       </table>
     </div>
-
-    <div>
-      <h3 style="margin-bottom: 10px; font-weight: bold;">Fakturačné údaje</h3>
-      <table style="width: 100%; border: 1px solid #e0e0e0;">
-        <tr>
-          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceName}</td>
-        </tr>
-        ${invoiceCompanyRowHTML}
-        <tr>
-          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceEmail}</td>
-        </tr>
-        <tr>
-          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
-          <td style="padding: 8px;">${this.invoiceForm.value.invoicePhoneNumber}</td>
-        </tr>
-      </table>
-    </div>
+    ${invoiceDataHTML}
   </div>
 </div>
 `
@@ -939,6 +920,7 @@ export class OrderFormComponent implements OnInit {
       }
     }else{
       this.validateAllFormFields(this.invoiceForm);
+      this.validateAllFormFields(this.orderForm);
       this.invoiceCreated = false;
       loadingSnack.dismiss();
       this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
@@ -985,8 +967,16 @@ export class OrderFormComponent implements OnInit {
       })
     }
 
-    this.onDeliveryChange();
-    this.onPaymentChange();
+    const deliveryFeeStr = localStorage.getItem('deliveryFee');
+    const paymentFeeStr = localStorage.getItem('paymentFee');
+
+    const deliveryFee = deliveryFeeStr ? parseFloat(deliveryFeeStr) : 0;
+    const paymentFee = paymentFeeStr ? parseFloat(paymentFeeStr) : 0;
+
+    this.orderForm.patchValue({
+      deliveryCost: deliveryFee, //Tu + (unárny plus) premení string z toFixed(2) späť na číslo s dvoma desatinnými miestami.
+      paymentCost: paymentFee
+    });
   }
 }
 export interface OrderDTO {
@@ -1014,8 +1004,6 @@ export interface OrderDTO {
   invoiceNumber: string;
   variableSymbol: string;
   invoiceIssueDate: string; 
-  invoiceDueDate: string;  
-  invoiceDeliveryDate: string;
   invoiceName: string;
   invoiceCompany?: string; 
   invoiceICO?: string; 

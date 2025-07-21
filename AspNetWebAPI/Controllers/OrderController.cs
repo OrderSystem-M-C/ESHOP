@@ -64,8 +64,6 @@ namespace AspNetCoreAPI.Controllers
                 InvoiceNumber = orderDto.InvoiceNumber,
                 VariableSymbol = orderDto.VariableSymbol,
                 InvoiceIssueDate = orderDto.InvoiceIssueDate,
-                InvoiceDueDate = orderDto.InvoiceDueDate,
-                InvoiceDeliveryDate = orderDto.InvoiceDeliveryDate,
                 InvoiceName = orderDto.InvoiceName,
                 InvoiceCompany = orderDto.InvoiceCompany,
                 InvoiceICO = orderDto.InvoiceICO,
@@ -316,8 +314,6 @@ namespace AspNetCoreAPI.Controllers
                 order.InvoiceNumber = orderDto.InvoiceNumber;
                 order.VariableSymbol = orderDto.VariableSymbol;
                 order.InvoiceIssueDate = orderDto.InvoiceIssueDate;
-                order.InvoiceDueDate = orderDto.InvoiceDueDate;
-                order.InvoiceDeliveryDate = orderDto.InvoiceDeliveryDate;
                 order.InvoiceName = orderDto.InvoiceName;
                 order.InvoiceCompany = orderDto.InvoiceCompany;
                 order.InvoiceICO = orderDto.InvoiceICO;
@@ -447,8 +443,6 @@ namespace AspNetCoreAPI.Controllers
                         InvoiceNumber = original.InvoiceNumber,
                         VariableSymbol = original.VariableSymbol,
                         InvoiceIssueDate = original.InvoiceIssueDate,
-                        InvoiceDueDate = original.InvoiceDueDate,
-                        InvoiceDeliveryDate = original.InvoiceDeliveryDate,
                         InvoiceName = original.InvoiceName,
                         InvoiceCompany = original.InvoiceCompany,
                         InvoiceICO = original.InvoiceICO,
@@ -607,8 +601,6 @@ namespace AspNetCoreAPI.Controllers
                     InvoiceNumber = o.InvoiceNumber,
                     VariableSymbol = o.VariableSymbol,
                     InvoiceIssueDate = o.InvoiceIssueDate,
-                    InvoiceDueDate = o.InvoiceDueDate,
-                    InvoiceDeliveryDate = o.InvoiceDeliveryDate,
                     InvoiceName = o.InvoiceName,
                     InvoiceCompany = o.InvoiceCompany,
                     InvoiceICO = o.InvoiceICO,

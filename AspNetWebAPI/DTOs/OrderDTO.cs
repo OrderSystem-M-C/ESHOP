@@ -9,10 +9,10 @@ namespace AspNetCoreAPI.DTOs
         public int OrderId { get; set; }
         [Required]
         public string CustomerName { get; set; }
-        public string Company { get; set; }
-        public string ICO { get; set; }
-        public string DIC { get; set; }
-        public string ICDPH { get; set; }
+        public string? Company { get; set; }
+        public string? ICO { get; set; }
+        public string? DIC { get; set; }
+        public string? ICDPH { get; set; }
         [Required]
         public string Address { get; set; }
         [Required]
@@ -23,7 +23,7 @@ namespace AspNetCoreAPI.DTOs
         public string Email { get; set; }
         [Required]
         public string PhoneNumber { get; set; }
-        public string Note { get; set; }
+        public string? Note { get; set; }
         [Required]
         public string DeliveryOption { get; set; }
         [Required]
@@ -44,18 +44,13 @@ namespace AspNetCoreAPI.DTOs
         [Required]
         public string VariableSymbol { get; set; }
         [Required]
-        public string InvoiceIssueDate { get; set; }
-        public string? InvoiceDueDate { get; set; }
-        public string? InvoiceDeliveryDate { get; set; }
-        [Required]
-        public string InvoiceName { get; set; }
-        public string InvoiceCompany { get; set; }
-        public string InvoiceICO { get; set; }
-        public string InvoiceDIC { get; set; }
-        [Required]
-        public string InvoiceEmail { get; set; }
-        [Required]
-        public string InvoicePhoneNumber { get; set; }
+        public string? InvoiceIssueDate { get; set; }
+        public string? InvoiceName { get; set; }
+        public string? InvoiceCompany { get; set; }
+        public string? InvoiceICO { get; set; }
+        public string? InvoiceDIC { get; set; }
+        public string? InvoiceEmail { get; set; }
+        public string? InvoicePhoneNumber { get; set; }
         public string PackageCode { get; set; } = string.Empty;
     }
 }
