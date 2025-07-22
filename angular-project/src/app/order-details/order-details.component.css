@@ -81,6 +81,9 @@ h1 {
   border-bottom: 1px solid #ddd;
   width: 30%;
 }
+.order-table tr {
+  transition: background-color 0.15s ease;
+}
 .order-table tr:hover {
   background-color: #fbfbfb;
   cursor: pointer;
@@ -128,12 +131,13 @@ h1 {
   padding: 9px;
   text-align: left;
   background-color: white;
+  transition: background-color 0.15s ease;
   border-bottom: 1px solid #ccc;
 }
-.selected-products-table tr td:not(:first-child){
+.selected-products-table tr td:not(:first-child) {
   text-align: center;
 }
-.product-row:hover td, .total-row:hover td, .products-table-title:hover th {
+.selected-products-table tr:hover:not(.main-title) td {
   background-color: #fbfbfb;
   cursor: pointer;
 }

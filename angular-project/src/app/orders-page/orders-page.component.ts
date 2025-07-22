@@ -46,15 +46,15 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
 
   revenue_chartInstance: any;
   revenue_ctx: any;
-  @ViewChild('revenueChart') revenueChart!: { nativeElement: any };
+  @ViewChild('revenueChart', { static: false }) revenueChart!: { nativeElement: HTMLCanvasElement };
 
   orders_chartInstance: any;
   orders_ctx: any;
-  @ViewChild('ordersDate') ordersDate!: { nativeElement: any };
+  @ViewChild('ordersDate', { static: false }) ordersDate!: { nativeElement: HTMLCanvasElement };
 
   pie_chartInstance: any;
   pie_ctx: any;
-  @ViewChild('ordersStatusChart') ordersStatusChart!: { nativeElement: any };
+  @ViewChild('ordersStatusChart', { static: false }) ordersStatusChart!: { nativeElement: HTMLCanvasElement };
 
   totalItems: number = 0;
   pageIndex: number = 0;

@@ -64,12 +64,12 @@
     <div class="user-eph-settings">
       <h3>Aktuálna konfigurácia podacích čísel (EPH)</h3>
       @if(ephSettings != null || (deliveryFeeFromStorage && paymentFeeFromStorage)){
+        <p [ngClass]="{ 'warning-text': totalPackageCodes === 0, 'success-text': true }">
+          <strong>Celkový počet dostupných podacích čísel:</strong> {{ totalPackageCodes }}
+        </p>
         <p class="info-text"><strong>EPH Prefix:</strong> {{ ephSettings.ephPrefix }}</p>
         <p class="info-text"><strong>EPH rozsah (od - do):</strong> {{ ephSettings.ephStartingNumber }} - {{ ephSettings.ephEndingNumber }}</p>
         <p class="info-text"><strong>EPH Suffix:</strong> {{ ephSettings.ephSuffix }}</p>
-        <p [ngClass]="{ 'warning-text': totalPackageCodes === 0, 'info-text': true }">
-          <strong>Celkový počet dostupných podacích čísel:</strong> {{ totalPackageCodes }}
-        </p>
         <p class="info-text"><strong>Poplatok za dopravu:</strong> {{ deliveryFeeFromStorage().toFixed(2) || 'neuvedený' }} €</p>
         <p class="info-text"><strong>Poplatok za dobierku:</strong> {{ paymentFeeFromStorage().toFixed(2) || 'neuvedený' }} €</p>
       }@else{
