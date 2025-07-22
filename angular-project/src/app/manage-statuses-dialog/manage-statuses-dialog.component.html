@@ -1,6 +1,6 @@
 <div class="manage-statuses-dialog-component">
     <div class="title-close">
-        <h2>Nastavenia stavov objednávky</h2>
+        <h2>Nastavenia stavov objednávky <img src="../../assets/Images/settings-icon.png" alt="settings-icon"></h2>
         <button class="btn btn-secondary" (click)="closeDialog()">Zavrieť okno</button>
     </div>
     @if(isLoading){
@@ -21,7 +21,12 @@
                     <input class="form-control status-color" id="statusColor" type="color" formControlName="statusColor" [ngClass]="{'is-invalid': statusForm.get('statusColor').invalid && statusForm.get('statusColor').touched}">
                 </div>
                 <div class="field">
-                    <p>Poznámka: Poradie vytvoreného stavu bude automaticky zvolené ako posledné.</p>
+                    <p>
+                        <strong>Poznámka:</strong> Poradie nového stavu sa automaticky nastaví na posledné. Po zatvorení dialógu je možné poradie manuálne upraviť.<br><br>
+                        <strong>Stavy:</strong> „Nezpracované - nová objednávka“, 
+                        „Zasielanie čísla zásielky“ a 
+                        „Dobierka - Info k objednávke (poslať e-mail)” sú preddefinované.
+                    </p>
                 </div>
                 <div class="submit">
                     @if(editingOrderStatusId !== null){
@@ -42,7 +47,12 @@
                         </span> 
                         <div class="dropdown-menu">
                             <button (click)="editOrderStatus(status)"><img src="../../assets/Images/edit-icon.png" alt="edit-icon"> Upraviť stav</button>
-                            <button *ngIf="status.statusName !== 'Nezpracované - nová objednávka'" (click)="deleteOrderStatus(status.statusId)"><img src="../../assets/Images/bin-icon.png" alt="bin-icon">Vymazať stav</button>
+                            <button *ngIf="![
+                                'Nezpracované - nová objednávka',
+                                'Zasielanie čísla zásielky',
+                                'Dobierka - Info k objednávke (poslať e-mail)'
+                            ].includes(status.statusName)"
+                            (click)="deleteOrderStatus(status.statusId)"><img src="../../assets/Images/bin-icon.png" alt="bin-icon">Vymazať stav</button>
                         </div>
                     </div>
                 </div>

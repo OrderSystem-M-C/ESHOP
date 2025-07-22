@@ -101,7 +101,7 @@
             </div>
         </div>
         <div class="total-price">
-            @if(selectedProducts.length > 0){
+            @if(selectedProducts.length > 0 || isEditMode){
               <p><b>Súčet produktov:</b></p>
               <p>{{ productsTotalPrice | number : '1.2-2' }}€</p> 
             }
@@ -221,7 +221,7 @@
               <input type="text" id="invoicePhoneNumber" class="form-control" placeholder="Zadajte telefónne číslo na faktúre" formControlName="invoicePhoneNumber" [ngClass]="{'is-invalid': invoiceForm.get('invoicePhoneNumber').invalid && invoiceForm.get('invoicePhoneNumber').touched}">
             </div>
             <div class="field">
-              <p>Poznámka: Faktúra bude automaticky vygenerovaná pri odoslaní objednávky. Toto tlačidlo slúži na jej náhľad a kontrolu.</p>
+              <p><strong>Poznámka:</strong> Faktúra bude automaticky vygenerovaná pri odoslaní objednávky. Toto tlačidlo slúži na jej náhľad a kontrolu.</p>
               <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn" (click)="createInvoice()" [disabled]="invoiceCreated">Vytvoriť faktúru</button>
             </div>
             </form>

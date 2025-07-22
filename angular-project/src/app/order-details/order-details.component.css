@@ -137,7 +137,10 @@ h1 {
 .selected-products-table tr td:not(:first-child) {
   text-align: center;
 }
-.selected-products-table tr:hover:not(.main-title) td {
+.selected-products-table tbody tr:hover td,
+.selected-products-table tbody tr:hover th,
+.selected-products-table tfoot tr:hover td,
+.selected-products-table tfoot tr:hover th {
   background-color: #fbfbfb;
   cursor: pointer;
 }

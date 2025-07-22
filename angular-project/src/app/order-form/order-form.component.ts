@@ -173,7 +173,7 @@ export class OrderFormComponent implements OnInit {
   }
   openManageStatusesDialog(): void {
     const dialogRef = this.dialog.open(ManageStatusesDialogComponent, {
-      width: '1000px'
+      width: '1100px'
     });
     dialogRef.afterClosed().subscribe(result => {
       if(result === true){
@@ -502,7 +502,6 @@ export class OrderFormComponent implements OnInit {
     this.orderService.getOrderDetails(orderId).subscribe((order) => {
       this.orderForm.patchValue(order); //patchValue robi ze vyplni hodnoty objednavky
       this.originalPackageCode = order.packageCode;
-      this.recalculateTotalPrice();
 
       if(order.packageCode === ''){
         this.ephService.generatePackageCode().subscribe({
@@ -531,6 +530,7 @@ export class OrderFormComponent implements OnInit {
 
       this.orderService.getOrderProducts(order.id).subscribe((result) => {
         this.selectedProducts = result;
+        this.recalculateTotalPrice();
         this.isLoading_edit = false;
       });
     })

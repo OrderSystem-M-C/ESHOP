@@ -37,7 +37,7 @@
                   <label class="form-label" for="ephEndingNumber">Rozsah do*</label>
                   <input formControlName="ephEndingNumber" id="ephEndingNumber" type="number" inputmode="numeric" class="form-control" placeholder="napr.: 12345690" [ngClass]="{'is-invalid': ephForm.get('ephEndingNumber').invalid && ephForm.get('ephEndingNumber').touched}">
                 </div>
-              <p>Poznámka: Kontrolné číslo „x“ dopočíta program automaticky.</p>
+              <p><strong>Poznámka:</strong> Kontrolné číslo „x“ dopočíta program automaticky.</p>
           </div>
       </form>
       <form [formGroup]="settingsForm">
