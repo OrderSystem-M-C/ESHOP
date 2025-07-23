@@ -22,24 +22,24 @@
     <div class="canvas-chart">
       <canvas #ordersDate></canvas>
       <div class="select-range">
-        <select class="form-control">
-          <option (click)="changeRange('1d', 'orders')">1 deň</option>
-          <option (click)="changeRange('7d', 'orders')">7 dní</option>
-          <option (click)="changeRange('1m', 'orders')">1 mesiac</option>
-          <option (click)="changeRange('1y', 'orders')">1 rok</option>
-          <option (click)="changeRange('all', 'orders')" selected>Celý čas</option>
+        <select class="form-control" (change)="onRangeChange($event, 'orders')">
+          <option value="1d">1 deň</option>
+          <option value="7d">7 dní</option>
+          <option value="1m">1 mesiac</option>
+          <option value="1y">1 rok</option>
+          <option value="all" selected>Celý čas</option>
         </select>
       </div>
     </div>
     <div class="canvas-chart">
       <canvas #revenueChart></canvas>
       <div class="select-range">
-        <select class="form-control">
-          <option (click)="changeRange('1d', 'revenue')">1 deň</option>
-          <option (click)="changeRange('7d', 'revenue')">7 dní</option>
-          <option (click)="changeRange('1m', 'revenue')">1 mesiac</option>
-          <option (click)="changeRange('1y', 'revenue')">1 rok</option>
-          <option (click)="changeRange('all', 'revenue')" selected>Celý čas</option>
+        <select class="form-control" (change)="onRangeChange($event, 'revenue')">
+          <option value="1d">1 deň</option>
+          <option value="7d">7 dní</option>
+          <option value="1m">1 mesiac</option>
+          <option value="1y">1 rok</option>
+          <option value="all" selected>Celý čas</option>
         </select>
         <div class="total-revenue">
           <p><b>Celkový príjem:</b> {{ totalRevenue }}€</p>

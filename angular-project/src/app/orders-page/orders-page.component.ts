@@ -22,7 +22,7 @@ import { HttpErrorResponse } from '@angular/common/http';
   templateUrl: './orders-page.component.html',
   styleUrl: './orders-page.component.scss'
 })
-export class OrdersPageComponent implements OnInit, AfterViewInit{
+export class OrdersPageComponent implements OnInit, AfterViewInit {
   public ordersData: OrderDTO[] = [];
   filteredOrders = [...this.ordersData];
   ourFilteredOrders: OrderDTO[] = [];
@@ -308,15 +308,23 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
     })
   }
 
+  onRangeChange(event: Event, chart: 'orders' | 'revenue'): void {
+    const value = (event.target as HTMLSelectElement).value as '1d' | '7d' | '1m' | '1y' | 'all';
+    this.changeRange(value, chart);
+  }
+
   changeRange(range: '1d' | '7d' | '1m' | '1y' | 'all', chart: 'orders' | 'revenue'){
     this.selectedRange = range;
-    if(chart === 'orders'){
-      this.orders_chartInstance.destroy();
-      this.createChart(chart);
-    }else{
-      this.revenue_chartInstance.destroy();
-      this.createChart(chart);
-    }
+
+    setTimeout(() => {
+      if (chart === 'orders' && this.ordersDate?.nativeElement) {
+        this.orders_chartInstance?.destroy();
+        this.createChart(chart);
+      } else if (chart === 'revenue' && this.revenueChart?.nativeElement) {
+        this.revenue_chartInstance?.destroy();
+        this.createChart(chart);
+      }
+    }, 0);
   }
 
   createChart(chart: 'status' | 'orders' | 'revenue'): void {
@@ -634,6 +642,15 @@ export class OrdersPageComponent implements OnInit, AfterViewInit{
         this.isLoading = false;
         const now = new Date();
         this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
+
+        console.log('%c\
+       ██╗  ██╗███████╗██╗     ██╗      ██████╗\n\
+        ██║  ██║██╔════╝██║     ██║     ██╔═══██╗\n\
+        ███████║█████╗  ██║     ██║     ██║   ██║\n\
+        ██╔══██║██╔══╝  ██║     ██║     ██║   ██║\n\
+        ██║  ██║███████╗███████╗███████╗╚██████╔╝\n\
+        ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝ ╚═════╝', 
+        'font-family: monospace; white-space: pre; font-size: 12px; color: #4CAF50; background: black; padding: 5px;');
       }
     })
   }
