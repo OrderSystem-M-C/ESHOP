@@ -64,7 +64,7 @@
     <div class="user-eph-settings">
       <h3>Aktuálna konfigurácia podacích čísel (EPH)</h3>
       @if(ephSettings != null || (deliveryFeeFromStorage && paymentFeeFromStorage)){
-        <p [ngClass]="{ 'warning-text': totalPackageCodes === 0, 'success-text': true }">
+        <p [ngClass]="{ 'warning-text': totalPackageCodes === 0, 'success-text': totalPackageCodes > 0 }">
           <strong>Celkový počet dostupných podacích čísel:</strong> {{ totalPackageCodes }}
         </p>
         <p class="info-text"><strong>EPH Prefix:</strong> {{ ephSettings.ephPrefix }}</p>

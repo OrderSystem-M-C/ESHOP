@@ -608,7 +608,8 @@ namespace AspNetCoreAPI.Controllers
                     InvoiceEmail = o.InvoiceEmail,
                     InvoicePhoneNumber = o.InvoicePhoneNumber,
                     PaymentCost = o.PaymentCost,
-                    DeliveryCost = o.DeliveryCost
+                    DeliveryCost = o.DeliveryCost,
+                    PackageCode = o.PackageCode ?? ""
                 }).ToList();
 
             if (orders == null || !orders.Any())
@@ -616,7 +617,7 @@ namespace AspNetCoreAPI.Controllers
                 return NotFound("Orders selected for generation of the XML file were not found.");
             }
 
-            XNamespace tns = "http://mojezasielky.posta.sk/api";
+            XNamespace tns = "http://ekp.posta.sk/LOGIS/Formulare/Podaj_v03";
             var zasielkyElements = new List<XElement>();
             int pocetZasielok = 0;
 
@@ -643,16 +644,22 @@ namespace AspNetCoreAPI.Controllers
                 return NotFound("No valid orders found for XML export.");
             }
 
+            string infoEphDruhZasielky = "8";
+
             var ephXml = new XElement(tns + "EPH",
-                new XAttribute("verzia", "1.0"),
+                new XAttribute("verzia", "3.0"), 
                 new XElement(tns + "InfoEPH",
+                    new XElement(tns + "Mena", "EUR"),
+                    new XElement(tns + "TypEPH", "1"),
                     new XElement(tns + "EPHID", Guid.NewGuid().ToString().Replace("-", "").Substring(0, 20)),
-                    new XElement(tns + "Datum", DateTime.Now.ToString("dd.MM.yyyy")),
-                    new XElement(tns + "PocetZasielok", pocetZasielok.ToString()),
-                    new XElement(tns + "DruhZasielky", "1"),
+                    new XElement(tns + "Datum", DateTime.Now.ToString("yyyyMMdd")),
+                    new XElement(tns + "Uhrada",
+                        new XElement(tns + "SposobUhrady", "8")
+                    ),
+                    new XElement(tns + "DruhZasielky", infoEphDruhZasielky),
                     new XElement(tns + "Odosielatel",
                         new XElement(tns + "OdosielatelID", "WEB_EPH"),
-                        new XElement(tns + "Meno", ""),
+                        new XElement(tns + "Meno", ""), 
                         new XElement(tns + "Organizacia", "Anna Bylinková Cibulková"),
                         new XElement(tns + "Ulica", "Cesta do Rudiny 1007"),
                         new XElement(tns + "Mesto", "Kysucké Nové Mesto"),
@@ -660,62 +667,51 @@ namespace AspNetCoreAPI.Controllers
                         new XElement(tns + "Krajina", "SK"),
                         new XElement(tns + "Telefon", ""),
                         new XElement(tns + "Email", "ephdobierky@gmail.com"),
-                        new XElement(tns + "CisloUctu", "SK56 1111 0000 0010 7290 6017")
+                        new XElement(tns + "CisloUctu", "SK84 6500 0000 0036 5285 9471")
                     )
                 ),
                 new XElement(tns + "Zasielky", zasielkyElements)
             );
 
-            XNamespace soapenv = "http://schemas.xmlsoap.org/soap/envelope/";
-            var soapEnvelope = new XDocument(
-                new XDeclaration("1.0", "UTF-8", "no"),
-                new XElement(soapenv + "Envelope",
-                    new XAttribute(XNamespace.Xmlns + "soapenv", soapenv.NamespaceName),
-                    new XAttribute(XNamespace.Xmlns + "tns", tns.NamespaceName),
-                    new XElement(soapenv + "Header"),
-                    new XElement(soapenv + "Body",
-                    new XElement(tns + "importSheetRequest",
-                        new XElement(tns + "auth",
-                            new XElement(tns + "userId", _userId),
-                            new XElement(tns + "apiKey", _apiKey)
-                        ),
-                        ephXml
-                        )
-                    )
-                )
-            );
-
             var requestBody = ephXml.ToString();
             var fileBytes = Encoding.UTF8.GetBytes(requestBody);
             var contentType = "application/xml";
-            string fileName = $"Zasielky_{DateTime.Now:ddMMyyyy}.xml";
+            string fileName = $"Zasielky_{DateTime.Now:ddMMyyyy_HHmmss}.xml";
 
             return File(fileBytes, contentType, fileName);
         }
         private async Task<XElement> ProcessOrderAsync(OrderDTO order, XNamespace tns)
         {
+            string druhZasielky = (order.DeliveryOption == "Kuriér") ? "8" : "1";
+
             return new XElement(tns + "Zasielka",
                 new XElement(tns + "Adresat",
                     new XElement(tns + "Meno", order.CustomerName),
-                    new XElement(tns + "Organizacia", string.IsNullOrWhiteSpace(order.Company) ? "" : $"{order.Company}"),
+                    new XElement(tns + "Organizacia", string.IsNullOrWhiteSpace(order.Company) ? "" : order.Company),
                     new XElement(tns + "Ulica", order.Address),
                     new XElement(tns + "Mesto", order.City),
                     new XElement(tns + "PSC", order.PostalCode),
                     new XElement(tns + "Krajina", "SK"),
                     new XElement(tns + "Telefon", order.PhoneNumber),
                     new XElement(tns + "Email", order.Email),
-
                     string.IsNullOrEmpty(order.ICO) ? null : new XElement(tns + "ICO", order.ICO),
                     string.IsNullOrEmpty(order.DIC) ? null : new XElement(tns + "DIC", order.DIC),
                     string.IsNullOrEmpty(order.ICDPH) ? null : new XElement(tns + "ICDPH", order.ICDPH)
                 ),
                 new XElement(tns + "Info",
-                    new XElement(tns + "ZasielkaID", order.OrderId),
-                    new XElement(tns + "Hmotnost", "1"),
+                    new XElement(tns + "CiarovyKod", order.PackageCode),
+                    new XElement(tns + "Hmotnost", "1"), 
+                    new XElement(tns + "CenaPoistneho", "100"),
                     (order.PaymentOption == "Hotovosť" ? new XElement(tns + "CenaDobierky", order.PaymentCost.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)) : null),
-                    new XElement(tns + "DruhZasielky", "8"),
+                    new XElement(tns + "DruhZasielky", druhZasielky),
                     new XElement(tns + "Poznamka", order.Note),
                     new XElement(tns + "SymbolPrevodu", order.VariableSymbol)
+                ),
+                new XElement(tns + "DalsieUdaje",
+                    new XElement(tns + "Udaj",
+                        new XElement(tns + "Nazov", "UloznaLehota"),
+                        new XElement(tns + "Hodnota")
+                    )
                 )
             );
         }
