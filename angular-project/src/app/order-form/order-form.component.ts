@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import * as html2pdf from 'html2pdf.js';
 import { OrderService } from '../services/order.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -126,7 +126,68 @@ export class OrderFormComponent implements OnInit {
     invoiceDIC: new FormControl(''),
     invoiceEmail: new FormControl('', [this.emailValidator]),
     invoicePhoneNumber: new FormControl('', [this.phoneValidator]),
-  });
+  }, { validators: this.conditionalInvoiceValidator() });
+
+  conditionalInvoiceValidator(): ValidatorFn {
+    return (formGroup: AbstractControl): { [key: string]: any } | null => {
+      const nameControl = formGroup.get('invoiceName');
+      const emailControl = formGroup.get('invoiceEmail');
+      const phoneControl = formGroup.get('invoicePhoneNumber');
+
+      const nameValue = nameControl?.value?.trim() || '';
+      const emailValue = emailControl?.value?.trim() || '';
+      const phoneValue = phoneControl?.value?.trim() || '';
+
+      const isAnyFieldFilled = nameValue.length > 0 || emailValue.length > 0 || phoneValue.length > 0;
+
+      let hasError = false;
+
+      const setConditionalError = (control: AbstractControl | null) => {
+        if(control) {
+          control.setErrors({ requiredConditional: true });
+          if (!control.touched) control.markAsTouched();
+          if (!control.dirty) control.markAsDirty();
+          hasError = true;
+        }
+      }
+      const clearConditionalError = (control: AbstractControl | null) => {
+        if(control && control.hasError('requiredConditional')) {
+          control.setErrors(null);
+        }
+      };
+
+      if(isAnyFieldFilled) {
+        if(nameControl && nameValue.length === 0) {
+          setConditionalError(nameControl);
+        }else {
+          clearConditionalError(nameControl)
+        }
+
+        if(emailControl && emailValue.length === 0) {
+          setConditionalError(emailControl);
+        }else {
+          clearConditionalError(emailControl)
+        }
+
+        if(phoneControl && phoneValue.length === 0) {
+          setConditionalError(phoneControl)
+        }else {
+          clearConditionalError(phoneControl)
+        }
+
+        return hasError ? { incompleteInvoiceContactData: true } : null;
+      }else {
+        clearConditionalError(nameControl);
+        clearConditionalError(emailControl);
+        clearConditionalError(phoneControl);
+
+        if (formGroup.hasError('incompleteInvoiceContactData')) {
+          return null; 
+        }
+      }
+      return null;
+    }
+  }
 
   createOrderDTO(): OrderDTO{
     return {
@@ -476,8 +537,12 @@ export class OrderFormComponent implements OnInit {
       this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
       this.validateAllFormFields(this.orderForm);
       this.validateAllFormFields(this.invoiceForm);
+
+      this.isLoading = false;
     }else if(this.selectedProducts.length === 0) {
       this.snackBar.open('Neboli zvolené žiadne produkty!', '', {duration: 2000});
+
+      this.isLoading = false;
     }
   }
 
@@ -631,10 +696,14 @@ export class OrderFormComponent implements OnInit {
       const element = document.getElementById('selected-products-id');
       element.scrollIntoView({behavior: 'smooth', block: 'start'});
       this.snackBar.open('Nemáte zvolené produkty pre túto objednávku!', '', {duration: 2500}); 
+
+      this.isLoading = false;
     }else if(this.orderForm.invalid || this.invoiceForm.invalid){
       this.validateAllFormFields(this.orderForm);
       this.validateAllFormFields(this.invoiceForm);
       this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
+
+      this.isLoading = false;
     }
   }
 
