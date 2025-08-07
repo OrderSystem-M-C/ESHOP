@@ -272,6 +272,13 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
     )
   }
 
+  selectAllOrders(){
+    for (let order of this.ourFilteredOrders) {
+      order.orderSelected = true;
+    }
+    this.selectOrder();
+  }
+
   clearSelection(showSnackbar: boolean = false) {
     this.selectedOrders = [];
     this.filteredOrders.forEach(order => order.orderSelected = false);

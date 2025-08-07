@@ -70,7 +70,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       localStorage.setItem('deliveryFee', '5');
     }
     if (!localStorage.getItem('paymentFee')) {
-      localStorage.setItem('paymentFee', '2');
+      localStorage.setItem('paymentFee', '1.50');
     }
   }
 
