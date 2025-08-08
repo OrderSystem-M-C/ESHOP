@@ -31,6 +31,10 @@ export class ProductService {
 }
 export interface ProductUpdateDTO {
   productId: number;
+  productName?: string;
+  productDescription?: string;
+  productPrice?: number;
+  productWeight?: number;
   stockAmount?: number;
   productCode?: number;
 }

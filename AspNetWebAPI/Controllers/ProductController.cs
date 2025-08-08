@@ -104,6 +104,22 @@ namespace AspNetCoreAPI.Controllers
                         return NotFound($"Product with ID {update.ProductId} not found.");
                     }
 
+                    if (!string.IsNullOrEmpty(update.ProductName))
+                    {
+                        product.ProductName = update.ProductName;
+                    }
+                    if (update.ProductDescription != null) 
+                    {
+                        product.ProductDescription = update.ProductDescription;
+                    }
+                    if (update.ProductPrice.HasValue)
+                    {
+                        product.ProductPrice = update.ProductPrice.Value;
+                    }
+                    if (update.ProductWeight.HasValue)
+                    {
+                        product.ProductWeight = update.ProductWeight.Value;
+                    }
                     if (update.StockAmount.HasValue)
                     {
                         product.StockAmount = update.StockAmount.Value;
@@ -115,7 +131,7 @@ namespace AspNetCoreAPI.Controllers
                 }
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = "Stock amounts updated successfully." });
+                return Ok(new { message = "Product was updated successfully." });
             }
             catch (Exception ex)
             {

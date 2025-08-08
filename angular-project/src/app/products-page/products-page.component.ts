@@ -40,7 +40,9 @@ export class ProductsPageComponent implements OnInit {
   pageSize: number = 6;
 
   editedProducts: { [productId: number]: { stockAmount?: number; productCode?: number }} = {};
+  editingProductId?: number;
   isEditingProducts: boolean = false;
+  isEditMode: boolean = false;
   hasShownEditingSnackbar = false;
 
   constructor(private datePipe: DatePipe, private dialog: MatDialog, private snackBar: MatSnackBar, private productService: ProductService){}
@@ -51,7 +53,7 @@ export class ProductsPageComponent implements OnInit {
     productPrice: new FormControl('', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
     productWeight: new FormControl('', [Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
     stockAmount: new FormControl('', [Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
-    productCode: new FormControl('', [Validators.pattern(/^\d+(\.\d{1,2})?$/)])
+    productCode: new FormControl('', [Validators.pattern(/^\d+$/), Validators.min(0)]),
   })
 
   updatePagedProducts(): void {
@@ -90,7 +92,80 @@ export class ProductsPageComponent implements OnInit {
   }
 
   isProductEdited(productId: number, field: 'stockAmount' | 'productCode'): boolean {
-    return this.editedProducts.hasOwnProperty(productId) && this.editedProducts[productId].hasOwnProperty(field);
+    if (!this.editedProducts.hasOwnProperty(productId)) return false;
+    if (!this.editedProducts[productId].hasOwnProperty(field)) return false;
+
+    const originalProduct = this.productsData.find(p => p.productId === productId);
+    if (!originalProduct) return false;
+
+    return this.editedProducts[productId][field] !== originalProduct[field];
+  }
+
+  openEditDialog(editProductDialog: TemplateRef<any>, product: ProductDTO){
+    this.isEditMode = true;
+    this.editingProductId = product.productId;
+    this.productForm.setValue({
+      productName: product.productName || '',
+      productDescription: product.productDescription || '',
+      productPrice: product.productPrice?.toString() || '',
+      productWeight: product.productWeight?.toString() || '',
+      stockAmount: product.stockAmount?.toString() || '',
+      productCode: product.productCode?.toString() || ''
+    });
+
+    this.dialogRef = this.dialog.open(editProductDialog, {
+      autoFocus: false
+    });
+
+    this.dialogRef.afterClosed().subscribe(result => {
+      if (!result) {
+        this.productForm.reset();
+        this.snackBar.open('Upravovanie produktu bolo zrušené.', '', { duration: 1000 });
+      }
+    })
+  }
+
+  updateProduct(productId: number) {
+    if(!this.productForm.valid) {
+      this.validateAllFormFields(this.productForm);
+      this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
+      return;
+    }
+
+    this.isLoadingForm = true;
+
+    const updatedProduct: ProductUpdateDTO = {
+      productId,
+      productName: this.productForm.value.productName,
+      productDescription: this.productForm.value.productDescription || '',
+      productPrice: Number(this.productForm.value.productPrice),
+      productWeight: this.productForm.value.productWeight ? Number(this.productForm.value.productWeight) : 0,
+      stockAmount: this.productForm.value.stockAmount ? Number(this.productForm.value.stockAmount) : 0,
+      productCode: this.productForm.value.productCode ? Number(this.productForm.value.productCode) : 0,
+    }
+
+    this.productService.updateProduct([updatedProduct]).subscribe({
+      next: () => {
+        this.snackBar.open('Produkt bol úspešne upravený.', '', { duration: 1000 });
+
+        const index = this.productsData.findIndex(p => p.productId === productId);
+        if(index !== -1){
+          this.productsData[index] = {
+            ...this.productsData[index],
+            ...updatedProduct
+          }
+        }
+
+        this.applyFilters();
+        this.isLoadingForm = false;
+        this.dialogRef.close(true);
+      },
+      error: (err) => {
+        console.error("Chyba pri úprave produktu:", err);
+        this.snackBar.open('Chyba pri ukladaní zmien!', '', { duration: 2000 });
+        this.isLoadingForm = false;
+      }
+    })
   }
 
   saveAllChanges() {
@@ -103,12 +178,31 @@ export class ProductsPageComponent implements OnInit {
       const originalProduct = this.productsData.find(p => p.productId === productId);
 
       if(originalProduct){
-        let update: ProductUpdateDTO = { productId };
-        if (edited.stockAmount !== undefined && edited.stockAmount !== originalProduct.stockAmount) {
-          update.stockAmount = edited.stockAmount;
+        if(edited.stockAmount !== undefined){
+          const stockAmount = Number(edited.stockAmount);
+          if(isNaN(stockAmount) || stockAmount < 0){
+            this.snackBar.open('Záporné alebo neplatné hodnoty pre sklad nie sú povolené!', '', { duration: 2500 });
+            this.isLoading = false;
+            return;
+          }
         }
-        if (edited.productCode !== undefined && edited.productCode !== originalProduct.productCode) {
-          update.productCode = edited.productCode;
+
+        if(edited.productCode !== undefined){
+          const productCodeNum = Number(edited.productCode);
+          if(isNaN(productCodeNum) || productCodeNum < 0){
+            this.snackBar.open('Záporné alebo neplatné hodnoty pre kód produktu nie sú povolené!', '', { duration: 2500 });
+            this.isLoading = false;
+            return;
+          }
+        }
+
+        let update: ProductUpdateDTO = { productId };
+        
+        if (edited.stockAmount !== undefined && Number(edited.stockAmount) !== Number(originalProduct.stockAmount)) {
+          update.stockAmount = Number(edited.stockAmount);
+        }
+        if (edited.productCode !== undefined && Number(edited.productCode) !== Number(originalProduct.productCode)) {
+          update.productCode = Number(edited.productCode);
         }
         if (update.stockAmount !== undefined || update.productCode !== undefined) {
           updates.push(update);
@@ -256,8 +350,8 @@ export class ProductsPageComponent implements OnInit {
     }
   }
 
-  openDialog(createProductDialog: TemplateRef<any>){
-    this.creationSuccessful = false; 
+  openCreateDialog(createProductDialog: TemplateRef<any>){
+    this.creationSuccessful = this.isEditMode = false; 
     this.dialogRef = this.dialog.open(createProductDialog, {
         autoFocus: false
     });  

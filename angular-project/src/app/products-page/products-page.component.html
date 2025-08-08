@@ -6,12 +6,12 @@
       <p>{{currentDate}}</p>
     </div>
     <div class="button-container">
-      @if(isEditingProducts){
-        <button class="btn btn-secondary" (click)="openDialog(createProductDialog)"><img src="../../assets/Images/add-icon.png" alt="add-icon"> Pridať produkt</button>
+      @if(isEditingProducts && !isLoading){
+        <button class="btn btn-secondary" (click)="openCreateDialog(productDialog)"><img src="../../assets/Images/add-icon.png" alt="add-icon"> Pridať produkt</button>
         <button class="btn btn-primary" (click)="saveAllChanges()"><img src="../../assets/Images/save-icon.png" height="17px" width="17px" alt="save-icon" style="margin: 0 0 1px 0;">Uložiť zmeny</button>
         <button class="btn btn-outline-danger" (click)="cancelEditing()">Zahodiť zmeny</button>
       }@else{
-        <button class="btn btn-primary" (click)="openDialog(createProductDialog)"><img src="../../assets/Images/add-icon.png" alt="add-icon"> Pridať produkt</button>
+        <button class="btn btn-primary" (click)="openCreateDialog(productDialog)"><img src="../../assets/Images/add-icon.png" alt="add-icon"> Pridať produkt</button>
       }
     </div>
   </div>
@@ -75,13 +75,14 @@
               <th style="text-align: center;">Kód produktu</th>
               <th style="text-align: center;">Cena produktu</th>
               <th style="text-align: center;">Hmotnosť produktu</th>
-              <th style="text-align: center;">Upraviť</th>
+              <th style="text-align: center;">Sklad</th>
               <th style="text-align: center;">Stav</th>
+              <th>Upraviť</th>
               <th>Vymazať</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let product of ourFilteredProducts" class="product-row">
+            <tr *ngFor="let product of ourFilteredProducts" class="product-row" [class.editing]="isProductEdited(product.productId, 'stockAmount') || isProductEdited(product.productId, 'productCode')">
               <td style="width: 130px; text-align: center;">{{ product.productId }}</td>
               <td><div class="scrollable-cell">{{ product.productName }}</div></td>
               <td><div class="scrollable-cell">{{ product.productDescription ? product.productDescription : 'Nezadané' }}</div></td>
@@ -106,6 +107,9 @@
               <td style="text-align: center;" [ngClass]="product.stockAmount > 0 ? 'in-stock' : 'out-of-stock'">
                 {{ product.stockAmount > 0 ? 'Na sklade' : 'Vypredané' }}
               </td>
+              <td class="edit-column" title="Upraviť produkt" (click)="openEditDialog(productDialog, product)">
+                <img src="../../assets/Images/edit-icon.png" class="edit-icon">
+              </td>
               <td class="remove-column" title="Vymazať produkt" (click)="removeProduct(product.productId)"><img src="../../assets/Images/bin-icon.png" class="remove-icon"></td>
             </tr>
           </tbody>
@@ -125,10 +129,10 @@
     </div>
   }
 </div>
-<ng-template #createProductDialog>
+<ng-template #productDialog>
   <form class="product-form" [formGroup]="productForm">
     <div class="title-date">
-        <h1>Vytvoriť nový produkt</h1>
+        <h1>{{ isEditMode ? 'Upraviť produkt' : 'Vytvoriť nový produkt' }}</h1>
         <p>{{currentDate}}</p>
     </div>
     <div class="product-info">
@@ -171,7 +175,9 @@
         </div>
         @if(!isLoadingForm){
           <div class="submit">
-            <button type="submit" class="btn btn-primary" (click)="createProduct()">Vytvoriť produkt</button>
+            <button type="submit" class="btn btn-primary" (click)="isEditMode ? updateProduct(editingProductId!) : createProduct()">
+              {{ isEditMode ? 'Uložiť zmeny' : 'Vytvoriť produkt' }}
+            </button>
           </div> 
         }@else{
           <div class="spinner-container" style="height: 100px;">
