@@ -44,10 +44,10 @@
         </div>
         <div class="dropdown-content" [ngClass]="isVisiblePrice ? 'is-visible': 'is-not-visible'">
           <div class="price-field">
-            <div class="price-item" (click)="sortProducts('priceAsc')">
+            <div class="price-item" (click)="sortProducts('priceDesc')">
               <span>Najdrahšie</span>
             </div>
-            <div class="price-item" (click)="sortProducts('priceDesc')">
+            <div class="price-item" (click)="sortProducts('priceAsc')">
               <span>Najlacnejšie</span>
             </div>
           </div>
@@ -175,8 +175,13 @@
         </div>
         @if(!isLoadingForm){
           <div class="submit">
-            <button type="submit" class="btn btn-primary" (click)="isEditMode ? updateProduct(editingProductId!) : createProduct()">
-              {{ isEditMode ? 'Uložiť zmeny' : 'Vytvoriť produkt' }}
+            <button type="submit" class="btn btn-primary btn-primary-with-icon" (click)="isEditMode ? updateProduct(editingProductId!) : createProduct()">
+              @if(isEditMode){
+                <img src="../../assets/Images/save-icon.png" alt="save-icon" style="height:20px; width:20px; margin-right:5px;" />
+                Uložiť zmeny
+              }@else {
+                Vytvoriť produkt
+              }
             </button>
           </div> 
         }@else{

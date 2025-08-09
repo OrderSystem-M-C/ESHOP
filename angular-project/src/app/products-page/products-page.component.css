@@ -68,6 +68,15 @@ h1 {
 .submit button{
   margin-top: 5px;
 }
+.btn-primary-with-icon {
+  display: flex;
+  align-items: center;
+}
+.btn-primary-with-icon img {
+  width: 15px;
+  height: 15px;
+  margin: 0 5px 0px 0;
+}
 .product-price, .product-weight, .stock-amount, .product-code {
   display: flex;
   flex-direction: row;

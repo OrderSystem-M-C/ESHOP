@@ -13,9 +13,10 @@ import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/materi
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { EmailService } from '../services/email.service';
 import { EphService } from '../services/eph.service';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, finalize, map, Observable, of } from 'rxjs';
 import { CdkDrag, DragDropModule, moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ManageStatusesDialogComponent } from '../manage-statuses-dialog/manage-statuses-dialog.component';
+import { pack } from 'html2canvas/dist/types/css/types/color';
 
 @Component({
   selector: 'app-order-form',
@@ -293,33 +294,46 @@ export class OrderFormComponent implements OnInit {
 
   searchProducts() {
     let filtered = [...this.productsData];
+    const searchNormalized = this.removeDiacritics(this.searchText.trim().toLowerCase());
 
-    if(this.searchText && this.searchText.trim() !== ''){
-      const searchLower = this.searchText.toLowerCase();
-
+    if(searchNormalized.length > 0){
       filtered = filtered.filter(product => {
+        const productNameNormalized = this.removeDiacritics(product.productName.toLowerCase());
+        const productIdStr = product.productId.toString();
+        const productCodeStr = product.productCode.toString();
+        const productPriceStr = product.productPrice.toString();
         switch (this.searchOption) {
           case 'productName':
-            return product.productName.toLowerCase().includes(searchLower);
+            return productNameNormalized.includes(searchNormalized);
           case 'productId':
-            return product.productId.toString().startsWith(searchLower);
+            return productIdStr.startsWith(searchNormalized);
+          case 'productCode':
+            return productCodeStr.startsWith(this.searchText);
           case 'productPrice':
-            return product.productPrice.toString().startsWith(searchLower);
+            return productPriceStr.startsWith(searchNormalized);
           case 'auto':
             return (
-              product.productName.toLowerCase().includes(searchLower) ||
-              product.productId.toString().startsWith(searchLower) ||
-              product.productPrice.toString().startsWith(searchLower)
+              productNameNormalized.includes(searchNormalized) ||
+              productIdStr.startsWith(searchNormalized) ||
+              productCodeStr.startsWith(this.searchText) ||
+              productPriceStr.startsWith(searchNormalized)
             );
           default:
             return false;
         }
       });
     }
+
     this.sortedProducts = filtered;
     this.pageIndex = 0;
     this.totalItems = this.sortedProducts.length;
     this.updatePagedProducts();
+  }
+
+  private removeDiacritics(str: string): string {
+    return str
+      ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      : '';
   }
 
   openDialog(selectProductsDialog: TemplateRef<any>, edit: boolean | null){
@@ -354,15 +368,15 @@ export class OrderFormComponent implements OnInit {
     
     this.dialogRef.afterClosed().subscribe((result) => {
       if (result === true) {
-        this.snackBar.open('Výber produktov bol úspešne zmenený!', '', { duration: 1000 });
+        this.snackBar.open('Výber produktov bol úspešne zmenený!', '', { duration: 1500 });
       } else if (result === false) {
         if (hadNoProductsBefore && this.selectedProducts.length > 0) {
-          this.snackBar.open('Produkty boli úspešne pridané!', '', { duration: 1000 });
+          this.snackBar.open('Produkty boli úspešne pridané!', '', { duration: 1500 });
         } else {
-          this.snackBar.open('Výber produktov bol upravený!', '', { duration: 1000 });
+          this.snackBar.open('Výber produktov bol upravený!', '', { duration: 1500 });
         }
       } else {
-        this.snackBar.open('Výber produktov bol zrušený!', '', { duration: 1000 });
+        this.snackBar.open('Výber produktov bol zrušený!', '', { duration: 1500 });
         this.selectedProducts = JSON.parse(JSON.stringify(this.newSelectedProducts));
         this.totalPrice = this.selectedProducts.reduce((sum, p) => sum + p.productPrice, 0);
       }
@@ -430,7 +444,7 @@ export class OrderFormComponent implements OnInit {
     this.totalPrice -= this.selectedProducts[index].productAmount * this.selectedProducts[index].productPrice;
     if(index !== -1){
       this.selectedProducts.splice(index, 1);
-      this.snackBar.open('Produkt bol odstránený!', '', { duration: 1000 });
+      this.snackBar.open('Produkt bol odstránený!', '', { duration: 1500 });
     }
     if(this.isEditMode){
       const newIndex = this.newSelectedProducts.findIndex(p => p.productId === productId);
@@ -483,6 +497,21 @@ export class OrderFormComponent implements OnInit {
 
   async updateOrder(){
     this.isLoading = true;
+
+    const orderStatus = this.orderForm.get('orderStatus')?.value;
+    const packageCodeControl = this.orderForm.get('packageCode');
+    const packageCode = packageCodeControl?.value;
+
+    if (orderStatus === 'Zasielanie čísla zásielky' && !packageCode) {
+      this.orderForm.get('packageCode')?.setErrors({ required: true });
+      this.orderForm.get('packageCode')?.markAsTouched();
+      this.snackBar.open('Pre tento stav objednávky je potrebné zadať podacie číslo!', '', { duration: 3000 });
+      this.isLoading = false;
+      return; 
+    }else{
+      packageCodeControl?.setErrors(null);
+    }
+
     if (this.isEditMode && this.orderForm.value.packageCode === this.originalPackageCode) {
     } else if (this.orderForm.value.packageCode?.trim()) {
       const isValid = await this.validatePackageCodeForSubmit(this.orderForm.value.packageCode).toPromise();
@@ -494,7 +523,7 @@ export class OrderFormComponent implements OnInit {
     const arrayChanged = this.checkChanges(this.selectedProducts, this.newSelectedProducts);
     if(this.orderForm.valid && this.invoiceForm.valid){
       if(this.orderForm.pristine && !arrayChanged){
-        this.snackBar.open('Nebola vykonaná žiadna zmena v objednávke!', '', {duration: 1000});
+        this.snackBar.open('Nebola vykonaná žiadna zmena v objednávke!', '', { duration: 1500 });
       }else{
         let order = this.createOrderDTO();
 
@@ -504,6 +533,7 @@ export class OrderFormComponent implements OnInit {
                const packageCodeControl = this.orderForm.get('packageCode');
                packageCodeControl?.setErrors({ invalid: true });
                packageCodeControl?.markAsTouched();
+               this.isLoading = false;
                return;
             }
         }
@@ -516,7 +546,7 @@ export class OrderFormComponent implements OnInit {
             this.orderService.updateOrderProducts(response_obj.id, this.selectedProducts).subscribe((response: HttpResponse<boolean>) => {
               if(response.status === 200 || response.status === 204){
                 this.checkOrderStatusAndSendEmails(order);
-                this.snackBar.open('Objednávka bola úspešne upravená!', '', {duration: 2000});
+                this.snackBar.open('Objednávka bola úspešne upravená!', '', { duration: 2000 });
                 this.router.navigate(['/orders-page']);
                 this.isLoading = false;
               }
@@ -534,13 +564,13 @@ export class OrderFormComponent implements OnInit {
       });
       }
     }else if(this.orderForm.invalid || this.invoiceForm.invalid){
-      this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
+      this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', { duration: 3000 });
       this.validateAllFormFields(this.orderForm);
       this.validateAllFormFields(this.invoiceForm);
 
       this.isLoading = false;
     }else if(this.selectedProducts.length === 0) {
-      this.snackBar.open('Neboli zvolené žiadne produkty!', '', {duration: 2000});
+      this.snackBar.open('Neboli zvolené žiadne produkty!', '', { duration: 3000 });
 
       this.isLoading = false;
     }
@@ -566,18 +596,11 @@ export class OrderFormComponent implements OnInit {
     this.isLoading_edit = true;
     this.orderService.getOrderDetails(orderId).subscribe((order) => {
       this.orderForm.patchValue(order); //patchValue robi ze vyplni hodnoty objednavky
-      this.originalPackageCode = order.packageCode;
 
-      if(order.packageCode === ''){
-        this.ephService.generatePackageCode().subscribe({
-          next: (response) => {
-            this.orderForm.patchValue({
-              packageCode: response.packageCode
-            })
-          },
-          error: (err) => console.error(err)
-        })
-      }
+      this.userMessage = order.note;
+      this.charactersCount = this.userMessage.length;
+
+      this.originalPackageCode = order.packageCode;
 
       this.totalPrice = order.totalPrice;
 
@@ -640,6 +663,21 @@ export class OrderFormComponent implements OnInit {
   
   async submitOrder(){
     this.isLoading = true;
+
+    const orderStatus = this.orderForm.get('orderStatus')?.value;
+    const packageCodeControl = this.orderForm.get('packageCode');
+    const packageCode = packageCodeControl?.value;
+
+    if (orderStatus === 'Zasielanie čísla zásielky' && !packageCode) {
+      this.orderForm.get('packageCode')?.setErrors({ required: true });
+      this.orderForm.get('packageCode')?.markAsTouched();
+      this.snackBar.open('Pre tento stav objednávky je potrebné zadať podacie číslo!', '', { duration: 3000 });
+      this.isLoading = false;
+      return; 
+    }else{
+      packageCodeControl?.setErrors(null);
+    }
+
     if(this.orderForm.value.packageCode?.trim()){
       const isValid = await this.validatePackageCodeForSubmit(this.orderForm.value.packageCode).toPromise();
       if(!isValid){
@@ -647,6 +685,9 @@ export class OrderFormComponent implements OnInit {
         return;
       }
     }
+
+    this.orderForm.get('packageCode')?.setErrors(null);
+
     if(this.orderForm.valid && this.invoiceForm.valid && this.selectedProducts.length > 0){
       let order = this.createOrderDTO();
 
@@ -656,6 +697,7 @@ export class OrderFormComponent implements OnInit {
             const packageCodeControl = this.orderForm.get('packageCode');
             packageCodeControl?.setErrors({ invalid: true });
             packageCodeControl?.markAsTouched();
+            this.isLoading = false;
             return;
         }
       }
@@ -672,7 +714,7 @@ export class OrderFormComponent implements OnInit {
                   this.createInvoice();
                   this.router.navigate(['/orders-page']);
                 } else {
-                  this.snackBar.open('Objednávka bola úspešne vytvorená!', '', {duration: 1000});
+                  this.snackBar.open('Objednávka bola úspešne vytvorená!', '', { duration: 1500 });
                   this.router.navigate(['/orders-page']);
                 }
              } else {
@@ -695,13 +737,13 @@ export class OrderFormComponent implements OnInit {
     }else if(this.selectedProducts.length === 0) {
       const element = document.getElementById('selected-products-id');
       element.scrollIntoView({behavior: 'smooth', block: 'start'});
-      this.snackBar.open('Nemáte zvolené produkty pre túto objednávku!', '', {duration: 2500}); 
+      this.snackBar.open('Nemáte zvolené produkty pre túto objednávku!', '', { duration: 2500 }); 
 
       this.isLoading = false;
     }else if(this.orderForm.invalid || this.invoiceForm.invalid){
       this.validateAllFormFields(this.orderForm);
       this.validateAllFormFields(this.invoiceForm);
-      this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
+      this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', { duration: 3000 });
 
       this.isLoading = false;
     }
@@ -730,12 +772,13 @@ export class OrderFormComponent implements OnInit {
     }
     return null
   }
+
   checkPackageCodeFormat(code: string): boolean {
     const trackingPattern = /^[A-Z]{2}\d{9}[A-Z]{2}$/;
     const result = trackingPattern.test(code);
 
     if (!result) {
-      this.snackBar.open('Zadané podacie číslo nie je v správnom formáte!', '', { duration: 3000 });
+      this.snackBar.open('Zadané podacie číslo nie je v správnom formáte!', '', { duration: 2000 });
       this.orderForm.get('packageCode')?.setErrors({ invalidFormat: true });
       return false;
     }
@@ -745,36 +788,46 @@ export class OrderFormComponent implements OnInit {
 
   validatePackageCode(packageCode: string): void {
     this.isLoading_packageCode = true;
-    if (this.isEditMode && packageCode === this.originalPackageCode) {
-      this.orderForm.get('packageCode')?.setErrors(null);
-      this.snackBar.open('Podacie číslo ostáva nezmenené a je platné.', '', { duration: 3000 });
+
+    if(!packageCode){
+      this.orderForm.get('packageCode')?.setErrors({ required: true });
+      this.snackBar.open('Podacie číslo nebolo zadané!', '', { duration: 2000 });
       this.isLoading_packageCode = false;
       return;
     }
+
+    if (this.isEditMode && packageCode === this.originalPackageCode) {
+      this.orderForm.get('packageCode')?.setErrors(null);
+      this.snackBar.open('Podacie číslo ostáva nezmenené a je platné.', '', { duration: 2000 });
+      this.isLoading_packageCode = false;
+      return;
+    }
+
     if (!this.checkPackageCodeFormat(packageCode)) {
       this.isLoading_packageCode = false;
       return;
     }
 
-    this.ephService.validatePackageCode(packageCode).subscribe({
-      next: (response) => {
-        if(response.valid){
-          this.orderForm.get('packageCode')?.setErrors(null);
-          this.snackBar.open(response.message || 'Podacie číslo je platné a dostupné.', '', { duration: 3000 });
-        }else{
+    this.ephService.validatePackageCode(packageCode)
+      .pipe(finalize(() => this.isLoading_packageCode = false))
+      .subscribe({
+        next: (response) => {
+          if(response.valid){
+            this.orderForm.get('packageCode')?.setErrors(null);
+            this.snackBar.open(response.message || 'Podacie číslo je platné a dostupné.', '', { duration: 2000 });
+          }else{
+            this.orderForm.get('packageCode')?.setErrors({ invalid: true });
+            this.snackBar.open(response.message || 'Neznáma chyba pri validácií podacieho čísla!', '', { duration: 2000 });
+          }
+        },
+        error: (err) => {
+          const msg = err?.error?.message || 'Neznáma chyba pri validácií podacieho čísla!';
           this.orderForm.get('packageCode')?.setErrors({ invalid: true });
-          this.snackBar.open(response.message || 'Neznáma chyba pri validácií podacieho čísla!', '', { duration: 3000 });
+          this.snackBar.open(msg, '', { duration: 2000 });
         }
-        this.isLoading_packageCode = false;
-      },
-      error: (err) => {
-        const msg = err?.error?.message || 'Neznáma chyba pri validácií podacieho čísla!';
-        this.orderForm.get('packageCode')?.setErrors({ invalid: true });
-        this.snackBar.open(msg, '', { duration: 3000 });
-        this.isLoading_packageCode = false;
-      }
     })
   }
+
   validatePackageCodeForSubmit(packageCode: string): Observable<boolean> {
     if (!this.checkPackageCodeFormat(packageCode)) {
       this.isLoading_packageCode = false;
@@ -798,6 +851,34 @@ export class OrderFormComponent implements OnInit {
         return of(false);
       })
     )
+  }
+
+  generatePackageCode(){
+    this.isLoading_packageCode = true;
+    this.ephService.generatePackageCode().subscribe({
+      next: (response) => {
+        this.orderForm.patchValue({
+          packageCode: response.packageCode
+        });
+
+        this.snackBar.open("Podacie číslo bolo úspešne vygenerované!", "", { duration: 2000 });
+
+        this.isLoading_packageCode = false;
+      },
+      error: (err: HttpErrorResponse) => {
+        let errorMsg = "Nebolo možné vygenerovať podacie číslo: V zadanom rozsahu nie sú k dispozícii žiadne ďalšie podacie čísla!";
+
+        this.snackBar.open(errorMsg, "", { duration: 2000 });
+
+        this.orderForm.patchValue({
+          packageCode: null
+        });
+
+        console.error("Package code generation error:", err);
+
+        this.isLoading_packageCode = false;
+        }
+    });
   }
 
   async createInvoice(){
@@ -985,14 +1066,14 @@ export class OrderFormComponent implements OnInit {
           this.invoiceCreated = false;
         }, 2000);
         loadingSnack.dismiss();
-        this.snackBar.open('Faktúra bola úspešne stiahnutá!', '', {duration: 2000});
+        this.snackBar.open('Faktúra bola úspešne stiahnutá!', '', { duration: 2000 });
       }
     }else{
       this.validateAllFormFields(this.invoiceForm);
       this.validateAllFormFields(this.orderForm);
       this.invoiceCreated = false;
       loadingSnack.dismiss();
-      this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', {duration: 2000});
+      this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', { duration: 3000 });
     }
   }
 
@@ -1015,25 +1096,6 @@ export class OrderFormComponent implements OnInit {
       this.loadOrder(this.existingOrderId);
     }else{
       this.isEditMode = false;
-
-      this.ephService.generatePackageCode().subscribe({
-        next: (response) => {
-          this.orderForm.patchValue({
-            packageCode: response.packageCode
-          })
-        },
-        error: (err: HttpErrorResponse) => {
-          let errorMsg = "Nebolo možné vygenerovať podacie číslo: V zadanom rozsahu nie sú k dispozícii žiadne ďalšie podacie čísla!";
-
-          this.snackBar.open(errorMsg, "", { duration: 3000 });
-
-          this.orderForm.patchValue({
-            packageCode: null
-          });
-
-          console.error("Package code generation error:", err);
-        }
-      })
     }
 
     const deliveryFeeStr = localStorage.getItem('deliveryFee');

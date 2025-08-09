@@ -229,7 +229,7 @@
     </div>
     <div class="package-code">
       <h3>Podacie číslo objednávky</h3>
-      <label for="packageCode" class="form-label">Podacie číslo vašej objednávky (Pošta)*</label>
+      <label for="packageCode" class="form-label">Podacie číslo vašej objednávky (Pošta)</label>
          <div class="field">
             @if(isLoading_packageCode){
               <div class="spinner-container">
@@ -239,7 +239,10 @@
               </div>
             }@else{
               <input formControlName="packageCode" type="text" id="packageCode" class="form-control" placeholder="Zadajte podacie číslo o dĺžke 13 znakov a s dodržaním formátu (napr.: RR123456789SK)" maxlength="13" [ngClass]="{'is-invalid': orderForm.get('packageCode').invalid && orderForm.get('packageCode').touched}">
-              <button class="btn btn-primary" (click)="validatePackageCode(orderForm.get('packageCode').value)">Skontrolovať</button>
+
+              <button class="btn btn-secondary" (click)="generatePackageCode()"><img src="../../assets/Images/envelope-icon.png" alt="envelope-icon">Požiadať o číslo</button>
+              
+              <button class="btn btn-primary" (click)="validatePackageCode(orderForm.get('packageCode').value)"><img src="../../assets/Images/check-circle-icon.png" alt="check-circle-icon">Skontrolovať</button>
             }
          </div>
     </div>
@@ -335,6 +338,7 @@
         <option selected value="auto">Automatické vyhľadávanie</option>
         <option value="productId">Vyhľadávanie podľa čísla produktu</option>
         <option value="productName">Vyhľadávanie podľa názvu produktu</option>
+        <option value="productCode">Vyhľadávanie podľa kódu produktu</option>
         <option value="productPrice">Vyhľadávanie podľa ceny produktu</option>
       </select>
       </div>
@@ -345,8 +349,9 @@
           <tbody>
             <tr>
               <th style="text-align: center;">Zvoliť</th>
-              <th style="text-align: center;">Číslo produktu</th>
-              <th>Kompletný názov produktu</th>
+              <th style="text-align: center;">Č. produktu</th>
+              <th>Názov produktu</th>
+              <th style="text-align: center;">Kód produktu</th>
               <th style="text-align: center;">Cena/ks</th>
               <th style="text-align: center;">Stav</th>
               <th style="text-align: center;">Počet</th>
@@ -355,6 +360,7 @@
               <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="form-check-input" [(ngModel)]="product.productSelected" (change)="toggleProductSelection(product)" [checked]="selectedProducts.includes(product)" ></td>
               <td style="text-align: center;">{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
+              <td style="text-align: center;">{{ product.productCode }}</td>
               <td style="width: 100px; text-align: center;">{{ product.productPrice }}€</td>
               <td style="text-align: center;" [ngClass]="product.stockAmount > 0 ? 'in-stock' : 'out-of-stock'">
                 {{ product.stockAmount > 0 ? 'Na sklade' : 'Vypredané' }} 

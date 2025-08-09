@@ -396,25 +396,29 @@ namespace AspNetCoreAPI.Controllers
                         return NotFound($"Order with ID {orderId} not found.");
                     };
 
-                    var packageCodeResult = await GeneratePackageCodeAsync();
                     string newPackageCode = null;
 
-                    if (packageCodeResult is OkObjectResult okResult)
+                    if (!string.IsNullOrEmpty(original.PackageCode))
                     {
-                        var packageCodeObject = okResult.Value as dynamic;
-                        if (packageCodeObject != null)
-                        {
-                            newPackageCode = packageCodeObject.packageCode;
-                        }
-                    }
-                    else
-                    {
-                        return packageCodeResult;
-                    }
+                        var packageCodeResult = await GeneratePackageCodeAsync();
 
-                    if (string.IsNullOrEmpty(newPackageCode))
-                    {
-                        return StatusCode(500, "Failed to generate package code for order copy.");
+                        if(packageCodeResult is ObjectResult okResult)
+                        {
+                            var packageCodeObject = okResult.Value as dynamic;
+                            if(packageCodeObject != null)
+                            {
+                                newPackageCode = packageCodeObject.packageCode;
+                            }
+                        }
+                        else
+                        {
+                            return packageCodeResult;
+                        }
+
+                        if (string.IsNullOrEmpty(newPackageCode))
+                        {
+                            return StatusCode(500, "Failed to generate package code for order copy.");
+                        }
                     }
 
                     int newOrderId = await GetNewOrderId();
@@ -448,7 +452,7 @@ namespace AspNetCoreAPI.Controllers
                         InvoiceDIC = original.InvoiceDIC,
                         InvoiceEmail = original.InvoiceEmail,
                         InvoicePhoneNumber = original.InvoicePhoneNumber,
-                        PackageCode = newPackageCode,
+                        PackageCode = string.IsNullOrEmpty(newPackageCode) ? null : newPackageCode,
                         DeliveryCost = original.DeliveryCost,
                         PaymentCost = original.PaymentCost
                     };
@@ -997,6 +1001,17 @@ namespace AspNetCoreAPI.Controllers
             {
                 return StatusCode(500, new { message = $"An error occurred while counting available package codes: {ex.Message}" });
             }
+        }
+        [HttpPatch("update-package-code/{orderId}")]
+        public async Task<IActionResult> UpdatePackageCode([FromRoute] int orderId, [FromBody] string packageCode)
+        {
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if (order == null) return NotFound(new { message = $"Order with ID {orderId} was not found." });
+
+            order.PackageCode = packageCode ?? "";
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = $"Package code for order {orderId} was successfully updated." });
         }
         [HttpGet("get-order-statuses")]
         public async Task<ActionResult<IEnumerable<OrderStatusModel>>> GetOrderStatuses()

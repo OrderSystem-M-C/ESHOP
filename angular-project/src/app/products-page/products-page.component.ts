@@ -260,23 +260,30 @@ export class ProductsPageComponent implements OnInit {
   
   applyFilters(criteria?: string): void {
     let filtered = [...this.productsData];
+    const searchNormalized = this.removeDiacritics(this.searchText);
 
-    if (this.searchText.length > 0) {
+    if (searchNormalized.length > 0) {
       filtered = filtered.filter(product => {
+        const productNameNormalized = this.removeDiacritics(product.productName);
+        const productIdStr = product.productId.toString();
+        const productCodeStr = product.productCode.toString();
+        const productPriceStr = product.productPrice.toString();
+
         switch (this.searchOption) {
           case 'productName':
-            return product.productName.toLowerCase().includes(this.searchText.toLowerCase());
+            return productNameNormalized.includes(searchNormalized);
           case 'productId':
-            return product.productId.toString().startsWith(this.searchText);
+            return productIdStr.startsWith(this.searchText);
           case 'productCode':
-            return product.productCode.toString().startsWith(this.searchText);
+            return productCodeStr.startsWith(this.searchText);
           case 'productPrice':
-            return product.productPrice.toString().startsWith(this.searchText);
+            return productPriceStr.startsWith(this.searchText);
           case 'auto':
             return (
-              product.productName.toLowerCase().includes(this.searchText.toLowerCase()) ||
-              product.productId.toString().startsWith(this.searchText) ||
-              product.productPrice.toString().startsWith(this.searchText)
+              productNameNormalized.includes(searchNormalized) ||
+              productIdStr.startsWith(this.searchText) ||
+              productCodeStr.startsWith(this.searchText) ||
+              productPriceStr.startsWith(this.searchText)
             );
           default:
             return false;
@@ -290,9 +297,9 @@ export class ProductsPageComponent implements OnInit {
       }else if(criteria === 'alphabeticalDesc'){
         filtered.sort((a, b) => b.productName.localeCompare(a.productName));
       }else if(criteria === 'priceAsc'){
-        filtered.sort((a, b) => b.productPrice - a.productPrice);
-      }else if(criteria === 'priceDesc'){
         filtered.sort((a, b) => a.productPrice - b.productPrice);
+      }else if(criteria === 'priceDesc'){
+        filtered.sort((a, b) => b.productPrice - a.productPrice);
       }
       this.isVisibleAlphabetical = this.isVisiblePrice = false;
     }
@@ -305,6 +312,12 @@ export class ProductsPageComponent implements OnInit {
 
   searchOrders(): void {
     this.applyFilters();
+  }
+
+  private removeDiacritics(str: string): string {
+    return str 
+    ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    : '';
   }
 
   sortProducts(criteria: 'alphabeticalAsc' | 'alphabeticalDesc' | 'priceAsc' | 'priceDesc'): void{

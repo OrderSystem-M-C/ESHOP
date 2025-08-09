@@ -10,9 +10,12 @@ import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { EmailService } from '../services/email.service';
-import { catchError, EMPTY, finalize, forkJoin, of, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, finalize, forkJoin, of, shareReplay, switchMap, take, tap } from 'rxjs';
 import { OrderDetailsComponent } from '../order-details/order-details.component';
 import { HttpErrorResponse } from '@angular/common/http';
+import { node } from 'canvg/dist/presets';
+import { EphService } from '../services/eph.service';
+import { pack } from 'html2canvas/dist/types/css/types/color';
 
 @Component({
   selector: 'app-orders-page',
@@ -66,7 +69,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
 
   hoveredOrder: OrderDTO = null;
 
-  constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar, public authService: AuthenticationService, private emailService: EmailService){}
+  constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar, public authService: AuthenticationService, private emailService: EmailService, private ephService: EphService){}
 
   updatePagedOrders(): void {
     const startIndex = this.pageIndex * this.pageSize;
@@ -232,10 +235,29 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    const orderIds = this.selectedOrders.map(o => o.orderId);
+    this.isLoading = true;
     const loadingRef = this.snackBar.open("Sťahuje sa XML súbor...", "", { duration: undefined });
 
-    this.orderService.getOrdersXmlFile(orderIds).subscribe({
+    const updateObservables = this.selectedOrders.map(order => 
+      this.ephService.generatePackageCode().pipe(
+        switchMap((packageCode: string) => {
+          return this.ephService.updatePackageCode(order.orderId, packageCode).pipe(take(1));
+        }),
+        catchError(err => {
+          console.error("An error have occurred while trying to update orders: ", err);
+          return of(null);
+        }),
+        take(1)  
+      )
+    )
+    
+    forkJoin(updateObservables).pipe(
+      switchMap(() => this.orderService.getOrdersXmlFile(this.selectedOrders.map(o => o.orderId))),
+      finalize(() => {
+        this.isLoading = false;
+        loadingRef.dismiss();
+      })
+    ).subscribe({
       next: (blob) => {
         const a = document.createElement('a');
         const objectUrl = URL.createObjectURL(blob);
@@ -243,12 +265,15 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
         a.download = `Zasielky_${new Date().toLocaleDateString("sk").replace(/\s/g, "").replace(/\./g, "")}.xml`;
         a.click();
         URL.revokeObjectURL(objectUrl);
-        
-        loadingRef.dismiss();
+
         this.snackBar.open("XML súbor bol úspešne stiahnutý!", "", { duration: 1500 });
         this.clearSelection();
       },
-      error: (err) => console.error("An error has occurred while trying to download XML file.", err)
+      error: (err) => {
+        loadingRef.dismiss();
+        console.error("Chyba pri spracovaní objednávok alebo sťahovaní XML.", err);
+        this.snackBar.open("Chyba pri spracovaní objednávok alebo sťahovaní XML.", "", { duration: 1500 });
+      }
     })
   }
 
@@ -539,25 +564,31 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
   
   applyFilters(): void {
     let filtered = [...this.ordersData];
+    const searchNormalized = this.removeDiacritics(this.searchText);
 
-    if (this.searchText.length > 0) {
+    if(searchNormalized.length > 0){
       filtered = filtered.filter(order => {
-        switch (this.searchOption) {
+        const customerNameNormalized = this.removeDiacritics(order.customerName);
+        const emailNormalized = this.removeDiacritics(order.email);
+        const noteNormalized = this.removeDiacritics(order.note);
+        const orderIdStr = order.orderId.toString();
+
+        switch(this.searchOption) {
           case 'customerName':
-            return order.customerName.toLowerCase().includes(this.searchText.toLowerCase());
+            return customerNameNormalized.includes(searchNormalized);
           case 'orderId':
-            return order.orderId.toString().startsWith(this.searchText);
+            return orderIdStr.startsWith(searchNormalized);
           case 'email':
-            return order.email.toLowerCase().includes(this.searchText.toLowerCase());
+            return emailNormalized.includes(searchNormalized);
           case 'note':
-            return order.note.toLowerCase().includes(this.searchText.toLowerCase())
+            return noteNormalized.includes(searchNormalized);
           case 'auto':
             return (
-              order.customerName.toLowerCase().includes(this.searchText.toLowerCase()) ||
-              order.orderId.toString().startsWith(this.searchText) ||
-              order.email.toLowerCase().includes(this.searchText.toLowerCase()) ||
-              order.note.toLowerCase().includes(this.searchText.toLowerCase())
-            );
+              customerNameNormalized.includes(searchNormalized) ||
+              orderIdStr.startsWith(searchNormalized) ||
+              emailNormalized.includes(searchNormalized) ||
+              noteNormalized.includes(searchNormalized)
+            )
           default:
             return false;
         }
@@ -585,6 +616,12 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
 
   searchOrders(): void {
     this.applyFilters();
+  }
+
+  private removeDiacritics(str: string): string {
+    return str 
+    ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    : '';
   }
 
   parseDate(dateString: string): Date {
