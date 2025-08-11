@@ -20,6 +20,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   authService = inject(AuthenticationService);
   private router = inject(Router);
 
+  siteKey: string | null = null;
+
   isLogging: boolean = false;
 
   constructor(private snackBar: MatSnackBar){}
@@ -57,7 +59,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     }else {
       this.validateAllFormFields(this.loginForm);
       
-      if(!this.loginForm.get('recaptcha')?.value){
+      if(!this.loginForm.get('recaptchaResponse')?.value){
         this.snackBar.open("Zabudli ste na overenie reCAPTCHA!", "", { duration: 3000 });
       }else{
         this.snackBar.open("Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!", "", { duration: 3000 });
@@ -95,6 +97,13 @@ export class LoginComponent implements OnInit, OnDestroy {
     document.body.style.width = 'auto';
 
     this.setDefaultFeesInLocalStorage();
+
+    this.authService.getRecaptchaSiteKey().subscribe({
+      next: (response) => {
+        this.siteKey = response;
+      },
+      error: (err) => console.error('Error getting site key:', err)
+    })
   }
 
   ngOnDestroy() {

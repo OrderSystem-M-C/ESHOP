@@ -394,7 +394,7 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpPost("export-orders-to-xml")]
-        public async Task<IActionResult> ExportOrdersToXml([FromBody] OrderXML_DTO ordersXML_DTO)
+        public async Task<IActionResult> ExportOrdersToXml([FromBody] OrderXmlDTO ordersXML_DTO)
         {
             var orders = _context.Orders
                 .Where(o => ordersXML_DTO.OrderIds.Contains(o.OrderId))

@@ -18,6 +18,10 @@ export class AuthenticationService {
     return this.httpClient.post<UserLoginResponse>(this.baseUrl + '/user/login', userData);
   }
 
+  getRecaptchaSiteKey(): Observable<string> {
+    return this.httpClient.get(this.baseUrl + '/user/get-recaptcha-site-key', { responseType: 'text'});
+  }
+
   logout() {
     localStorage.removeItem("token");
     this.router.navigate(['/login']);

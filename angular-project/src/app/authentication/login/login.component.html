@@ -12,7 +12,7 @@
       <input class="form-control" type="password" placeholder="Zadajte heslo" formControlName="password" [ngClass]="{'is-invalid': loginForm.get('password')?.invalid && loginForm.get('password')?.touched}">
     </div>
     <div class="re-captcha">
-      <re-captcha siteKey="6Le7IFwrAAAAALTQTj8u6Gc5tWIevrRC1Y-LREdV" (resolved)="onCaptchaResolved($event)"></re-captcha>
+      <re-captcha *ngIf="siteKey" [siteKey]="siteKey" (resolved)="onCaptchaResolved($event)"></re-captcha>
     </div>
     <div [ngClass]="isLogging ? 'isLogging' : 'notLogging'" class="information">
       <p>Prihlasuje sa, prosím čakajte...</p>

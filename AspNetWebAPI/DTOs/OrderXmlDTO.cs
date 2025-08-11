@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AspNetCoreAPI.DTOs
 {
-    public class OrderXML_DTO
+    public class OrderXmlDTO
     {
         [Required]
         public List<int> OrderIds { get; set; } = new List<int>();

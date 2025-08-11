@@ -16,21 +16,14 @@ namespace AspNetCoreAPI.Registration
         private readonly UserManager<User> _userManager;
         private readonly JwtHandler _jwtHandler;
         private readonly RecaptchaService _recaptchaService;
+        private readonly IConfiguration _configuration;
 
-        public UserController(UserManager<User> userManager, JwtHandler jwtHandler, RecaptchaService recaptchaService)
+        public UserController(UserManager<User> userManager, JwtHandler jwtHandler, RecaptchaService recaptchaService, IConfiguration configuration)
         {
             _userManager = userManager;
             _jwtHandler = jwtHandler;
             _recaptchaService = recaptchaService;
-        }
-
-        [HttpPost("add-claim")]
-        public async Task<IActionResult> AddClaim([FromBody] ClaimDTO claimDto)
-        {
-            var user = await _userManager.FindByNameAsync(claimDto.UserEmail);
-            var result = await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim(claimDto.Type, claimDto.Value));
-
-            return Ok(result.Succeeded);
+            _configuration = configuration;
         }
 
         [HttpPost("login")]
@@ -53,6 +46,24 @@ namespace AspNetCoreAPI.Registration
             var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
             return Ok(new UserLoginResponseDTO { IsAuthSuccessful = true, Token = token, Username = user.UserName });
+        }
+        [HttpPost("add-claim")]
+        public async Task<IActionResult> AddClaim([FromBody] ClaimDTO claimDto)
+        {
+            var user = await _userManager.FindByNameAsync(claimDto.UserEmail);
+            var result = await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim(claimDto.Type, claimDto.Value));
+
+            return Ok(result.Succeeded);
+        }
+        [HttpGet("get-recaptcha-site-key")]
+        public IActionResult GetRecaptchaSiteKey()
+        {
+            var siteKey = _configuration["GoogleReCaptcha:SiteKey"];
+            if (string.IsNullOrEmpty(siteKey))
+            {
+                return NotFound("ReCAPTCHA site key is not configured.");
+            }
+            return Ok(siteKey);
         }
     }
 }
