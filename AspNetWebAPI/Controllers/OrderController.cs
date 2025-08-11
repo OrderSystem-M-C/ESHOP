@@ -13,24 +13,10 @@ namespace AspNetCoreAPI.Controllers
     public class OrderController : Controller
     {
         protected readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
-        private readonly HttpClient _httpClient;
 
-        private readonly string _slovakPostApiUrl;
-        private readonly string _userId;
-        private readonly string _apiKey;
-
-        private readonly string _xmlSavePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
-
-        public OrderController(ApplicationDbContext context, IConfiguration configuration)
+        public OrderController(ApplicationDbContext context)
         {
             _context = context;
-            _httpClient = new HttpClient();
-            _configuration = configuration;
-            _userId = _configuration["SlovakPostApi:UserId"];
-            _apiKey = _configuration["SlovakPostApi:ApiKey"];
-            _slovakPostApiUrl = _configuration["SlovakPostApi:ApiUrl"];
         }
 
         [HttpPost("create-order")]
@@ -73,12 +59,10 @@ namespace AspNetCoreAPI.Controllers
                 DeliveryCost = orderDto.DeliveryCost,
                 PaymentCost = orderDto.PaymentCost
             };
-
             try
             {
                 await _context.Orders.AddAsync(order);
                 await _context.SaveChangesAsync();
-                //Odpoved s vytvoreným objektom (201 Created) druhy parameter je location header akoby kde je to ID(proste moze ziskat podrobnosti o tejto objednavke na zaklade ID) prvy je nazov akcie ktora bude zodpovedat ziskaniu detailov objednavky 
                 return CreatedAtAction(nameof(CreateOrder), new { id = order.Id }, order);
             }
             catch (Exception ex)
@@ -111,112 +95,6 @@ namespace AspNetCoreAPI.Controllers
                     }).ToListAsync();
 
                 return Ok(orders);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message });
-            }
-        }
-        [HttpGet("get-sorted-orders")]
-        public async Task<ActionResult<SortedOrdersDTO<OrderDTO>>> GetSortedOrdersAsync(
-            [FromQuery] int pageIndex = 0,
-            [FromQuery] int pageSize = 6,
-            [FromQuery] string searchText = null,
-            [FromQuery] string searchOption = "auto",
-            [FromQuery] string statuses = null,
-            [FromQuery] string dateSortOrder = null
-            )
-        {
-            try
-            {
-                IQueryable<OrderModel> query = _context.Orders;
-
-                if (!string.IsNullOrWhiteSpace(searchText))
-                {
-                    string lowerSearchText = searchText.ToLower();
-                    switch (searchOption.ToLower())
-                    {
-                        case "customername":
-                            query = query.Where(o => o.CustomerName.ToLower().Contains(lowerSearchText));
-                            break;
-                        case "orderId":
-                            if (int.TryParse(searchText, out int orderId))
-                            {
-                                query = query.Where(o => o.OrderId.ToString().StartsWith(searchText));
-                            }
-                            break;
-                        case "email":
-                            query = query.Where(o => o.Email.ToLower().Contains(lowerSearchText));
-                            break;
-                        case "note":
-                            query = query.Where(o => o.Note != null && o.Note.ToLower().Contains(lowerSearchText));
-                            break;
-                        case "auto":
-                        default:
-                            query = query.Where(o =>
-                                o.CustomerName.ToLower().Contains(lowerSearchText) ||
-                                o.OrderId.ToString().StartsWith(searchText) ||
-                                o.Email.ToLower().Contains(lowerSearchText) ||
-                                (o.Note != null && o.Note.ToLower().Contains(lowerSearchText))
-                            );
-                            break;
-                    }
-                }
-                if (!string.IsNullOrWhiteSpace(statuses))
-                {
-                    var statusList = statuses.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => s.Trim())
-                        .ToList();
-                    if (statusList.Any())
-                    {
-                        query = query.Where(o => statusList.Contains(o.OrderStatus));
-                    }
-                }
-                int totalCount = await query.CountAsync();
-                if (totalCount == 0)
-                {
-                    return NotFound(new { message = "No orders found matching the criteria." });
-                }
-                if (!string.IsNullOrWhiteSpace(dateSortOrder))
-                {
-                    switch (dateSortOrder.ToLower())
-                    {
-                        case "newest":
-                            query = query.OrderByDescending(o => DateTime.ParseExact(o.OrderDate, "dd.MM.yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture));
-                            break;
-                        case "oldest":
-                            query = query.OrderBy(o => DateTime.ParseExact(o.OrderDate, "dd.MM.yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture));
-                            break;
-                        default:
-                            query = query.OrderByDescending(o => DateTime.ParseExact(o.OrderDate, "dd.MM.yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture));
-                            break;
-                    }
-                }
-                else
-                {
-                    query = query.OrderByDescending(o => o.OrderDate);
-                }
-                var orders = await query
-                    .Skip(pageIndex * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-                var orderDTOs = orders.Select(o => new OrderDTO
-                {
-                    OrderId = o.OrderId,
-                    CustomerName = o.CustomerName,
-                    Email = o.Email,
-                    OrderDate = o.OrderDate,
-                    OrderStatus = o.OrderStatus,
-                    TotalPrice = o.TotalPrice,
-                    Note = o.Note,
-                    PackageCode = o.PackageCode,
-                }).ToList();
-
-                return Ok(new SortedOrdersDTO<OrderDTO>
-                {
-                    Orders = orderDTOs,
-                    TotalCount = totalCount
-                });
             }
             catch (Exception ex)
             {
@@ -350,41 +228,6 @@ namespace AspNetCoreAPI.Controllers
                     return BadRequest(new { message = "Ending number must be greater than starting number." });
                 }
 
-                var generatedPackageCodesIn = new List<string>();
-
-                var ordersToCopyDetails = await _context.Orders
-                    .Where(o => orderCopyDTO.OrderIds.Contains(o.OrderId))
-                    .Select(o => new { o.OrderId, NeedsNewPackageCode = !string.IsNullOrEmpty(o.PackageCode) }) 
-                    .ToListAsync();
-
-                int numberOfCodesNeeded = ordersToCopyDetails.Count(o => o.NeedsNewPackageCode);
-
-                var packageCodesFromDb = await _context.Orders
-                    .Where(o => !string.IsNullOrEmpty(o.PackageCode) &&
-                                o.PackageCode.StartsWith(settings.EphPrefix) &&
-                                o.PackageCode.EndsWith(settings.EphSuffix))
-                    .Select(o => o.PackageCode)
-                    .ToListAsync();
-
-                var usedNumbersFromDb = packageCodesFromDb
-                    .Select(code =>
-                    {
-                        int numLength = code.Length - settings.EphPrefix.Length - settings.EphSuffix.Length;
-                        return code.Substring(settings.EphPrefix.Length, Math.Min(8, numLength)); ;
-                    })
-                    .Where(numStr => int.TryParse(numStr, out _))
-                    .Select(int.Parse)
-                    .ToHashSet();
-
-                var validUsedNumbersCount = usedNumbersFromDb.Count(n => n >= settings.EphStartingNumber && n <= settings.EphEndingNumber);
-                int totalPossibleNumbers = settings.EphEndingNumber - settings.EphStartingNumber + 1;
-                int availableNumbers = totalPossibleNumbers - validUsedNumbersCount;
-
-                if (availableNumbers < numberOfCodesNeeded)
-                {
-                    return new JsonResult(new { message = $"V rozsahu nie je dostatok dostupných podacích čísiel pre objednávky, ktoré ho vyžadujú! K dispozícii: {availableNumbers}, požadovaných: {numberOfCodesNeeded}." });
-                }
-
                 foreach (var orderId in orderCopyDTO.OrderIds)
                 {
                     var original = await _context.Orders
@@ -395,31 +238,6 @@ namespace AspNetCoreAPI.Controllers
                     {
                         return NotFound($"Order with ID {orderId} not found.");
                     };
-
-                    string newPackageCode = null;
-
-                    if (!string.IsNullOrEmpty(original.PackageCode))
-                    {
-                        var packageCodeResult = await GeneratePackageCodeAsync();
-
-                        if(packageCodeResult is ObjectResult okResult)
-                        {
-                            var packageCodeObject = okResult.Value as dynamic;
-                            if(packageCodeObject != null)
-                            {
-                                newPackageCode = packageCodeObject.packageCode;
-                            }
-                        }
-                        else
-                        {
-                            return packageCodeResult;
-                        }
-
-                        if (string.IsNullOrEmpty(newPackageCode))
-                        {
-                            return StatusCode(500, "Failed to generate package code for order copy.");
-                        }
-                    }
 
                     int newOrderId = await GetNewOrderId();
 
@@ -452,7 +270,7 @@ namespace AspNetCoreAPI.Controllers
                         InvoiceDIC = original.InvoiceDIC,
                         InvoiceEmail = original.InvoiceEmail,
                         InvoicePhoneNumber = original.InvoicePhoneNumber,
-                        PackageCode = string.IsNullOrEmpty(newPackageCode) ? null : newPackageCode,
+                        PackageCode = "",
                         DeliveryCost = original.DeliveryCost,
                         PaymentCost = original.PaymentCost
                     };
@@ -719,19 +537,6 @@ namespace AspNetCoreAPI.Controllers
                 )
             );
         }
-        private void SaveXmlToDisk(string xmlContent, string fileName)
-        {
-            try
-            {
-                string filePath = Path.Combine(_xmlSavePath, fileName);
-                System.IO.File.WriteAllText(filePath, xmlContent);
-                Console.WriteLine($"XML saved to: {filePath}");
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error saving XML to disk: {ex.Message}");
-            }
-        }
         [HttpPost("save-eph-settings")]
         public async Task<IActionResult> SaveEphSettings([FromBody] EphSettingsDTO ephSettingsDTO)
         {
@@ -807,11 +612,11 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpGet("generate-package-code")]
-        public async Task<IActionResult> GeneratePackageCode()
+        public async Task<IActionResult> GeneratePackageCodeAsync()
         {
-            return await GeneratePackageCodeAsync();
+            return await GeneratePackageCodeInternalAsync();
         }
-        private async Task<IActionResult> GeneratePackageCodeAsync()
+        private async Task<IActionResult> GeneratePackageCodeInternalAsync()
         {
             try
             {
@@ -900,6 +705,16 @@ namespace AspNetCoreAPI.Controllers
                 {
                     return new JsonResult(new { message = "Nastavenia pre podacie čísla neboli nájdené. Najskôr ich vytvorte." });
                 };
+
+                if (!string.IsNullOrEmpty(settings.EphPrefix) && !packageCode.StartsWith(settings.EphPrefix))
+                {
+                    return new JsonResult(new { message = $"Podacie číslo musí začínať prefixom '{settings.EphPrefix}'." });
+                }
+
+                if (!string.IsNullOrEmpty(settings.EphSuffix) && !packageCode.EndsWith(settings.EphSuffix))
+                {
+                    return new JsonResult(new { message = $"Podacie číslo musí končiť suffixom '{settings.EphSuffix}'." });
+                }
 
                 if (packageCode.Length != settings.EphPrefix.Length + 9 + settings.EphSuffix.Length)
                 {
@@ -1003,12 +818,12 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpPatch("update-package-code/{orderId}")]
-        public async Task<IActionResult> UpdatePackageCode([FromRoute] int orderId, [FromBody] string packageCode)
+        public async Task<IActionResult> UpdatePackageCode([FromRoute] int orderId, [FromBody] UpdatePackageCodeDTO updatePackageCodeDTO)
         {
             var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
             if (order == null) return NotFound(new { message = $"Order with ID {orderId} was not found." });
 
-            order.PackageCode = packageCode ?? "";
+            order.PackageCode = updatePackageCodeDTO.PackageCode ?? "";
             await _context.SaveChangesAsync();
 
             return Ok(new { message = $"Package code for order {orderId} was successfully updated." });

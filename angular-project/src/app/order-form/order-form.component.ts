@@ -16,7 +16,6 @@ import { EphService } from '../services/eph.service';
 import { catchError, finalize, map, Observable, of } from 'rxjs';
 import { CdkDrag, DragDropModule, moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ManageStatusesDialogComponent } from '../manage-statuses-dialog/manage-statuses-dialog.component';
-import { pack } from 'html2canvas/dist/types/css/types/color';
 
 @Component({
   selector: 'app-order-form',
@@ -65,7 +64,7 @@ export class OrderFormComponent implements OnInit {
 
   totalItems: number = 0;
   pageIndex: number = 0;
-  pageSize: number = 4;
+  pageSize: number = 6;
 
   originalPackageCode: string = '';
 
@@ -228,7 +227,8 @@ export class OrderFormComponent implements OnInit {
   loadOrderStatuses(): void {
     this.orderService.getOrderStatuses().subscribe({
       next: (response) => {
-        this.statuses = this.originalStatusesOrder = response;
+        this.statuses = response.map(s => ({ ...s }));
+        this.originalStatusesOrder = response.map(s => ({ ...s }));
       },
       error: (err) => console.error(err)
     })
@@ -817,6 +817,7 @@ export class OrderFormComponent implements OnInit {
             this.snackBar.open(response.message || 'Podacie číslo je platné a dostupné.', '', { duration: 2000 });
           }else{
             this.orderForm.get('packageCode')?.setErrors({ invalid: true });
+            this.orderForm.get('packageCode')?.markAsTouched();
             this.snackBar.open(response.message || 'Neznáma chyba pri validácií podacieho čísla!', '', { duration: 2000 });
           }
         },

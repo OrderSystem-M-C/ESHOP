@@ -20,7 +20,7 @@
       <div class="details-container">
         <table class="order-table">
           <tr>
-            <th colspan="2" class="main-title">Informácie objednávky</th>
+            <th colspan="2" class="main-title">Informácie o objednávke</th>
           </tr>
           <tr>
             <td><b>Meno a priezvisko:</b></td>
@@ -63,7 +63,7 @@
           <table class="selected-products-table">
             <thead>
                <tr>
-                 <th colspan="6" class="main-title">Objednané produkty</th>
+                 <th colspan="6" class="main-title">Objednané produkty a súvisiace informácie</th>
                </tr>
             </thead>
             <tbody>
@@ -86,12 +86,12 @@
             </tbody>
             <tfoot>
               <tr>
-                <td colspan="4">Zvolený spôsob dopravy (vrátane poštovného)</td>
+                <td colspan="4">Zvolený spôsob dopravy pre objednávku (vrátane poštovného)</td>
                 <td>{{order?.deliveryOption}} + cena poštovného:</td>
                 <td>{{order?.deliveryCost.toFixed(2)}} €</td>
               </tr>
               <tr>
-                <td colspan="4">Zvolený spôsob platby (vrátane poplatku)</td>
+                <td colspan="4">Zvolený spôsob platby pre objednávku (vrátane poplatku)</td>
                 <td>{{order?.paymentOption}} + poplatok za platbu:</td>
                 <td>{{order?.paymentCost.toFixed(2)}} €</td>
               </tr>
@@ -110,7 +110,7 @@
             <th colspan="2" class="main-title"><b>Fakturačné údaje:</b></th>
           </tr>
           <tr>
-            <td><b>Číslo faktúry a variabilný symbol:</b></td>
+            <td><b>Číslo faktúry a variabilný symbol (unikátne identifikačné čísla faktúry):</b></td>
             <td>{{ order?.invoiceNumber }}, {{ order?.variableSymbol }}</td>
           </tr>
           <tr>
@@ -135,7 +135,7 @@
             <th colspan="2" class="main-title"><b>Faktúra a podacie číslo objednávky:</b></th>
           </tr>
           <tr>
-            <td><b>Kliknutím na odkaz stiahnete faktúru objednávky:</b></td>
+            <td><b>Kliknutím na odkaz stiahnete aktuálnu faktúru k objednávke vo formáte PDF:</b></td>
             <td><a (click)="getInvoice()" title="Kliknutím stiahnete faktúru objednávky"><img src="../../assets/Images/download-icon.png" alt="download-icon">Prevziať faktúru</a></td>
           </tr>
           <tr>

@@ -254,6 +254,9 @@ mat-paginator {
 }
 tr.editing {
   border: 2px solid #084298 !important;
+}
+tr.editing td {
+  background-color: #f1f7ff !important; 
   transition: background-color 0.3s ease;
 }
 /*Pre neplatné polia*/

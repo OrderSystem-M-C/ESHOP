@@ -161,6 +161,7 @@
           <tr
             *ngFor="let order of ourFilteredOrders"
             class="order-row"
+            [class.selected]="selectedOrders.includes(order)"
             (click)="navigateToDetails(order, $event)">
             <td>
               <div class="preview-container"

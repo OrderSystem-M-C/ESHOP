@@ -10,12 +10,10 @@ import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { EmailService } from '../services/email.service';
-import { catchError, EMPTY, finalize, forkJoin, of, shareReplay, switchMap, take, tap } from 'rxjs';
+import { catchError, EMPTY, finalize, forkJoin, map, of, switchMap, take, tap } from 'rxjs';
 import { OrderDetailsComponent } from '../order-details/order-details.component';
 import { HttpErrorResponse } from '@angular/common/http';
-import { node } from 'canvg/dist/presets';
-import { EphService } from '../services/eph.service';
-import { pack } from 'html2canvas/dist/types/css/types/color';
+import { EphService, PackageCodeResponseDTO } from '../services/eph.service';
 
 @Component({
   selector: 'app-orders-page',
@@ -240,8 +238,11 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
 
     const updateObservables = this.selectedOrders.map(order => 
       this.ephService.generatePackageCode().pipe(
-        switchMap((packageCode: string) => {
-          return this.ephService.updatePackageCode(order.orderId, packageCode).pipe(take(1));
+        switchMap((response: PackageCodeResponseDTO) => {
+          return this.ephService.updatePackageCode(order.orderId, response.packageCode).pipe(
+            map(() => ({ orderId: order.orderId, packageCode: response.packageCode })),
+            take(1)
+          );
         }),
         catchError(err => {
           console.error("An error have occurred while trying to update orders: ", err);
@@ -252,6 +253,16 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
     )
     
     forkJoin(updateObservables).pipe(
+      tap(results => {
+        this.filteredOrders = this.filteredOrders.map(order => {
+            const updatedResult = results.find(result => result && result.orderId === order.orderId);
+            if (updatedResult) {
+                return { ...order, packageCode: updatedResult.packageCode };
+            }
+            return order;
+        });
+        this.updatePagedOrders();
+      }),
       switchMap(() => this.orderService.getOrdersXmlFile(this.selectedOrders.map(o => o.orderId))),
       finalize(() => {
         this.isLoading = false;

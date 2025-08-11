@@ -1,0 +1,131 @@
+* [33m4f30bfd[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m Added new features + fixed some issues.
+* [33m24d6fed[m Added new features and fixed some issues.
+* [33mfd65d47[m Small fix.
+* [33mee0852a[m Added and fixed some issues.
+* [33m139a558[m Added better validation for invoice.
+* [33m6cd2278[m Minor fix.
+* [33m12fff1a[m Fixed some issues.
+* [33m9d7ccd1[m Fixed some issues.
+* [33m5874ddc[m Fixed some UI issues.
+* [33m2ce0666[m Fixed some issues.
+* [33mc354471[m Fixed some important issues.
+* [33m59489ca[m Fixed some issues.
+* [33m1719596[m Changed the URL.
+* [33m298ea32[m Fixed some FE and BE issues + added new features.
+* [33m6052722[m Finished.
+* [33m94495b4[m Fixed many issues.
+* [33m409ecc4[m Fixed some UI issues.
+* [33m6a3b6e5[m Prepared new method for optimalization.
+* [33md5697cd[m Forgot to change something.
+* [33mdf03c1b[m Fixed some issues.
+* [33m06fffa5[m Fixed some issues.
+* [33m8a65f31[m Fixed minor UI issues.
+* [33m86e1fbe[m Managed to fix the status form and updated UI for better user experience.
+* [33m3873136[m Added logic for addind and removing statuses.
+* [33m90c0201[m Added logic for managing statuses (it is not accessible for normal user)
+* [33m39e53d8[m Fixed some issues.
+* [33m22ebb35[m Fixed some issues.
+* [33m0bb1271[m Fixed some issues.
+* [33m38a2fee[m Added drag & drop function for statuses
+* [33m69167f9[m The system for EPH was successfully fixed and it is now fully functional.
+* [33m077fa25[m Added EPH system and fixed some issues.
+* [33md2e1c27[m Added few things.
+* [33maa00805[m Added few things + fixed some issues.
+* [33m36c6f7e[m Added new features + fixed some issues.
+* [33m6d348df[m Fix.
+* [33mccd325a[m Added few things + fixed some BE and FE issues.
+* [33maeec39a[m Fix for the apple touch icon.
+* [33m81d7363[m Added apple-touch-icon.
+* [33m1311df3[m Fixed XML issue and added "Clear products" button.
+* [33m00ab5f7[m Small fix.
+* [33m06e4534[m Added the biggest update oat!
+* [33m614c391[m Added logic for e-mails and fixed some issues.
+* [33mc6df117[m Fixed the relationship between products and orders, also fixed some UI issues.
+* [33m83c1124[m Fixed many issues and added new UI features.
+* [33mb13fd1c[m Added BE verification for reCAPTCHA and page not found component.
+* [33m150e20b[m Added reCAPTCHA verification.
+* [33md5ac744[m Fix.
+* [33m1eb2e6f[m Added new functions and fixed UI.
+* [33m7a7785e[m Fixed some issues.
+* [33m553242f[m Added functions for generation of EPH.
+* [33m895a769[m Managed to fix some important things.
+* [33m5fd3e3c[m Fixed some issues.
+* [33m163ee95[m TODO - Don't forget to fix the UI problem on orders-page => border problem.
+* [33m1b04ded[m Managed to fix an unnoticable bug.
+* [33mdaeb940[m Added markers for orderStatuses.
+* [33m69c1d00[m Added a huge range of features including: UI upgrades, bug patches, new features for better user experience and many more.
+* [33ma664bcb[m Added a range of new features and fixes.
+* [33m44d5220[m Added logic for removing a range of orders and for XML file generation.
+* [33m6bd0249[m Added new feature which represents an ability to change order status quickly.
+* [33m3c319f0[m Fixed the copying logic.
+* [33m9a754ba[m Added working pagination and logic for copying orders.
+* [33m8d01861[m Added working pagination.
+* [33m5c466a8[m Forgot to commit changes.
+* [33m593f2b8[m Added pagination.
+* [33m9917d9a[m Change
+* [33me636938[m Added a button on order details page.
+* [33mf5f261c[m Added huge update to the UI of pages and fixed some issues
+* [33m27ec091[m Added huge update for forms and fixed some issues
+* [33m62711e1[m Fixed the logic for updating products.
+* [33m57135ff[m Added working logic for updating products in the order.
+* [33m40daeaa[m Did some changes
+* [33m3dccf5d[m Pridal som niekoľko zmien do projektu. Zajtra dorobiť
+* [33m179d977[m Added a huge update and commiting from git bash!
+* [33m33fe099[m Added a huge update, TODO - finish product interface completely and start doing charts.
+* [33m6fea66e[m Pridal som veľký update.
+* [33m4d42263[m Implemented more friendly UI for managing products in order form. TODO - finish integration of product interface with order interface.
+* [33m40c8a7c[m Added functionality for selecting products in order form component
+* [33mbc1b5e1[m updated products
+* [33m1949837[m Added filtering for products
+* [33m8301df5[m Updated system for products
+* [33me45fc9c[m Updated product system
+* [33m8b46eab[m Fixed UI
+* [33m36c9b5e[m Prepared stuff for updating orders
+* [33mf56ccbe[m Added columns for invoice in orders table and invoice is available on the order details page
+* [33m9fbcd84[m Added filtering orders by date and status
+* [33mbb7f4cb[m Updated css
+* [33m2f47246[m Added filtering by order status and fixed some issues
+* [33m2c2dc32[m Did some changes and added some features
+* [33m27d3b8f[m Added few things
+*   [33m5b0bf55[m Merge branch 'master' of https://github.com/ESHOP-project-2-0/ESHOP
+[32m|[m[33m\[m  
+[32m|[m * [33m5c1623b[m Update README.md
+* [33m|[m [33m19d79d2[m Added function for removing order
+[33m|[m[33m/[m  
+* [33m6eb1c15[m Did a lot
+* [33m07502c2[m Did a huge update
+* [33m0f63da7[m Updated UI
+* [33m569ff14[m Did some changes
+* [33m582cd70[m Updated UI
+* [33mfeb3142[m Added logic for addid orders, getting orders, updated UI and couple more
+* [33m35b7774[m Added service and did some changes
+* [33md4180ae[m Added forms and functionality for it also better UI and some fixes
+* [33m8bb625f[m Added form for creating and editing order
+* [33meef435d[m Added tables into database => Products, Orders, OrderProducts
+* [33mfb3fd68[m Added cookies pop-up, updated UI and added connection to the db + creation of the database
+* [33m3d627f4[m Added UI for login-page
+* [33mf022155[m Fix isAdmin() in authentication.service.ts
+* [33mbdc81e8[m Add log for github actions
+* [33m4e985f5[m Fix admin signal on page refresh
+* [33m26f5b8f[m Add user claims to token and add-claim endpoint
+* [33m78e3498[m Change content of message for non admin user
+* [33m565835b[m Read admin flag from token and show dashboard content accordingly
+* [33m99822dd[m Set correct direcory of firebase.json
+* [33mb2c6401[m Delete angular-project/package-lock.json
+* [33m41f82c0[m Set up node
+* [33mf0e366e[m Update firebase-hosting-merge.yml
+* [33m06a9a28[m Add npm install to pipeline
+* [33mfeb2124[m Update firebase-hosting-merge.yml
+* [33m9071c2c[m Update firebase-hosting-merge.yml
+* [33mb4dd94d[m Set up github actions
+* [33m36ebe51[m Add missing semicolon
+* [33m82400de[m Get current user info on BE and FE
+* [33mec01eec[m Use takeUntilDestroyed instead of manual unsubscribe
+* [33m21fb681[m Update README.md
+* [33m91a38b5[m Enable swagger in development env
+* [33m828d297[m Create README.md
+* [33mc5dae13[m Delete desktop.ini
+* [33m5477604[m Update .gitignore
+* [33m87e2bad[m Delete angular-project/.firebaserc
+* [33m8aa44fc[m Extend .gitignore
+* [33m993994c[m Add project files

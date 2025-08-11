@@ -29,7 +29,8 @@
                   <div class="table-container">
                     <table class="selected-products-table">
                       <tr *ngFor="let product of selectedProducts" class="product-row">
-                        <td style="width: 70%;"><div class="cell-content">{{product.productName}}</div></td>
+                        <td style="width: 60%;"><div class="cell-content">{{ product.productName }}</div></td>
+                        <td>{{ product.productPrice.toFixed(2) }}€</td>
                         <td class="product-amount-control-column">
                           <input type="number" [(ngModel)]="product.productAmount" [ngModelOptions]="{standalone: true}" (change)="updateAmount(product.productId, product.productAmount)" value="1" min="1" class="form-control product-amount-control">
                         </td>
@@ -303,7 +304,7 @@
         </div>
       }@else{
         <div class="submit">
-          <button type="submit" class="btn btn-primary" (click)="submitOrder()">Vytvoriť objednávku</button>
+          <button type="submit" class="btn btn-primary" (click)="submitOrder()"><img src="../../assets/Images/create-icon.png" height="23px" width="23px" alt="save-icon" style="margin: 0 5px 2px 0; filter: invert(1) brightness(2);">Vytvoriť objednávku</button>
         </div> 
       }
     }@else{
@@ -356,7 +357,9 @@
               <th style="text-align: center;">Stav</th>
               <th style="text-align: center;">Počet</th>
             </tr>
-            <tr *ngFor="let product of ourSortedProducts" class="product-row">
+            <tr *ngFor="let product of ourSortedProducts" 
+                class="product-row" 
+                [class.selectedProduct]="selectedProducts.includes(product)">
               <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="form-check-input" [(ngModel)]="product.productSelected" (change)="toggleProductSelection(product)" [checked]="selectedProducts.includes(product)" ></td>
               <td style="text-align: center;">{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
@@ -370,7 +373,7 @@
           </tbody>
         </table>
         <div class="pagination-container">
-          <mat-paginator [length]="totalItems" [pageSizeOptions]="[4, 6]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
+          <mat-paginator [length]="totalItems" [pageSizeOptions]="[6, 8, 10]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
         </div>
       }
     }

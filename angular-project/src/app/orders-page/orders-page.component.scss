@@ -176,6 +176,13 @@ h1 {
   border-collapse: collapse;
   margin: 0 auto;
 }
+tr.selected {
+  border: 2px solid #084298 !important;
+}
+tr.selected td {
+  background-color: #f1f7ff !important; 
+  transition: background-color 0.3s ease;
+}
 .orders-table thead {
   border-right: 8px solid #084298;
 }
@@ -187,18 +194,22 @@ h1 {
   text-align: left;
   border-bottom: 1px solid #ccc;
 }
-.orders-table td input[type="checkbox"]{
-  height: 25px;
-  width: 25px;
-}
 .checkbox-section {
   width: 100px !important;
 }
-.checkbox-section input[type="checkbox"]{
-  height: 20px;
-  width: 20px;
+.orders-table td input[type="checkbox"]{
+  height: 25px;
+  width: 25px;
+  accent-color: #084298;
   cursor: pointer;
   margin: 0;
+}
+.checkbox-section input[type="checkbox"]:checked {
+  background-color: #084298;
+}
+.checkbox-section input[type="checkbox"]:focus {
+  border-color: #084298;
+  box-shadow: 0 0 0 0.25rem rgba(8, 66, 152, 0.25);
 }
 .orders-table th {
   background-color: #084298;
