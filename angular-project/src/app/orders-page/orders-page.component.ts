@@ -1,7 +1,6 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { OrderService } from '../services/order.service';
+import { OrderDTO, OrderService, OrderStatusDTO } from '../services/order.service';
 import { CommonModule, DatePipe } from '@angular/common';
-import { OrderDTO, OrderStatusDTO } from '../order-form/order-form.component';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Chart } from 'chart.js/auto';

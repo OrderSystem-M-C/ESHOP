@@ -1,8 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, Input, OnInit, TemplateRef  } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { OrderService } from '../services/order.service';
-import { OrderDTO } from '../order-form/order-form.component';
+import { OrderDTO, OrderService } from '../services/order.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';

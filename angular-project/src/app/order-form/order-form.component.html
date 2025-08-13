@@ -349,18 +349,17 @@
         <table class="products-table">
           <tbody>
             <tr>
-              <th style="text-align: center;">Zvoliť</th>
               <th style="text-align: center;">Č. produktu</th>
               <th>Názov produktu</th>
               <th style="text-align: center;">Kód produktu</th>
               <th style="text-align: center;">Cena/ks</th>
               <th style="text-align: center;">Stav</th>
               <th style="text-align: center;">Počet</th>
+              <th style="text-align: center;">Zvoliť</th>
             </tr>
             <tr *ngFor="let product of ourSortedProducts" 
                 class="product-row" 
-                [class.selectedProduct]="selectedProducts.includes(product)">
-              <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="form-check-input" [(ngModel)]="product.productSelected" (change)="toggleProductSelection(product)" [checked]="selectedProducts.includes(product)" ></td>
+                [class.selectedProduct]="isSelected(product)">
               <td style="text-align: center;">{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
               <td style="text-align: center;">{{ product.productCode }}</td>
@@ -369,6 +368,7 @@
                 {{ product.stockAmount > 0 ? 'Na sklade' : 'Vypredané' }} 
               </td>
               <td style="text-align: center;">{{product.stockAmount}} ks</td>
+              <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="form-check-input" [(ngModel)]="product.productSelected" (change)="toggleProductSelection(product)" [checked]="selectedProducts.includes(product)" ></td>
             </tr>
           </tbody>
         </table>

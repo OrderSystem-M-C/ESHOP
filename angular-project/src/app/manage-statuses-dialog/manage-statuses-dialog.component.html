@@ -14,7 +14,10 @@
             <form [formGroup]="statusForm" (ngSubmit)="addOrderStatus()">
                 <div class="field">
                     <label class="form-label" for="statusName">Zadajte názov stavu*</label>
-                    <input class="form-control" id="statusName" type="text" formControlName="statusName" placeholder="Zadajte názov stavu" [ngClass]="{'is-invalid': statusForm.get('statusName').invalid && statusForm.get('statusName').touched}">
+                    <input class="form-control" id="statusName" type="text" formControlName="statusName" placeholder="Zadajte názov stavu" [ngClass]="{'is-invalid': statusForm.get('statusName').invalid && statusForm.get('statusName').touched}" maxlength="50">
+                    <p class="char-count" *ngIf="statusForm.get('statusName')?.value">
+                        {{ statusForm.get('statusName')?.value?.length || 0 }}/50 písmen
+                    </p>
                 </div>
                 <div class="field">
                     <label class="form-label" for="statusColor">Zadajte farbu pre stav*</label>
@@ -23,7 +26,7 @@
                 <div class="field">
                     <p>
                         <strong>Poznámka:</strong> Nový stav sa automaticky pridá na koniec zoznamu. Po zatvorení dialógu môžete poradie upraviť.<br><br>
-                        Stavy označené hviezdičkou (*) sú preddefinované a nie je možné ich zmazať ani upraviť názov.
+                        Stavy označené hviezdičkou (*) sú preddefinované a nie je možné ich zmazať ani upraviť ich názov.
                     </p>
                 </div>
                 <div class="submit">

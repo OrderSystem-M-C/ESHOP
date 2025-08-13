@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { OrderStatusDTO } from '../order-form/order-form.component';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
-import { OrderService } from '../services/order.service';
+import { OrderService, OrderStatusDTO } from '../services/order.service';
 import { CommonModule } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatPaginator, MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
@@ -49,6 +48,7 @@ export class ManageStatusesDialogComponent implements OnInit {
     this.orderService.getOrderStatuses().subscribe({
       next: (response) => {
         this.statuses = response;
+        this.pageIndex = 0;
         this.totalItems = response.length;
         this.isLoading = false;
       },

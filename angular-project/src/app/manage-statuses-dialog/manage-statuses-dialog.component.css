@@ -51,7 +51,10 @@
 .field {
   margin-bottom: 5px;
 }
-.field p {
+.char-count {
+  margin: 7.5px 0 0 0;
+}
+.field p:not(.char-count) {
   margin: 0;
 }
 .submit {
@@ -89,8 +92,8 @@
   border: 2px solid transparent;
   cursor: pointer;
   font-size: 14px;
-  height: 62.5px; 
-  min-height: 62.5px;
+  height: 60px; 
+  min-height: 60px;
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1), box-shadow 100ms ease,
     background-color 0.2s ease-in-out, border 0.2s ease-in-out,
     font-weight 1ms ease-in-out;

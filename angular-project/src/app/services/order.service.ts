@@ -1,6 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { OrderDTO, OrderStatusDTO } from '../order-form/order-form.component';
 import { Observable } from 'rxjs';
 import { ProductDTO } from '../products-page/products-page.component';
 
@@ -130,6 +129,46 @@ export class OrderService {
     const url = `${this.baseUrl}/order/update-order-status`;
     return this.http.put(url, status);
   }
+}
+export interface OrderDTO {
+  id?: number;
+  orderId: number;
+  customerName: string;
+  company?: string;
+  ico?: string;
+  dic?: string;
+  icDph?: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  email: string;
+  phoneNumber: string;
+  note?: string;
+  deliveryOption: string;
+  deliveryCost: number;
+  paymentOption: string;
+  paymentCost: number;
+  discountAmount?: number;
+  orderStatus: string;
+  orderDate?: string;
+  totalPrice: number;
+  invoiceNumber: string;
+  variableSymbol: string;
+  invoiceIssueDate: string; 
+  invoiceName: string;
+  invoiceCompany?: string; 
+  invoiceICO?: string; 
+  invoiceDIC?: string;
+  invoiceEmail: string;
+  invoicePhoneNumber: string;
+  orderSelected?: boolean;
+  packageCode?: string;
+}
+export interface OrderStatusDTO {
+  statusId?: number;
+  statusName: string;
+  sortOrder?: number;
+  statusColor: string;
 }
 // export interface SortedOrdersDTO {
 //   orders: OrderDTO[];

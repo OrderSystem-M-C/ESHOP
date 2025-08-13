@@ -2,7 +2,7 @@ import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import * as html2pdf from 'html2pdf.js';
-import { OrderService } from '../services/order.service';
+import { OrderDTO, OrderService, OrderStatusDTO } from '../services/order.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ProductDTO } from '../products-page/products-page.component';
@@ -12,7 +12,7 @@ import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { EmailService } from '../services/email.service';
-import { EphService } from '../services/eph.service';
+import { EphService, EphSettingsDTO } from '../services/eph.service';
 import { catchError, finalize, map, Observable, of } from 'rxjs';
 import { CdkDrag, DragDropModule, moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ManageStatusesDialogComponent } from '../manage-statuses-dialog/manage-statuses-dialog.component';
@@ -71,6 +71,8 @@ export class OrderFormComponent implements OnInit {
   statuses: OrderStatusDTO[] = [];
   private originalStatusesOrder: OrderStatusDTO[] = [];
 
+  ephSettings: EphSettingsDTO;
+
   constructor(private datePipe: DatePipe, private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar, private dialog: MatDialog, private productService: ProductService, private emailService: EmailService, private ephService: EphService){}
 
   updatePagedProducts(): void {
@@ -113,7 +115,7 @@ export class OrderFormComponent implements OnInit {
     paymentCost: new FormControl(0, [Validators.required, Validators.min(0)]),
     discountAmount: new FormControl(null, Validators.pattern('^[0-9]*$')),
     orderStatus: new FormControl('Nezpracované - nová objednávka'),
-    packageCode: new FormControl('', Validators.pattern('^[A-Z]{2}\\d{9}[A-Z]{2}$'))
+    packageCode: new FormControl('')
   });
 
   invoiceForm = new FormGroup({
@@ -290,6 +292,10 @@ export class OrderFormComponent implements OnInit {
   }
   trackByStatusId(index: number, status: OrderStatusDTO): number {
     return status.statusId;
+  }
+
+  isSelected(product: ProductDTO): boolean {
+    return this.selectedProducts.some(p => p.productId === product.productId);
   }
 
   searchProducts() {
@@ -774,7 +780,14 @@ export class OrderFormComponent implements OnInit {
   }
 
   checkPackageCodeFormat(code: string): boolean {
-    const trackingPattern = /^[A-Z]{2}\d{9}[A-Z]{2}$/;
+    let trackingPattern: RegExp;
+
+    if (this.ephSettings && this.ephSettings.ephPrefix && this.ephSettings.ephSuffix) {
+        trackingPattern = new RegExp(`^(${this.ephSettings.ephPrefix})\\d{9}(${this.ephSettings.ephSuffix})$`);
+    } else {
+        trackingPattern = /^[A-Z]{2}\d{9}[A-Z]{2}$/;
+    }
+
     const result = trackingPattern.test(code);
 
     if (!result) {
@@ -788,6 +801,8 @@ export class OrderFormComponent implements OnInit {
 
   validatePackageCode(packageCode: string): void {
     this.isLoading_packageCode = true;
+
+    this.orderForm.get('packageCode')?.markAsTouched();
 
     if(!packageCode){
       this.orderForm.get('packageCode')?.setErrors({ required: true });
@@ -812,19 +827,22 @@ export class OrderFormComponent implements OnInit {
       .pipe(finalize(() => this.isLoading_packageCode = false))
       .subscribe({
         next: (response) => {
-          if(response.valid){
-            this.orderForm.get('packageCode')?.setErrors(null);
-            this.snackBar.open(response.message || 'Podacie číslo je platné a dostupné.', '', { duration: 2000 });
-          }else{
-            this.orderForm.get('packageCode')?.setErrors({ invalid: true });
-            this.orderForm.get('packageCode')?.markAsTouched();
-            this.snackBar.open(response.message || 'Neznáma chyba pri validácií podacieho čísla!', '', { duration: 2000 });
-          }
+          setTimeout(() => {
+            if(response.valid){
+              this.orderForm.get('packageCode')?.setErrors(null);
+              this.snackBar.open(response.message || 'Podacie číslo je platné a dostupné.', '', { duration: 2000 });
+            }else{
+              this.orderForm.get('packageCode')?.setErrors({ invalid: true });
+              this.snackBar.open(response.message || 'Neznáma chyba pri validácií podacieho čísla!', '', { duration: 2000 });
+            }
+          }, 0);
         },
         error: (err) => {
-          const msg = err?.error?.message || 'Neznáma chyba pri validácií podacieho čísla!';
-          this.orderForm.get('packageCode')?.setErrors({ invalid: true });
-          this.snackBar.open(msg, '', { duration: 2000 });
+          setTimeout(() => {
+            const msg = err?.error?.message || 'Neznáma chyba pri validácií podacieho čísla!';
+            this.orderForm.get('packageCode')?.setErrors({ invalid: true });
+            this.snackBar.open(msg, '', { duration: 2000 });
+          }, 0);
         }
     })
   }
@@ -1078,6 +1096,15 @@ export class OrderFormComponent implements OnInit {
     }
   }
 
+  loadEphSettings(): void {
+    this.ephService.getEphSettings().subscribe({
+      next: (response) => {
+        this.ephSettings = response;
+      }, 
+      error: (err) => console.error(err)
+    })
+  }
+
   ngOnInit(): void {
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
@@ -1091,6 +1118,8 @@ export class OrderFormComponent implements OnInit {
     this.existingOrderId = Number(this.route.snapshot.paramMap.get('orderId')) ?? null;
 
     this.loadOrderStatuses();
+
+    this.loadEphSettings();
 
     if(this.existingOrderId){
       this.isEditMode = true;
@@ -1110,44 +1139,4 @@ export class OrderFormComponent implements OnInit {
       paymentCost: paymentFee
     });
   }
-}
-export interface OrderDTO {
-  id?: number;
-  orderId: number;
-  customerName: string;
-  company?: string;
-  ico?: string;
-  dic?: string;
-  icDph?: string;
-  address: string;
-  city: string;
-  postalCode: string;
-  email: string;
-  phoneNumber: string;
-  note?: string;
-  deliveryOption: string;
-  deliveryCost: number;
-  paymentOption: string;
-  paymentCost: number;
-  discountAmount?: number;
-  orderStatus: string;
-  orderDate?: string;
-  totalPrice: number;
-  invoiceNumber: string;
-  variableSymbol: string;
-  invoiceIssueDate: string; 
-  invoiceName: string;
-  invoiceCompany?: string; 
-  invoiceICO?: string; 
-  invoiceDIC?: string;
-  invoiceEmail: string;
-  invoicePhoneNumber: string;
-  orderSelected?: boolean;
-  packageCode?: string;
-}
-export interface OrderStatusDTO {
-  statusId?: number;
-  statusName: string;
-  sortOrder?: number;
-  statusColor: string;
 }
