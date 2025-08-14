@@ -63,7 +63,17 @@
           <table class="selected-products-table">
             <thead>
                <tr>
-                 <th colspan="6" class="main-title">Objednané produkty a súvisiace informácie</th>
+                 <th colspan="6" class="main-title">
+                    <div class="main-title-save-container">
+                      Objednané produkty a súvisiace informácie
+                      @if(isEditingProducts){
+                        <div class="button-container">
+                          <button class="btn btn-secondary" (click)="saveAllChanges()"><img src="../../assets/Images/save-icon.png" alt="save-icon"> Uložiť zmeny</button>
+                          <button class="btn btn-danger" (click)="cancelEditing()">Zahodiť zmeny</button>
+                        </div>
+                      } 
+                    </div>
+                 </th>
                </tr>
             </thead>
             <tbody>
@@ -77,7 +87,17 @@
                 </tr>
                 <tr class="product-row" *ngFor="let product of selectedProducts">
                     <td>{{product.productName}}</td>
-                    <td>{{product.productPrice.toFixed(2)}} €</td>
+                    <td>
+                      <div class="product-price-container">
+                        <input type="number" 
+                        class="form-control" 
+                        [ngModel]="isProductEdited(product.productId) ? editedProducts[product.productId].productPrice : product.productPrice" 
+                        step="0.01"
+                        (ngModelChange)="onProductFieldChange(product.productId, $event)"
+                        min="1">
+                        €
+                      </div>
+                    </td>
                     <td>{{product.productWeight.toFixed(2)}} kg</td>
                     <td>{{product.productAmount}} ks</td>
                     <td>{{(product.productWeight * product.productAmount).toFixed(2)}} kg</td>
@@ -85,21 +105,21 @@
                 </tr>
             </tbody>
             <tfoot>
-              <tr>
-                <td colspan="4">Zvolený spôsob dopravy pre objednávku (vrátane poštovného)</td>
-                <td>{{order?.deliveryOption}} + cena poštovného:</td>
-                <td>{{order?.deliveryCost.toFixed(2)}} €</td>
+              <tr style="border-top: 2px solid #000;">
+                <td colspan="4" style="border: none">Zvolený spôsob dopravy pre objednávku (vrátane poštovného)</td>
+                <td style="border: none">{{order?.deliveryOption}} + cena poštovného:</td>
+                <td style="border: none">{{order?.deliveryCost.toFixed(2)}} €</td>
               </tr>
-              <tr>
-                <td colspan="4">Zvolený spôsob platby pre objednávku (vrátane poplatku)</td>
-                <td>{{order?.paymentOption}} + poplatok za platbu:</td>
-                <td>{{order?.paymentCost.toFixed(2)}} €</td>
+              <tr style="border-bottom: 2px solid #000;">
+                <td colspan="4" style="border: none">Zvolený spôsob platby pre objednávku (vrátane poplatku)</td>
+                <td style="border: none">{{order?.paymentOption}} + poplatok za platbu:</td>
+                <td style="border: none">{{order?.paymentCost.toFixed(2)}} €</td>
               </tr>
               <tr class="total-row">
                   <td colspan="3"><strong>CELKOVÝ POČET KUSOV, VÁHA A CENA OBJEDNÁVKY</strong></td>
                   <td><strong>{{calculateTotalAmount()}} ks</strong></td>
                   <td><strong>{{calculateTotalWeight().toFixed(2)}} kg</strong></td>
-                  <td><strong>{{this.order.discountAmount ? ((this.order.totalPrice - (this.order.totalPrice * this.order?.discountAmount / 100)).toFixed(2) + ' € (-' + this.order.discountAmount + '%)') : (this.order.totalPrice.toFixed(2) + ' €')}}</strong></td>
+                  <td><strong>{{this.order.discountAmount ? (this.order.totalPrice.toFixed(2) + ' € (-' + this.order.discountAmount + '%)') : (this.order.totalPrice.toFixed(2) + ' €')}}</strong></td>
               </tr>
           </tfoot>
         </table>

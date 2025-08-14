@@ -69,7 +69,7 @@
            <button class="btn btn-light" (click)="toggleDropdown('changeStatus')"><img src="../../assets/Images/change-status-icon.png"> Rýchla zmena stavu objednávky</button>
             <div class="dropdown-content" [ngClass]="isVisibleChangeStatus ? 'is-visible': 'is-not-visible'">
               <h3><img src="../../assets/Images/click-icon.png" alt="click-icon"> Kliknutím zmeníte stav:</h3>
-              <div class="status-item" *ngFor="let status of statuses">
+              <div class="status-item" [ngStyle]="{'border-left': '8px solid ' + status.statusColor }" *ngFor="let status of statuses">
                 <a class="status-item-link" (click)="changeOrderStatus(status.statusName)">
                   {{status.statusName}}
                 </a>
@@ -103,7 +103,7 @@
             <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('status')"><img src="../../assets/Images/filter-icon.png" alt="filter-icon"> Zvoľte stavy objednávok pre filtráciu</button>
           </div>
           <div class="dropdown-content" [ngClass]="isVisibleCheckbox ? 'is-visible': 'is-not-visible'">
-            <div class="checkbox-item" *ngFor="let status of statuses">
+            <div class="checkbox-item" [ngStyle]="{'border-left': '8px solid ' + status.statusColor }" *ngFor="let status of statuses">
               <label class="checkbox-label">
                 <input type="checkbox" class="form-check-input" id="checkbox" [value]="status.statusName" (change)="onCheckboxChange($event)" [checked]="selectedStatuses.includes(status.statusName)">
                 {{ status.statusName }}

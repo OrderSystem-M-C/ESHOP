@@ -6,12 +6,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import * as html2pdf from 'html2pdf.js';
-import { ProductDTO } from '../products-page/products-page.component';
+import { ProductDTO, ProductService, ProductUpdateDTO } from '../services/product.service';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-order-details',
   standalone: true,
-  imports: [DatePipe, RouterLink, MatDialogModule, CommonModule],
+  imports: [DatePipe, RouterLink, MatDialogModule, CommonModule, FormsModule, ReactiveFormsModule ],
   providers: [DatePipe],
   templateUrl: './order-details.component.html',
   styleUrl: './order-details.component.css'
@@ -28,7 +29,11 @@ export class OrderDetailsComponent implements OnInit{
 
   selectedProducts: ProductDTO[] = [];
 
-  constructor(private dialog: MatDialog, private route: ActivatedRoute, private router: Router, private datePipe: DatePipe, private orderService: OrderService, private snackBar: MatSnackBar){} /* private dialog: MatDialog => na otvaranie dialogovych okien atd */
+  editedProducts: { [productId: number]: { productPrice?: number }} = {};
+  isEditingProducts: boolean = false;
+  hasShownEditingSnackbar = false;
+
+  constructor(private dialog: MatDialog, private route: ActivatedRoute, private router: Router, private datePipe: DatePipe, private orderService: OrderService, private snackBar: MatSnackBar, private productService: ProductService){} /* private dialog: MatDialog => na otvaranie dialogovych okien atd */
 
   editOrder(){
     if(this.previewOrderId != null) {
@@ -41,6 +46,105 @@ export class OrderDetailsComponent implements OnInit{
       return;
     }
     this.router.navigate(['/orders-page']);
+  }
+
+  onProductFieldChange(productId: number, newValue: any) {
+    this.isEditingProducts = true;
+    const value = Number(newValue);
+
+    if (!this.editedProducts[productId]) {
+      this.editedProducts[productId] = {};
+    }
+    this.editedProducts[productId]['productPrice'] = value;
+
+    if (!this.hasShownEditingSnackbar) {
+      this.snackBar.open('Vstúpili ste do editačného režimu!', '', { duration: 1000 });
+      this.hasShownEditingSnackbar = true;
+    }
+  }
+
+  saveAllChanges() {
+    const updates: ProductUpdateDTO[] = [];
+    this.isLoading = true;
+  
+    for (const productIdStr of Object.keys(this.editedProducts)) {
+      const productId = Number(productIdStr);
+      const edited = this.editedProducts[productId];
+      const originalProduct = this.selectedProducts.find(p => p.productId === productId);
+  
+      if(originalProduct){
+        if(edited.productPrice!== undefined){
+          const productPrice = Number(edited.productPrice);
+          if(isNaN(productPrice) || productPrice < 0){
+            this.snackBar.open('Záporné alebo neplatné hodnoty pre cenu nie sú povolené!', '', { duration: 2500 });
+            this.isLoading = false;
+            return;
+          }
+        }
+  
+        let update: ProductUpdateDTO = { productId };
+          
+        if (edited.productPrice !== undefined) {
+          const editedPrice = Number(edited.productPrice);
+          const originalPrice = Number(originalProduct.productPrice ?? 0);
+
+          if (editedPrice !== originalPrice) {
+            update.productPrice = editedPrice;
+          }
+        }
+
+        if (update.productPrice !== undefined) {
+          updates.push(update);
+        }
+      }
+    }
+  
+    if(updates.length === 0) {
+      this.snackBar.open('Nemáte žiadne zmeny na uloženie!', '', { duration: 1000 });
+      this.isLoading = false;
+      return;
+    }
+  
+    this.productService.updateProductPrice(this.order.id, updates).subscribe({
+      next: (response) => {
+        this.snackBar.open('Zmeny boli úspešne uložené!', '', { duration: 1000 });
+  
+        for (const upd of updates) {
+          const productInMainData = this.selectedProducts.find(p => p.productId === upd.productId);
+          if (productInMainData) {
+            if (upd.productPrice !== undefined) {
+              productInMainData.productPrice = upd.productPrice;
+            }
+          }
+        }
+
+        this.order.totalPrice = response.totalPrice;
+  
+        this.editedProducts = {};
+        this.isEditingProducts = this.hasShownEditingSnackbar = this.isLoading = false;
+      },
+      error: (err) => {
+        console.error("Error saving changes:", err);
+        this.snackBar.open('Chyba pri ukladaní zmien!', '', { duration: 2000 });
+        this.isLoading = false; 
+      }
+    })
+  }
+
+  cancelEditing() {
+    this.editedProducts = {};
+    this.isEditingProducts = this.hasShownEditingSnackbar = false;
+    this.snackBar.open('Úpravy boli zrušené!', '', { duration: 2000 });
+  }
+
+  isProductEdited(productId: number): boolean {
+    if (!this.editedProducts.hasOwnProperty(productId)) return false;
+    if (!this.editedProducts[productId].hasOwnProperty('productPrice')) return false;
+
+    const originalProduct = this.selectedProducts.find(p => p.productId === productId);
+    if (!originalProduct) return false;
+
+    return this.editedProducts[productId]['productPrice'] !== originalProduct['productPrice'];
   }
 
   async getInvoice(){
@@ -148,16 +252,19 @@ export class OrderDetailsComponent implements OnInit{
             </td>
           </tr>
           `).join('')}
-          <tr>
-            <td colspan="2" style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Zvolený spôsob dopravy</td>
-            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">Poštovné (${this.order.deliveryOption}):</td>
-            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${this.order.deliveryCost.toFixed(2)} €</td>
+
+          <tr style="border-top: 1px solid #000; background-color: #f8f9fa;">
+            <td colspan="2" style="padding: 8px; text-align: left;">Zvolený spôsob dopravy</td>
+            <td style="padding: 8px; text-align: center;">Poštovné (${this.order.deliveryOption}):</td>
+            <td style="padding: 8px; text-align: center;">${this.order.deliveryCost.toFixed(2)} €</td>
           </tr>
-          <tr>
-            <td colspan="2" style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Zvolený spôsob platby</td>
-            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">Poplatok za platbu (${this.order.paymentOption}):</td>
-            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${this.order.paymentCost.toFixed(2)} €</td>
+
+          <tr style="border-bottom: 1px solid #000; background-color: #f8f9fa;">
+            <td colspan="2" style="padding: 8px; text-align: left;">Zvolený spôsob platby</td>
+            <td style="padding: 8px; text-align: center;">Poplatok za platbu (${this.order.paymentOption}):</td>
+            <td style="padding: 8px; text-align: center;">${this.order.paymentCost.toFixed(2)} €</td>
           </tr>
+
           <tr>
             <td colspan="2" style="padding: 8px; text-align: left;">Celková cena objednávky</td>
             <td style="padding: 8px; text-align: center; font-weight: bold;">CELKOM:</td>
@@ -241,12 +348,15 @@ export class OrderDetailsComponent implements OnInit{
       }
     })
   }
+
   calculateTotalAmount(): number {
     return this.selectedProducts.reduce((sum, product) => sum + product.productAmount, 0);
   }
+
   calculateTotalWeight(): number {
     return this.selectedProducts.reduce((sum, product) => sum + product.productWeight * product.productAmount, 0);
   }
+  
   formatDate(dateString: string): string {
     return dateString ? dateString.split('-').reverse().join('.') : '';
   }

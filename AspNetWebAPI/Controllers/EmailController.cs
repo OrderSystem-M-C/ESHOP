@@ -149,9 +149,9 @@ namespace AspNetCoreAPI.Controllers
                 <thead>
                     <tr style='background-color: #e4e4e4ff;'>
                         <th style='background-color: #e4e4e4ff;'>Názov produktu</th>
-                        <th style='background-color: #e4e4e4ff;'>Množstvo</th>
-                        <th style='background-color: #e4e4e4ff;'>Cena/ks</th>
-                        <th style='background-color: #e4e4e4ff;'>Celkovo</th>
+                        <th style='background-color: #e4e4e4ff; text-align: center;'>Cena/ks</th>
+                        <th style='background-color: #e4e4e4ff; text-align: center;'>Množstvo</th>
+                        <th style='background-color: #e4e4e4ff; text-align: center;'>Celkovo</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -169,9 +169,9 @@ namespace AspNetCoreAPI.Controllers
                     sb.Append($@"
                     <tr>
                         <td style='border-bottom:1px solid #e0e0e0;'>{System.Net.WebUtility.HtmlEncode(product.ProductNameSnapshot)}</td>
-                        <td style='border-bottom:1px solid #e0e0e0;'>{product.Quantity} ks</td>
-                        <td style='border-bottom:1px solid #e0e0e0;'>{product.ProductPriceSnapshot} €</td>
-                        <td style='border-bottom:1px solid #e0e0e0;'>{total} €</td>
+                        <td style='border-bottom:1px solid #e0e0e0; text-align: center;'>{product.ProductPriceSnapshot} €</td>
+                        <td style='border-bottom:1px solid #e0e0e0; text-align: center;'>{product.Quantity} ks</td>
+                        <td style='border-bottom:1px solid #e0e0e0; text-align: center;'>{total} €</td>
                     </tr>");
                 }
             }
@@ -215,7 +215,7 @@ namespace AspNetCoreAPI.Controllers
 
             <h3>Fakturačné údaje</h3>
             <table cellpadding='5' cellspacing='0' style='border-style: solid; border-color: #e0e0e0; border-width: 1px 1px 1px 1px; width:100%'>
-                <tr><th style='background-color:#e4e4e4ff;'>Meno a priezvisko</th><td style='border-bottom:1px solid #e0e0e0;'>{order.CustomerName}</td></tr>");
+                <tr><th style='background-color:#e4e4e4ff;'>Meno a priezvisko</th><td style='border-bottom:1px solid #e0e0e0;'>{(string.IsNullOrWhiteSpace(order.InvoiceName) ? "Nezadané" : order.InvoiceName)}</td></tr>");
 
                         if (!string.IsNullOrWhiteSpace(order.InvoiceCompany))
                         {
@@ -234,8 +234,8 @@ namespace AspNetCoreAPI.Controllers
                         }
 
                         sb.Append(@$"
-                <tr><th style='background-color:#e4e4e4ff;'>Email</th><td style='border-bottom:1px solid #e0e0e0;'>{order.InvoiceEmail}</td></tr>
-                <tr><th style='background-color:#e4e4e4ff;'>Telefón</th><td>{order.InvoicePhoneNumber}</td></tr>
+                <tr><th style='background-color:#e4e4e4ff;'>Email</th><td style='border-bottom:1px solid #e0e0e0;'>{(string.IsNullOrWhiteSpace(order.InvoiceEmail) ? "Nezadané" : order.InvoiceEmail)}</td></tr>
+                <tr><th style='background-color:#e4e4e4ff;'>Telefón</th><td>{(string.IsNullOrWhiteSpace(order.InvoicePhoneNumber) ? "Nezadané" : order.InvoicePhoneNumber)}</td></tr>
             </table>");
 
             return sb.ToString();

@@ -4,7 +4,7 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
-import { ProductService, ProductUpdateDTO } from '../services/product.service';
+import { ProductDTO, ProductService, ProductUpdateDTO } from '../services/product.service';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 
@@ -41,8 +41,10 @@ export class ProductsPageComponent implements OnInit {
 
   editedProducts: { [productId: number]: { stockAmount?: number; productCode?: number }} = {};
   editingProductId?: number;
+
   isEditingProducts: boolean = false;
   isEditMode: boolean = false;
+  
   hasShownEditingSnackbar = false;
 
   constructor(private datePipe: DatePipe, private dialog: MatDialog, private snackBar: MatSnackBar, private productService: ProductService){}
@@ -54,7 +56,7 @@ export class ProductsPageComponent implements OnInit {
     productWeight: new FormControl('', [Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
     stockAmount: new FormControl('', [Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
     productCode: new FormControl('', [Validators.pattern(/^\d+$/), Validators.min(0)]),
-  })
+  });
 
   updatePagedProducts(): void {
     const startIndex = this.pageIndex * this.pageSize;
@@ -410,7 +412,7 @@ export class ProductsPageComponent implements OnInit {
         }
       }
     }, (error) => {
-      console.error("An error have occurred while trying to remove product.");
+      console.error("An error have occurred while trying to remove product.", error);
     })
   }
 
@@ -438,15 +440,4 @@ export class ProductsPageComponent implements OnInit {
       console.error("An error have occurred while trying to get products data", error);
     })
   }
-}
-export interface ProductDTO {
-  productId?: number;
-  productName: string,
-  productDescription?: string,
-  productPrice: number,
-  productWeight?: number,
-  productSelected?: boolean;
-  productAmount?: number;
-  stockAmount?: number;
-  productCode?: number;
 }

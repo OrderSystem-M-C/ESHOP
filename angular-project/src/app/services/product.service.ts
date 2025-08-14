@@ -1,6 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { ProductDTO } from '../products-page/products-page.component';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -24,10 +23,25 @@ export class ProductService {
     const url = `${this.baseUrl}/product/remove-product/${productId}`;
     return this.http.delete(url);
   }
-  updateProduct(updates: ProductUpdateDTO[]){
+  updateProduct(updates: ProductUpdateDTO[]) {
     const url = `${this.baseUrl}/product/update-product`;
     return this.http.put(url, updates);
   }
+  updateProductPrice(orderId: number, updates: ProductUpdateDTO[]): Observable<any> {
+    const url = `${this.baseUrl}/product/update-order-product-price/${orderId}`;
+    return this.http.put<any>(url, updates);
+  }
+}
+export interface ProductDTO {
+  productId?: number;
+  productName: string,
+  productDescription?: string,
+  productPrice: number,
+  productWeight?: number,
+  productSelected?: boolean;
+  productAmount?: number;
+  stockAmount?: number;
+  productCode?: number;
 }
 export interface ProductUpdateDTO {
   productId: number;

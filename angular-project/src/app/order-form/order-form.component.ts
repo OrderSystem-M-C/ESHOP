@@ -5,9 +5,8 @@ import * as html2pdf from 'html2pdf.js';
 import { OrderDTO, OrderService, OrderStatusDTO } from '../services/order.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { ProductDTO } from '../products-page/products-page.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { ProductService } from '../services/product.service';
+import { ProductDTO, ProductService } from '../services/product.service';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
@@ -1014,21 +1013,22 @@ export class OrderFormComponent implements OnInit {
             </tr>
           `).join('')}
 
-          <tr>
-            <td colspan="2" style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Zvolený spôsob dopravy</td>
-            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">Poštovné (${this.orderForm.get('deliveryOption').value}):</td>
-            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
+          <tr style="border-top: 1px solid #000; background-color: #f8f9fa;">
+            <td colspan="2" style="padding: 8px; text-align: left;">Zvolený spôsob dopravy</td>
+            <td style="padding: 8px; text-align: center;">Poštovné (${this.orderForm.get('deliveryOption').value}):</td>
+            <td style="padding: 8px; text-align: center;">
               ${(this.orderForm.get('deliveryCost')?.value || 0).toFixed(2)} €
             </td>
           </tr>
 
-          <tr>
-            <td colspan="2" style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Zvolený spôsob platby</td>
-            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">Poplatok za platbu (${this.orderForm.get('paymentOption').value}):</td>
-            <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
+          <tr style="border-bottom: 1px solid #000; background-color: #f8f9fa;">
+            <td colspan="2" style="padding: 8px; text-align: left;">Zvolený spôsob platby</td>
+            <td style="padding: 8px; text-align: center;">Poplatok za platbu (${this.orderForm.get('paymentOption').value}):</td>
+            <td style="padding: 8px; text-align: center;">
               ${(this.orderForm.get('paymentCost')?.value || 0).toFixed(2)} €
             </td>
           </tr>
+
 
           <tr>
             <td colspan="2" style="padding: 8px; text-align: left;">Celková cena objednávky</td>

@@ -93,7 +93,7 @@ h1 {
 .select-orders-to-remove-button button img, .generate-xml-file-from-orders button img {
   filter: brightness(0%);
 }
-.dropdown-content{
+.dropdown-content {
   background-color: #f2f2f2;
   padding: 10px;
   position: absolute;
@@ -114,7 +114,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 .dropdown-content h3 img {
   margin-bottom: 3px;
@@ -124,6 +124,9 @@ h1 {
 .checkbox-item {
   padding: 4px 0;
   border-radius: 5px;
+}
+.checkbox-item:not(.checkbox-item:last-child), .status-item:not(.status-item:last-child) {
+  margin-bottom: 5px;
 }
 .filter-date-item{
   padding: 8px;
@@ -151,6 +154,9 @@ h1 {
   flex-direction: row;
   gap: 5px;
   cursor: pointer;
+  margin-left: 5px;
+}
+.checkbox-label input {
   margin-left: 5px;
 }
 .status-item-link {

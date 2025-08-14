@@ -138,6 +138,50 @@ namespace AspNetCoreAPI.Controllers
                 return StatusCode(500, new { error = "An internal server error occurred.", details = ex.Message });
             }
         }
+        [HttpPut("update-order-product-price/{orderId}")]
+        public async Task<IActionResult> UpdateOrderProductPriceAsync([FromRoute] int orderId, [FromBody] List<ProductUpdateDTO> updates)
+        {
+            if (updates == null || !updates.Any())
+                return BadRequest("No updates provided.");
+
+            var productIds = updates.Select(u => u.ProductId).ToList();
+
+            var orderProducts = await _context.OrderProducts
+                .Where(op => op.OrderId == orderId && productIds.Contains(op.ProductId))
+                .ToListAsync();
+
+            if (!orderProducts.Any())
+                return NotFound("No matching order products found for this order.");
+
+            foreach (var update in updates)
+            {
+                var orderProduct = orderProducts.FirstOrDefault(op => op.ProductId == update.ProductId);
+                if (orderProduct != null)
+                {
+                    orderProduct.ProductPriceSnapshot = update.ProductPrice ?? orderProduct.ProductPriceSnapshot;
+                }
+            }
+
+            var order = await _context.Orders
+                .Include(o => o.OrderProducts)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+                return NotFound("Order not found.");
+
+            var productsTotal = order.OrderProducts.Sum(op => op.ProductPriceSnapshot * op.Quantity);
+
+            var totalBeforeDiscount = productsTotal + order.DeliveryCost + order.PaymentCost;
+
+            var discountPercent = order.DiscountAmount;
+            order.TotalPrice = totalBeforeDiscount * (1 - discountPercent / 100m);
+
+            if (order.TotalPrice < 0) order.TotalPrice = 0;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { totalPrice = order.TotalPrice });
+        }
         [HttpPost("add-products")]
         public async Task<IActionResult> AddProductsToOrder([FromBody] OrderProductsDTO orderProductsDTO)
         {

@@ -1,7 +1,7 @@
-import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ProductDTO } from '../products-page/products-page.component';
+import { ProductDTO } from './product.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,31 +20,6 @@ export class OrderService {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.get<OrderDTO[]>(url, {headers});
   }
-  // getSortedOrders(
-  //   pageIndex: number,
-  //   pageSize: number,
-  //   searchText: string,
-  //   searchOption: string,
-  //   selectedStatuses: string[],
-  //   dateSortOrder: string
-  // ): Observable<SortedOrdersDTO> {
-  //   const url = `${this.baseUrl}/order/get-sorted-orders`;
-  //   let params = new HttpParams()
-  //   .set('pageIndex', pageIndex.toString())
-  //   .set('pageSize', pageSize.toString());
-  //   if(searchText) {
-  //     params = params.set('searchText', searchText);
-  //     params = params.set('searchOption', searchOption);
-  //   }
-  //   if(selectedStatuses.length > 0) {
-  //     params = params.set('selectedStatuses', selectedStatuses.join(','));
-  //   }
-  //   if(dateSortOrder){
-  //     params = params.set('dateSortOrder', dateSortOrder);
-  //   }
-  //   const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-  //   return this.http.get<SortedOrdersDTO>(url, { headers, params });
-  // }
   getOrderDetails(orderId: number){
     const url = `${this.baseUrl}/order/get-order-details/${orderId}`;
     return this.http.get<OrderDTO>(url);
@@ -170,7 +145,3 @@ export interface OrderStatusDTO {
   sortOrder?: number;
   statusColor: string;
 }
-// export interface SortedOrdersDTO {
-//   orders: OrderDTO[];
-//   totalCount: number;
-// }
