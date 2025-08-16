@@ -76,12 +76,10 @@ export class OrderService {
     };
     return this.http.delete(url, { body: body });
   }
-  getOrdersXmlFile(orderIds: number[]){
+  getOrdersXmlFile(orderIds: number[]): Observable<ExportXmlResponseDTO> {
     const url = `${this.baseUrl}/order/export-orders-to-xml`;
-    let body = {
-      OrderIds: orderIds
-    }
-    return this.http.post(url, body, { responseType: 'blob' });
+    const body = { OrderIds: orderIds };
+    return this.http.post<ExportXmlResponseDTO>(url, body);
   }
   getOrderStatuses(): Observable<OrderStatusDTO[]>{
     const url = `${this.baseUrl}/order/get-order-statuses`;
@@ -138,6 +136,11 @@ export interface OrderDTO {
   invoicePhoneNumber: string;
   orderSelected?: boolean;
   packageCode?: string;
+}
+export interface ExportXmlResponseDTO {
+  fileContentBase64: string;
+  fileName: string;
+  generatedCodes: { [key: number]: string };
 }
 export interface OrderStatusDTO {
   statusId?: number;

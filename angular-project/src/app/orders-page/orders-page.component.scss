@@ -136,12 +136,19 @@ h1 {
   background-color: #fbfbfb;
   cursor: pointer;
 }
-.checkbox-item input[type="checkbox"] {
-  cursor: pointer;
-  border: 2px solid #ccc;
+.checkbox-item input[type="checkbox"]{
   height: 20px;
   width: 20px;
-  margin-bottom: 5px;
+  accent-color: #084298;
+  cursor: pointer;
+  margin: 5px;
+}
+.checkbox-item input[type="checkbox"]:checked {
+  background-color: #084298;
+}
+.checkbox-item input[type="checkbox"]:focus {
+  border-color: #084298;
+  box-shadow: 0 0 0 0.25rem rgba(8, 66, 152, 0.25);
 }
 .status-item {
   padding: 8px 0;

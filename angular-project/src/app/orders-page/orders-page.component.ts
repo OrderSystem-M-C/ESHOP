@@ -11,8 +11,9 @@ import { AuthenticationService } from '../authentication/authentication.service'
 import { EmailService } from '../services/email.service';
 import { catchError, EMPTY, finalize, forkJoin, map, of, switchMap, take, tap } from 'rxjs';
 import { OrderDetailsComponent } from '../order-details/order-details.component';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { EphService, PackageCodeResponseDTO } from '../services/eph.service';
+import { pack } from 'html2canvas/dist/types/css/types/color';
 
 @Component({
   selector: 'app-orders-page',
@@ -235,54 +236,46 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
     this.isLoading = true;
     const loadingRef = this.snackBar.open("Sťahuje sa XML súbor...", "", { duration: undefined });
 
-    const updateObservables = this.selectedOrders.map(order => 
-      this.ephService.generatePackageCode().pipe(
-        switchMap((response: PackageCodeResponseDTO) => {
-          return this.ephService.updatePackageCode(order.orderId, response.packageCode).pipe(
-            map(() => ({ orderId: order.orderId, packageCode: response.packageCode })),
-            take(1)
-          );
-        }),
-        catchError(err => {
-          console.error("An error have occurred while trying to update orders: ", err);
-          return of(null);
-        }),
-        take(1)  
-      )
-    )
-    
-    forkJoin(updateObservables).pipe(
-      tap(results => {
-        this.filteredOrders = this.filteredOrders.map(order => {
-            const updatedResult = results.find(result => result && result.orderId === order.orderId);
-            if (updatedResult) {
-                return { ...order, packageCode: updatedResult.packageCode };
-            }
-            return order;
+    this.orderService.getOrdersXmlFile(this.selectedOrders.map(o => o.orderId)).pipe(
+      tap((response) => {
+        const byteCharacters = atob(response.fileContentBase64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for(let i = 0; i < byteCharacters.length; i++){
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/xml'});
+
+        if(blob){
+          const a = document.createElement('a');
+          const objectUrl = URL.createObjectURL(blob);
+          a.href = objectUrl;
+          a.download = response.fileName;
+          a.click();
+          URL.revokeObjectURL(objectUrl);
+        }
+
+        if(response.generatedCodes){
+          this.filteredOrders = this.filteredOrders.map(order => {
+            const newPackageCode = response.generatedCodes[order.orderId];
+            return newPackageCode ? { ...order, packageCode: newPackageCode } : order;
+          });
+          this.updatePagedOrders();
+        }
+
+        this.snackBar.open("XML súbor bol úspešne stiahnutý!", "", {
+          duration: 2000
         });
-        this.updatePagedOrders();
+        this.clearSelection();
       }),
-      switchMap(() => this.orderService.getOrdersXmlFile(this.selectedOrders.map(o => o.orderId))),
       finalize(() => {
         this.isLoading = false;
         loadingRef.dismiss();
       })
     ).subscribe({
-      next: (blob) => {
-        const a = document.createElement('a');
-        const objectUrl = URL.createObjectURL(blob);
-        a.href = objectUrl;
-        a.download = `Zasielky_${new Date().toLocaleDateString("sk").replace(/\s/g, "").replace(/\./g, "")}.xml`;
-        a.click();
-        URL.revokeObjectURL(objectUrl);
-
-        this.snackBar.open("XML súbor bol úspešne stiahnutý!", "", { duration: 1500 });
-        this.clearSelection();
-      },
       error: (err) => {
-        loadingRef.dismiss();
-        console.error("Chyba pri spracovaní objednávok alebo sťahovaní XML.", err);
-        this.snackBar.open("Chyba pri spracovaní objednávok alebo sťahovaní XML.", "", { duration: 1500 });
+        console.error("Chyba pri generovaní alebo sťahovaní XML.", err);
+        this.snackBar.open("Chyba pri generovaní alebo sťahovaní XML.", "", { duration: 1500 });
       }
     })
   }

@@ -128,7 +128,7 @@
         </div>
         <div class="select-all-orders">
           <div class="select-all-orders-button">
-            <button class="btn btn-outline-success" (click)="selectAllOrders()">Zvoliť všetky</button>
+            <button class="btn btn-outline-success" (click)="selectAllOrders()" *ngIf="ordersData.length > 0">Zvoliť všetky</button>
           </div>
         </div>
       </div>

@@ -1,10 +1,14 @@
 ﻿using AspNetCoreAPI.Data;
 using AspNetCoreAPI.DTOs;
+using AspNetCoreAPI.Exceptions;
 using AspNetCoreAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Text;
+using System.Transactions;
 using System.Xml.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AspNetCoreAPI.Controllers
 {
@@ -394,114 +398,125 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpPost("export-orders-to-xml")]
-        public async Task<IActionResult> ExportOrdersToXml([FromBody] OrderXmlDTO ordersXML_DTO)
+        public async Task<IActionResult> ExportOrdersToXml([FromBody] OrderXmlDTO ordersXmlDTO)
         {
-            var orders = _context.Orders
-                .Where(o => ordersXML_DTO.OrderIds.Contains(o.OrderId))
-                .Select(o => new OrderDTO
-                {
-                    Id = o.Id,
-                    OrderId = o.OrderId,
-                    CustomerName = o.CustomerName,
-                    Company = o.Company,
-                    ICO = o.ICO,
-                    DIC = o.DIC,
-                    ICDPH = o.ICDPH,
-                    Address = o.Address,
-                    City = o.City,
-                    PostalCode = o.PostalCode,
-                    Email = o.Email,
-                    PhoneNumber = o.PhoneNumber,
-                    Note = o.Note,
-                    DeliveryOption = o.DeliveryOption,
-                    PaymentOption = o.PaymentOption,
-                    DiscountAmount = o.DiscountAmount,
-                    OrderStatus = o.OrderStatus,
-                    OrderDate = o.OrderDate,
-                    TotalPrice = o.TotalPrice,
-                    InvoiceNumber = o.InvoiceNumber,
-                    VariableSymbol = o.VariableSymbol,
-                    InvoiceIssueDate = o.InvoiceIssueDate,
-                    InvoiceName = o.InvoiceName,
-                    InvoiceCompany = o.InvoiceCompany,
-                    InvoiceICO = o.InvoiceICO,
-                    InvoiceDIC = o.InvoiceDIC,
-                    InvoiceEmail = o.InvoiceEmail,
-                    InvoicePhoneNumber = o.InvoicePhoneNumber,
-                    PaymentCost = o.PaymentCost,
-                    DeliveryCost = o.DeliveryCost,
-                    PackageCode = o.PackageCode ?? ""
-                }).ToList();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            if (orders == null || !orders.Any())
+            try
             {
-                return NotFound("Orders selected for generation of the XML file were not found.");
-            }
+                var settings = await _context.EphSettings.FirstOrDefaultAsync();
 
-            XNamespace tns = "http://ekp.posta.sk/LOGIS/Formulare/Podaj_v03";
-            var zasielkyElements = new List<XElement>();
-            int pocetZasielok = 0;
-
-            foreach (var order in orders)
-            {
-                try
+                if (settings == null)
                 {
-                    var zasielkaXml = await ProcessOrderAsync(order, tns);
-                    if (zasielkaXml != null)
+                    return NotFound("EPH settings were not found. Please create them first.");
+                }
+
+                if (settings.EphEndingNumber < settings.EphStartingNumber)
+                {
+                    return BadRequest("Ending number must be greater than or equal to starting number.");
+                }
+
+                var orders = await _context.Orders
+                    .Where(o => ordersXmlDTO.OrderIds.Contains(o.OrderId))
+                    .ToListAsync();
+                ;
+                if (orders == null || !orders.Any())
+                {
+                    return NotFound("Orders selected for generation of the XML file were not found.");
+                }
+
+                XNamespace tns = "http://ekp.posta.sk/LOGIS/Formulare/Podaj_v03";
+                var zasielkyElements = new List<XElement>();
+                int pocetZasielok = 0;
+
+                var generatedCodes = new Dictionary<int, string>();
+
+                foreach (var order in orders)
+                {
+                    try
                     {
-                        zasielkyElements.Add(zasielkaXml);
-                        pocetZasielok++;
+                        if (string.IsNullOrEmpty(order.PackageCode))
+                        {
+                            var newCode = await GeneratePackageCodeInternalAsync();
+                            order.PackageCode = newCode;
+                            generatedCodes.Add(order.OrderId, order.PackageCode);
+                        }
+
+                        var zasielkaXml = await ProcessOrderAsync(order, tns);
+
+                        if (zasielkaXml != null)
+                        {
+                            zasielkyElements.Add(zasielkaXml);
+                            pocetZasielok++;
+                        }
+
+                        _context.Orders.Update(order);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"Error processing order {order.OrderId}: {ex.Message}");
+                        return StatusCode(500, new { error = $"An error occurred while processing order {order.OrderId} - {ex.Message}" });
                     }
                 }
-                catch (Exception ex)
+
+                await transaction.CommitAsync();
+
+                if (!zasielkyElements.Any())
                 {
-                    Console.Error.WriteLine($"Error processing order {order.OrderId}: {ex.Message}");
-                    return StatusCode(500, new { error = $"An error occurred while processing order {order.OrderId} - {ex.Message}" });
+                    return NotFound("No valid orders found for XML export.");
                 }
-            }
 
-            if (!zasielkyElements.Any())
-            {
-                return NotFound("No valid orders found for XML export.");
-            }
+                string infoEphDruhZasielky = "8";
 
-            string infoEphDruhZasielky = "8";
-
-            var ephXml = new XElement(tns + "EPH",
-                new XAttribute("verzia", "3.0"), 
-                new XElement(tns + "InfoEPH",
-                    new XElement(tns + "Mena", "EUR"),
-                    new XElement(tns + "TypEPH", "1"),
-                    new XElement(tns + "EPHID", Guid.NewGuid().ToString().Replace("-", "").Substring(0, 20)),
-                    new XElement(tns + "Datum", DateTime.Now.ToString("yyyyMMdd")),
-                    new XElement(tns + "Uhrada",
-                        new XElement(tns + "SposobUhrady", "8")
+                var ephXml = new XElement(tns + "EPH",
+                    new XAttribute("verzia", "3.0"),
+                    new XElement(tns + "InfoEPH",
+                        new XElement(tns + "Mena", "EUR"),
+                        new XElement(tns + "TypEPH", "1"),
+                        new XElement(tns + "EPHID", Guid.NewGuid().ToString().Replace("-", "").Substring(0, 20)),
+                        new XElement(tns + "Datum", DateTime.Now.ToString("yyyyMMdd")),
+                        new XElement(tns + "Uhrada",
+                            new XElement(tns + "SposobUhrady", "8")
+                        ),
+                        new XElement(tns + "DruhZasielky", infoEphDruhZasielky),
+                        new XElement(tns + "Odosielatel",
+                            new XElement(tns + "OdosielatelID", "WEB_EPH"),
+                            new XElement(tns + "Meno", ""),
+                            new XElement(tns + "Organizacia", "Anna Bylinková Cibulková"),
+                            new XElement(tns + "Ulica", "Cesta do Rudiny 1007"),
+                            new XElement(tns + "Mesto", "Kysucké Nové Mesto"),
+                            new XElement(tns + "PSC", "02401"),
+                            new XElement(tns + "Krajina", "SK"),
+                            new XElement(tns + "Telefon", ""),
+                            new XElement(tns + "Email", "ephdobierky@gmail.com"),
+                            new XElement(tns + "CisloUctu", "SK84 6500 0000 0036 5285 9471")
+                        )
                     ),
-                    new XElement(tns + "DruhZasielky", infoEphDruhZasielky),
-                    new XElement(tns + "Odosielatel",
-                        new XElement(tns + "OdosielatelID", "WEB_EPH"),
-                        new XElement(tns + "Meno", ""), 
-                        new XElement(tns + "Organizacia", "Anna Bylinková Cibulková"),
-                        new XElement(tns + "Ulica", "Cesta do Rudiny 1007"),
-                        new XElement(tns + "Mesto", "Kysucké Nové Mesto"),
-                        new XElement(tns + "PSC", "02401"),
-                        new XElement(tns + "Krajina", "SK"),
-                        new XElement(tns + "Telefon", ""),
-                        new XElement(tns + "Email", "ephdobierky@gmail.com"),
-                        new XElement(tns + "CisloUctu", "SK84 6500 0000 0036 5285 9471")
-                    )
-                ),
-                new XElement(tns + "Zasielky", zasielkyElements)
-            );
+                    new XElement(tns + "Zasielky", zasielkyElements)
+                );
 
-            var requestBody = ephXml.ToString();
-            var fileBytes = Encoding.UTF8.GetBytes(requestBody);
-            var contentType = "application/xml";
-            string fileName = $"Zasielky_{DateTime.Now:ddMMyyyy_HHmmss}.xml";
+                CultureInfo slovakCulture = new CultureInfo("sk-SK");
+                string slovakDate = DateTime.Now.ToString("dd.MM.yyyy", slovakCulture);
 
-            return File(fileBytes, contentType, fileName);
+                var requestBody = ephXml.ToString();
+                var fileBytes = Encoding.UTF8.GetBytes(requestBody);
+                string fileName = $"Zasielky_{slovakDate}.xml";
+
+                return Ok(new ExportXmlResponseDTO
+                {
+                    FileContentBase64 = Convert.ToBase64String(fileBytes),
+                    FileName = fileName,
+                    GeneratedCodes = generatedCodes
+                });
+            }
+            catch(Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, new { message = "An error occurred during XML export.", error = ex.Message });
+            }
         }
-        private async Task<XElement> ProcessOrderAsync(OrderDTO order, XNamespace tns)
+        private async Task<XElement> ProcessOrderAsync(OrderModel order, XNamespace tns)
         {
             string druhZasielky = (order.DeliveryOption == "Kuriér") ? "8" : "1";
             decimal totalCodePrice = order.TotalPrice + order.PaymentCost;
@@ -614,80 +629,90 @@ namespace AspNetCoreAPI.Controllers
         [HttpGet("generate-package-code")]
         public async Task<IActionResult> GeneratePackageCodeAsync()
         {
-            return await GeneratePackageCodeInternalAsync();
-        }
-        private async Task<IActionResult> GeneratePackageCodeInternalAsync()
-        {
             try
             {
-                var settings = await _context.EphSettings.FirstOrDefaultAsync();
-                if (settings == null)
-                {
-                    return NotFound("EPH settings were not found. Please create them first.");
-                };
-
-                if (settings.EphEndingNumber < settings.EphStartingNumber)
-                {
-                    return BadRequest("Ending number must be greater than or equal to starting number.");
-                }
-
-                var packageCodes = await _context.Orders
-                    .Where(o => !string.IsNullOrEmpty(o.PackageCode) &&
-                                o.PackageCode.StartsWith(settings.EphPrefix) &&
-                                o.PackageCode.EndsWith(settings.EphSuffix))
-                    .Select(o => o.PackageCode)
-                    .ToListAsync();
-
-                var usedNumbers = packageCodes
-                    .Select(code => code.Substring(settings.EphPrefix.Length, 8))
-                    .Where(numStr => int.TryParse(numStr, out _)) // out _ - hovorime kompilatoru ze nechceme vysledok, netreba vytvarat premennu typu int len nas zaujima ci je to true alebo false
-                    .Select(numStr => int.Parse(numStr))
-                    .ToList();
-
-                int nextNumber = settings.EphStartingNumber;
-
-                if (usedNumbers.Any())
-                {
-                    var maxUsed = usedNumbers.Where(n => n >= settings.EphStartingNumber && n <= settings.EphEndingNumber)
-                        .DefaultIfEmpty(settings.EphStartingNumber - 1) // ak ziadne cislo nie je v rozsahu
-                        .Max();
-
-                    if (maxUsed >= settings.EphEndingNumber)
-                    {
-                        return BadRequest("No available package codes left in the specified range.");
-                    }
-
-                    nextNumber = maxUsed + 1;
-                }
-                int[] nextNumberDigits = nextNumber.ToString().Select(d => int.Parse(d.ToString())).ToArray();
-                int[] controlWeights = { 8, 6, 4, 2, 3, 5, 9, 7 };
-
-                for(int i = 0; i < controlWeights.Length; i++)
-                {
-                    nextNumberDigits[i] *= controlWeights[i];   
-                };
-
-                int nextNumberDigitsSum = nextNumberDigits.Sum();
-                int controlDiv = nextNumberDigitsSum % 11;
-
-                int checkDigit = 11 - controlDiv;
-
-                if(checkDigit == 10)
-                {
-                    checkDigit = 0;
-                }else if(checkDigit == 11)
-                {
-                    checkDigit = 5;
-                }
-
-                var next = $"{settings.EphPrefix}{nextNumber:D8}{checkDigit}{settings.EphSuffix}";
-
-                return Ok(new { packageCode = next });
+                var code = await GeneratePackageCodeInternalAsync();
+                return Ok(new { packageCode = code });
             }
-            catch (Exception ex)
+            catch(NoAvailablePackageCodesException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch(Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while generating package code.", error = ex.Message });
             }
+        }
+        private async Task<string> GeneratePackageCodeInternalAsync()
+        {
+            var settings = await _context.EphSettings.FirstOrDefaultAsync();
+
+            if (settings == null)
+            {
+                throw new Exception("EPH settings were not found. Please create them first.");
+            }
+
+            if (settings.EphEndingNumber < settings.EphStartingNumber)
+            {
+                throw new Exception("Ending number must be greater than or equal to starting number."); 
+                }
+
+            var packageCodes = await _context.Orders
+                .FromSqlRaw(@"
+                    SELECT * 
+                    FROM Orders WITH (UPDLOCK, HOLDLOCK)
+                    WHERE PackageCode IS NOT NULL
+                      AND PackageCode LIKE {0} + '%' + {1}",
+                    settings.EphPrefix, settings.EphSuffix)
+                .Select(o => o.PackageCode)
+                .ToListAsync();
+
+            var usedNumbers = packageCodes
+                .Select(code => code.Substring(settings.EphPrefix.Length, 8))
+                .Where(numStr => int.TryParse(numStr, out _)) // out _ - hovorime kompilatoru ze nechceme vysledok, netreba vytvarat premennu typu int len nas zaujima ci je to true alebo false
+                .Select(numStr => int.Parse(numStr))
+                .ToList();
+
+            int nextNumber = settings.EphStartingNumber;
+
+            if (usedNumbers.Any())
+            {
+                var maxUsed = usedNumbers.Where(n => n >= settings.EphStartingNumber && n <= settings.EphEndingNumber)
+                    .DefaultIfEmpty(settings.EphStartingNumber - 1) // ak ziadne cislo nie je v rozsahu
+                    .Max();
+
+                if (maxUsed >= settings.EphEndingNumber)
+                {
+                    throw new NoAvailablePackageCodesException("No available package codes left in the specified range.");
+                }
+
+                nextNumber = maxUsed + 1;
+            }
+            int[] nextNumberDigits = nextNumber.ToString().Select(d => int.Parse(d.ToString())).ToArray();
+            int[] controlWeights = { 8, 6, 4, 2, 3, 5, 9, 7 };
+
+            for (int i = 0; i < controlWeights.Length; i++)
+            {
+                nextNumberDigits[i] *= controlWeights[i];
+            };
+
+            int nextNumberDigitsSum = nextNumberDigits.Sum();
+            int controlDiv = nextNumberDigitsSum % 11;
+
+            int checkDigit = 11 - controlDiv;
+
+            if (checkDigit == 10)
+            {
+                checkDigit = 0;
+            }
+            else if (checkDigit == 11)
+            {
+                checkDigit = 5;
+            }
+
+            var next = $"{settings.EphPrefix}{nextNumber:D8}{checkDigit}{settings.EphSuffix}";
+
+            return next;
         }
         [HttpGet("validate-package-code/{packageCode}")]
         public async Task<IActionResult> ValidatePackageCode([FromRoute] string packageCode)
