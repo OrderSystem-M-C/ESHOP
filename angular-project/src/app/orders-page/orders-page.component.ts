@@ -9,11 +9,10 @@ import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { EmailService } from '../services/email.service';
-import { catchError, EMPTY, finalize, forkJoin, map, of, switchMap, take, tap } from 'rxjs';
+import { catchError, EMPTY, finalize, forkJoin, of, switchMap, tap } from 'rxjs';
 import { OrderDetailsComponent } from '../order-details/order-details.component';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { EphService, PackageCodeResponseDTO } from '../services/eph.service';
-import { pack } from 'html2canvas/dist/types/css/types/color';
+import { EphService } from '../services/eph.service';
 
 @Component({
   selector: 'app-orders-page',
@@ -273,9 +272,14 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
         loadingRef.dismiss();
       })
     ).subscribe({
-      error: (err) => {
-        console.error("Chyba pri generovaní alebo sťahovaní XML.", err);
-        this.snackBar.open("Chyba pri generovaní alebo sťahovaní XML.", "", { duration: 1500 });
+      error: (err: HttpErrorResponse) => {
+        const backendError = err.error; 
+
+        if (backendError?.error === "NO_CODES_LEFT") {
+          this.snackBar.open(backendError.message, "", { duration: 3000 });
+        } else {
+          this.snackBar.open("Chyba pri generovaní alebo sťahovaní XML.", "", { duration: 3000 });
+        }
       }
     })
   }

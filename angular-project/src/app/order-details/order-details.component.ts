@@ -23,6 +23,8 @@ export class OrderDetailsComponent implements OnInit{
   orderId: number | null = null
   currentDate: string = '';
 
+  readonly DEFAULT_EMAIL: string = 'nezadany@objednavky.local';
+
   dialogRef!: MatDialogRef<any>; //akoby pristupujeme k otvorenemu dialogovemu oknu aby sme mohli s nim komunikovať => získať samotný výsledok
 
   isLoading: boolean = true;
@@ -294,7 +296,9 @@ export class OrderDetailsComponent implements OnInit{
         </tr>
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.email}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
+            ${this.order.email === this.DEFAULT_EMAIL ? 'Nezadané' : this.order.email}
+          </td>
         </tr>
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>

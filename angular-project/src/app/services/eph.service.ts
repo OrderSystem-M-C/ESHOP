@@ -17,9 +17,9 @@ export class EphService {
     const url = `${this.baseUrl}/order/get-eph-settings`;
     return this.http.get<EphSettingsDTO>(url);
   }
-  generatePackageCode(): Observable<PackageCodeResponseDTO> {
+  generatePackageCode(): Observable<any> {
     const url = `${this.baseUrl}/order/generate-package-code`;
-    return this.http.get<PackageCodeResponseDTO>(url);
+    return this.http.get<any>(url);
   }
   validatePackageCode(packageCode: string): Observable<any> {
     const url = `${this.baseUrl}/order/validate-package-code/${packageCode}`;
@@ -29,23 +29,10 @@ export class EphService {
     const url = `${this.baseUrl}/order/count-available-package-codes`;
     return this.http.get<any>(url);
   }
-  updatePackageCode(orderId: number, packageCode: string): Observable<any> {
-    const url = `${this.baseUrl}/order/update-package-code/${orderId}`;
-    const body: UpdatePackageCodeDTO = { packageCode: packageCode };
-    return this.http.patch<any>(url, body, {
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
 }
 export interface EphSettingsDTO {
   ephPrefix: string;
   ephStartingNumber: number;
   ephEndingNumber: number;
   ephSuffix: string;
-}
-export interface PackageCodeResponseDTO {
-  packageCode: string;
-}
-export interface UpdatePackageCodeDTO {
-  packageCode: string;
 }

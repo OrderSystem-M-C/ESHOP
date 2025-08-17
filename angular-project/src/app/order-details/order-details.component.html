@@ -36,7 +36,12 @@
           </tr>
           <tr>
             <td><b>E-mailová adresa:</b></td>
-            <td>{{ order?.email }}</td>
+            <td [ngStyle]="{
+                  'color': order?.email === 'nezadany@objednavky.local' ? 'gray' : 'black',
+                  'font-style': order?.email === 'nezadany@objednavky.local' ? 'italic' : 'normal'
+                }">
+              {{ order?.email }}
+            </td>
           </tr>
           <tr>
             <td><b>Telefónne číslo:</b></td>
@@ -106,17 +111,17 @@
             </tbody>
             <tfoot>
               <tr style="border-top: 2px solid #000;">
-                <td colspan="4" style="border: none">Zvolený spôsob dopravy pre objednávku (vrátane poštovného)</td>
+                <td colspan="4" style="border: none">Zvolený spôsob dopravy pre objednávku (vrátane poštovného):</td>
                 <td style="border: none">{{order?.deliveryOption}} + cena poštovného:</td>
                 <td style="border: none">{{order?.deliveryCost.toFixed(2)}} €</td>
               </tr>
               <tr style="border-bottom: 2px solid #000;">
-                <td colspan="4" style="border: none">Zvolený spôsob platby pre objednávku (vrátane poplatku)</td>
+                <td colspan="4" style="border: none">Zvolený spôsob platby pre objednávku (vrátane poplatku):</td>
                 <td style="border: none">{{order?.paymentOption}} + poplatok za platbu:</td>
                 <td style="border: none">{{order?.paymentCost.toFixed(2)}} €</td>
               </tr>
               <tr class="total-row">
-                  <td colspan="3"><strong>CELKOVÝ POČET KUSOV, VÁHA A CENA OBJEDNÁVKY</strong></td>
+                  <td colspan="3"><strong>CELKOVÝ POČET KUSOV, VÁHA A CENA OBJEDNÁVKY:</strong></td>
                   <td><strong>{{calculateTotalAmount()}} ks</strong></td>
                   <td><strong>{{calculateTotalWeight().toFixed(2)}} kg</strong></td>
                   <td><strong>{{this.order.discountAmount ? (this.order.totalPrice.toFixed(2) + ' € (-' + this.order.discountAmount + '%)') : (this.order.totalPrice.toFixed(2) + ' €')}}</strong></td>

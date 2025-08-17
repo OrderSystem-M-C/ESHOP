@@ -34,7 +34,7 @@ export class OrderService {
     return this.http.put(url, order, {headers, responseType: 'json'}); //znamena ze Angular bude ocakavat textovu spravu a nie JSON takze sa spravne spracuje
   }
   addProductsToOrder(orderId: number, products: ProductDTO[]): Observable<HttpResponse<any>>{
-    const url = `${this.baseUrl}/product/add-products`;
+    const url = `${this.baseUrl}/product/add-products-to-order`;
     const body = {
       orderId, 
       products
@@ -46,7 +46,7 @@ export class OrderService {
     return this.http.get<ProductDTO[]>(url);
   }
   updateOrderProducts(orderId: number, products: ProductDTO[]){
-    const url = `${this.baseUrl}/product/update-products`;
+    const url = `${this.baseUrl}/product/update-order-products`;
     const body = {
       orderId, 
       products

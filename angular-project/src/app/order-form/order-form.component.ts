@@ -33,6 +33,8 @@ export class OrderFormComponent implements OnInit {
   orderId = Math.floor(100000 + Math.random() * 900000);
   existingOrderId: number | null = null;
 
+  readonly DEFAULT_EMAIL: string = 'nezadany@objednavky.local';
+
   invoiceCreated: boolean = false;
 
   isLoading: boolean = false;
@@ -72,6 +74,10 @@ export class OrderFormComponent implements OnInit {
 
   ephSettings: EphSettingsDTO;
 
+  editedProducts: { [productId: number]: { productPrice?: number }} = {};
+  isEditingProductPrices: boolean = false;
+  hasShownEditingSnackbar: boolean = false;
+
   constructor(private datePipe: DatePipe, private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar, private dialog: MatDialog, private productService: ProductService, private emailService: EmailService, private ephService: EphService){}
 
   updatePagedProducts(): void {
@@ -85,7 +91,6 @@ export class OrderFormComponent implements OnInit {
     this.pageIndex = pageEvent.pageIndex;
     this.updatePagedProducts();
   }
-
   
   orderForm = new FormGroup({
     customerName: new FormControl('', Validators.required),
@@ -341,6 +346,44 @@ export class OrderFormComponent implements OnInit {
       : '';
   }
 
+  onProductFieldChange(productId: number, newValue: any) {
+    this.isEditingProductPrices = true;
+    const value = Number(newValue);
+
+    if (!this.editedProducts[productId]) {
+      this.editedProducts[productId] = {};
+    }
+    this.editedProducts[productId]['productPrice'] = value;
+
+    const productToUpdate = this.selectedProducts.find(product => product.productId === productId);
+    if (productToUpdate) {
+      productToUpdate.productPrice = value;
+    }
+
+    this.recalculateTotalPrice();
+
+    if (!this.hasShownEditingSnackbar) {
+      this.snackBar.open('Vstúpili ste do editačného režimu!', '', { duration: 1000 });
+      this.hasShownEditingSnackbar = true;
+    }
+  }
+
+  cancelEditing() {
+    this.editedProducts = {};
+    this.isEditingProductPrices = this.hasShownEditingSnackbar = false;
+    this.snackBar.open('Úpravy boli zrušené!', '', { duration: 2000 });
+  }
+
+  isProductEdited(productId: number): boolean {
+    if (!this.editedProducts.hasOwnProperty(productId)) return false;
+    if (!this.editedProducts[productId].hasOwnProperty('productPrice')) return false;
+
+    const originalProduct = this.selectedProducts.find(p => p.productId === productId);
+    if (!originalProduct) return false;
+
+    return this.editedProducts[productId]['productPrice'] !== originalProduct['productPrice'];
+  }
+
   openDialog(selectProductsDialog: TemplateRef<any>, edit: boolean | null){
     this.dialogClosed = false;
     this.isLoading = true;
@@ -478,6 +521,28 @@ export class OrderFormComponent implements OnInit {
       }
     }
   }
+  onDeliveryOptionChange(): void {
+    const deliveryOption = this.orderForm.get('deliveryOption')?.value;
+    if (deliveryOption === 'Kuriér') {
+      const deliveryFeeStr = localStorage.getItem('deliveryFee');
+      const deliveryFee = deliveryFeeStr ? parseFloat(deliveryFeeStr) : 0;
+      this.orderForm.patchValue({ deliveryCost: deliveryFee });
+    } else {
+      this.orderForm.patchValue({ deliveryCost: 0 });
+    }
+    this.recalculateTotalPrice();
+  }
+  onPaymentOptionChange(): void {
+    const paymentOption = this.orderForm.get('paymentOption')?.value;
+    if (paymentOption === 'Hotovosť') {
+      const paymentFeeStr = localStorage.getItem('paymentFee');
+      const paymentFee = paymentFeeStr ? parseFloat(paymentFeeStr) : 0;
+      this.orderForm.patchValue({ paymentCost: paymentFee });
+    } else {
+      this.orderForm.patchValue({ paymentCost: 0 });
+    }
+    this.recalculateTotalPrice();
+  }
   recalculateTotalPrice(): void {
     let productsTotal = 0;
     this.selectedProducts.forEach(product => {
@@ -485,8 +550,19 @@ export class OrderFormComponent implements OnInit {
     });
     this.productsTotalPrice = productsTotal; 
 
-    this.deliveryCost = this.orderForm.get('deliveryCost')?.value || 0;
-    this.paymentCost = this.orderForm.get('paymentCost')?.value || 0;
+    let currentDeliveryCost = 0;
+    let currentPaymentCost = 0;
+
+    if (this.orderForm.get('deliveryOption')?.value === 'Kuriér') {
+      currentDeliveryCost = this.orderForm.get('deliveryCost')?.value || 0;
+    }
+    this.deliveryCost = currentDeliveryCost;
+
+    if (this.orderForm.get('paymentOption')?.value === 'Hotovosť') {
+      currentPaymentCost = this.orderForm.get('paymentCost')?.value || 0;
+    }
+    this.paymentCost = currentPaymentCost;
+
     const discountPercentage = this.orderForm.get('discountAmount')?.value || 0;
 
     let currentTotal = this.productsTotalPrice + this.deliveryCost + this.paymentCost;
@@ -500,7 +576,7 @@ export class OrderFormComponent implements OnInit {
     }
   }
 
-  async updateOrder(){
+  async updateOrder() {
     this.isLoading = true;
 
     const orderStatus = this.orderForm.get('orderStatus')?.value;
@@ -525,7 +601,14 @@ export class OrderFormComponent implements OnInit {
         return;
       }
     }
+
+    const emailControl = this.orderForm.get('email');
+    if (!emailControl?.value || emailControl.value.trim() === '') {
+      emailControl?.setValue(this.DEFAULT_EMAIL);
+    }
+
     const arrayChanged = this.checkChanges(this.selectedProducts, this.newSelectedProducts);
+
     if(this.orderForm.valid && this.invoiceForm.valid){
       if(this.orderForm.pristine && !arrayChanged){
         this.snackBar.open('Nebola vykonaná žiadna zmena v objednávke!', '', { duration: 1500 });
@@ -689,6 +772,11 @@ export class OrderFormComponent implements OnInit {
         this.isLoading = false;
         return;
       }
+    }
+
+    const emailControl = this.orderForm.get('email');
+    if (!emailControl?.value || emailControl.value.trim() === '') {
+      emailControl?.setValue(this.DEFAULT_EMAIL);
     }
 
     this.orderForm.get('packageCode')?.setErrors(null);
@@ -873,29 +961,31 @@ export class OrderFormComponent implements OnInit {
 
   generatePackageCode(){
     this.isLoading_packageCode = true;
-    this.ephService.generatePackageCode().subscribe({
+    this.ephService.generatePackageCode().pipe(
+      finalize(() => this.isLoading_packageCode = false)
+    ).subscribe({
       next: (response) => {
         this.orderForm.patchValue({
           packageCode: response.packageCode
         });
 
         this.snackBar.open("Podacie číslo bolo úspešne vygenerované!", "", { duration: 2000 });
-
-        this.isLoading_packageCode = false;
       },
       error: (err: HttpErrorResponse) => {
-        let errorMsg = "Nebolo možné vygenerovať podacie číslo: V zadanom rozsahu nie sú k dispozícii žiadne ďalšie podacie čísla!";
+        const backendError = err.error; 
 
-        this.snackBar.open(errorMsg, "", { duration: 2000 });
+        if (backendError?.error === "NO_CODES_LEFT") {
+          this.snackBar.open(backendError.message, "", { duration: 3000 });
+        } else {
+          this.snackBar.open("Nastala chyba pri generovaní podacieho čísla!", "", { duration: 3000 });
+        }
 
         this.orderForm.patchValue({
           packageCode: null
         });
 
         console.error("Package code generation error:", err);
-
-        this.isLoading_packageCode = false;
-        }
+      }
     });
   }
 
@@ -1059,7 +1149,9 @@ export class OrderFormComponent implements OnInit {
         </tr>
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.email}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
+            ${this.orderForm.value.email === this.DEFAULT_EMAIL ? 'Nezadané' : this.orderForm.value.email}
+          </td>
         </tr>
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
@@ -1127,16 +1219,5 @@ export class OrderFormComponent implements OnInit {
     }else{
       this.isEditMode = false;
     }
-
-    const deliveryFeeStr = localStorage.getItem('deliveryFee');
-    const paymentFeeStr = localStorage.getItem('paymentFee');
-
-    const deliveryFee = deliveryFeeStr ? parseFloat(deliveryFeeStr) : 0;
-    const paymentFee = paymentFeeStr ? parseFloat(paymentFeeStr) : 0;
-
-    this.orderForm.patchValue({
-      deliveryCost: deliveryFee, //Tu + (unárny plus) premení string z toFixed(2) späť na číslo s dvoma desatinnými miestami.
-      paymentCost: paymentFee
-    });
   }
 }

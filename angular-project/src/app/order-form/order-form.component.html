@@ -29,8 +29,19 @@
                   <div class="table-container">
                     <table class="selected-products-table">
                       <tr *ngFor="let product of selectedProducts" class="product-row">
-                        <td style="width: 60%;"><div class="cell-content">{{ product.productName }}</div></td>
-                        <td>{{ product.productPrice.toFixed(2) }}€</td>
+                        <td style="width: 50%;"><div class="cell-content">{{ product.productName }}</div></td>
+                        <td>
+                          <div class="product-price-container">
+                            <input type="number" 
+                            class="form-control product-price-control" 
+                            [ngModel]="editedProducts[product.productId]?.productPrice ?? product.productPrice" 
+                            step="0.01"
+                            (ngModelChange)="onProductFieldChange(product.productId, $event)"
+                            min="1"
+                            [ngModelOptions]="{standalone: true}">
+                            €
+                          </div>
+                        </td>
                         <td class="product-amount-control-column">
                           <input type="number" [(ngModel)]="product.productAmount" [ngModelOptions]="{standalone: true}" (change)="updateAmount(product.productId, product.productAmount)" value="1" min="1" class="form-control product-amount-control">
                         </td>
@@ -55,7 +66,7 @@
             <div class="form-group">
                 <label for="deliveryOptions" class="form-label">Spôsob dopravy*</label>
                 <div class="delivery-options-wrapper">
-                    <select formControlName="deliveryOption" id="deliveryOptions" class="form-control" [ngClass]="{'is-invalid': orderForm.get('deliveryOption').invalid && orderForm.get('deliveryOption').touched}">
+                    <select formControlName="deliveryOption" id="deliveryOptions" class="form-control" [ngClass]="{'is-invalid': orderForm.get('deliveryOption').invalid && orderForm.get('deliveryOption').touched}" (change)="onDeliveryOptionChange()">
                         <option disabled selected value="">Zvoliť možnosť</option>
                         <option value="Kuriér">Kuriér</option>
                         <option value="Osobný odber">Osobný odber</option>
@@ -75,7 +86,7 @@
             <div class="form-group">
                 <label for="paymentOptions" class="form-label">Spôsob platby*</label>
                 <div class="payment-options-wrapper">
-                    <select formControlName="paymentOption" id="paymentOptions" class="form-control" [ngClass]="{'is-invalid': orderForm.get('paymentOption').invalid && orderForm.get('paymentOption').touched}">
+                    <select formControlName="paymentOption" id="paymentOptions" class="form-control" [ngClass]="{'is-invalid': orderForm.get('paymentOption').invalid && orderForm.get('paymentOption').touched}" (change)="onPaymentOptionChange()">
                         <option disabled selected value="">Zvoliť možnosť</option>
                         <option value="Hotovosť">Dobierka</option>
                         <option value="Bankový prevod">Bankový prevod</option>
@@ -106,12 +117,12 @@
               <p><b>Súčet produktov:</b></p>
               <p>{{ productsTotalPrice | number : '1.2-2' }}€</p> 
             }
-            @if(deliveryCost > 0) {
+            @if(deliveryCost > 0 && orderForm.get('deliveryOption')?.value === 'Kuriér') {
               <p><b>Doprava:</b></p>
               <p>{{ deliveryCost | number : '1.2-2' }}€</p>
             }
 
-            @if(paymentCost > 0) {
+            @if(paymentCost > 0 && orderForm.get('paymentOption')?.value === 'Dobierka') {
               <p><b>Platba:</b></p>
               <p>{{ paymentCost | number : '1.2-2' }}€</p>
             }

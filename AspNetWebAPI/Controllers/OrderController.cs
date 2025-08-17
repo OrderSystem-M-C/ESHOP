@@ -453,6 +453,17 @@ namespace AspNetCoreAPI.Controllers
                         _context.Orders.Update(order);
                         await _context.SaveChangesAsync();
                     }
+                    catch (NoAvailablePackageCodesException ex)
+                    {
+                        return new JsonResult(new
+                        {
+                            error = "NO_CODES_LEFT",
+                            message = ex.Message,
+                        })
+                        {
+                            StatusCode = StatusCodes.Status400BadRequest
+                        };
+                    }
                     catch (Exception ex)
                     {
                         Console.Error.WriteLine($"Error processing order {order.OrderId}: {ex.Message}");
@@ -510,7 +521,7 @@ namespace AspNetCoreAPI.Controllers
                     GeneratedCodes = generatedCodes
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
                 return StatusCode(500, new { message = "An error occurred during XML export.", error = ex.Message });
@@ -519,7 +530,7 @@ namespace AspNetCoreAPI.Controllers
         private async Task<XElement> ProcessOrderAsync(OrderModel order, XNamespace tns)
         {
             string druhZasielky = (order.DeliveryOption == "Kuriér") ? "8" : "1";
-            decimal totalCodePrice = order.TotalPrice + order.PaymentCost;
+            decimal totalWithoutPaymentCost = order.TotalPrice - order.PaymentCost;
 
             return new XElement(tns + "Zasielka",
                 new XElement(tns + "Adresat",
@@ -539,7 +550,7 @@ namespace AspNetCoreAPI.Controllers
                     new XElement(tns + "CiarovyKod", order.PackageCode),
                     new XElement(tns + "Hmotnost", "1"), 
                     new XElement(tns + "CenaPoistneho", "100"),
-                    (order.PaymentOption == "Hotovosť" ? new XElement(tns + "CenaDobierky", totalCodePrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)) : null),
+                    (order.PaymentOption == "Hotovosť" ? new XElement(tns + "CenaDobierky", totalWithoutPaymentCost.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)) : null),
                     new XElement(tns + "DruhZasielky", druhZasielky),
                     new XElement(tns + "Poznamka", order.Note),
                     new XElement(tns + "SymbolPrevodu", order.VariableSymbol)
@@ -636,7 +647,14 @@ namespace AspNetCoreAPI.Controllers
             }
             catch(NoAvailablePackageCodesException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return new JsonResult(new
+                {
+                    error = "NO_CODES_LEFT",
+                    message = ex.Message,
+                })
+                {
+                    StatusCode = StatusCodes.Status400BadRequest
+                };
             }
             catch(Exception ex)
             {
@@ -683,7 +701,7 @@ namespace AspNetCoreAPI.Controllers
 
                 if (maxUsed >= settings.EphEndingNumber)
                 {
-                    throw new NoAvailablePackageCodesException("No available package codes left in the specified range.");
+                    throw new NoAvailablePackageCodesException("Rozsah podacích čísel bol vyčerpaný, nové kódy nie je možné vygenerovať!");
                 }
 
                 nextNumber = maxUsed + 1;
@@ -841,17 +859,6 @@ namespace AspNetCoreAPI.Controllers
             {
                 return StatusCode(500, new { message = $"An error occurred while counting available package codes: {ex.Message}" });
             }
-        }
-        [HttpPatch("update-package-code/{orderId}")]
-        public async Task<IActionResult> UpdatePackageCode([FromRoute] int orderId, [FromBody] UpdatePackageCodeDTO updatePackageCodeDTO)
-        {
-            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
-            if (order == null) return NotFound(new { message = $"Order with ID {orderId} was not found." });
-
-            order.PackageCode = updatePackageCodeDTO.PackageCode ?? "";
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = $"Package code for order {orderId} was successfully updated." });
         }
         [HttpGet("get-order-statuses")]
         public async Task<ActionResult<IEnumerable<OrderStatusModel>>> GetOrderStatuses()

@@ -182,7 +182,7 @@ namespace AspNetCoreAPI.Controllers
 
             return Ok(new { totalPrice = order.TotalPrice });
         }
-        [HttpPost("add-products")]
+        [HttpPost("add-products-to-order")]
         public async Task<IActionResult> AddProductsToOrder([FromBody] OrderProductsDTO orderProductsDTO)
         {
             if (orderProductsDTO == null || orderProductsDTO.Products == null)
@@ -194,38 +194,41 @@ namespace AspNetCoreAPI.Controllers
             {
                 return NotFound("Order was not found.");
             }
-            var productIds = orderProductsDTO.Products.Select(p => p.ProductId).ToList();
 
-            var products = await _context.Products
-                .Where(p => productIds.Contains(p.ProductId))
-                .ToListAsync();
+            var productsDict = await _context.Products
+                .Where(p => orderProductsDTO.Products.Select(dtoP => dtoP.ProductId).Contains(p.ProductId))
+                .ToDictionaryAsync(p => p.ProductId);
 
-            if (products.Count != orderProductsDTO.Products.Count)
+            if (productsDict.Count != orderProductsDTO.Products.Count)
             {
                 return NotFound("One or more products were not found.");
             }
 
-            var orderProducts = products.Select(product =>
+            var orderProducts = new List<OrderProductModel>();
+
+            foreach (var dtoProduct in orderProductsDTO.Products)
             {
-                var quantity = orderProductsDTO.Products
-                    .FirstOrDefault(p => p.ProductId == product.ProductId)?.ProductAmount ?? 0;
-                if (quantity < 1) quantity = 1;
-
-                product.StockAmount -= quantity;
-
-                return new OrderProductModel
+                if (productsDict.TryGetValue(dtoProduct.ProductId, out var dbProduct))
                 {
-                    OrderId = orderProductsDTO.OrderId,
-                    ProductId = product.ProductId,
-                    Product = product,
-                    Order = order,
-                    Quantity = quantity,
-                    ProductNameSnapshot = product.ProductName,
-                    ProductDescriptionSnapshot = product.ProductDescription ?? string.Empty,
-                    ProductPriceSnapshot = product.ProductPrice,
-                    ProductWeightSnapshot = product.ProductWeight
-                };
-            }).ToList();    
+                    var quantity = dtoProduct.ProductAmount < 1 ? 1 : dtoProduct.ProductAmount;
+
+                    dbProduct.StockAmount -= quantity;
+
+                    var orderProduct = new OrderProductModel
+                    {
+                        OrderId = orderProductsDTO.OrderId,
+                        ProductId = dbProduct.ProductId,
+                        Product = dbProduct,
+                        Order = order,
+                        Quantity = quantity,
+                        ProductNameSnapshot = dbProduct.ProductName,
+                        ProductDescriptionSnapshot = dbProduct.ProductDescription ?? string.Empty,
+                        ProductPriceSnapshot = dtoProduct.ProductPrice,
+                        ProductWeightSnapshot = dbProduct.ProductWeight
+                    };
+                    orderProducts.Add(orderProduct);
+                }
+            }
 
             await _context.OrderProducts.AddRangeAsync(orderProducts);
             await _context.SaveChangesAsync();
@@ -256,7 +259,7 @@ namespace AspNetCoreAPI.Controllers
 
             return Ok(result);
         }
-        [HttpPut("update-products")]
+        [HttpPut("update-order-products")]
         public async Task<IActionResult> UpdateOrderProducts([FromBody] UpdateOrderProductsRequestDTO request)
         {
             if (request == null || request.Products == null)
@@ -271,53 +274,65 @@ namespace AspNetCoreAPI.Controllers
                 return NotFound("Order was not found.");
             }
 
-            var orderProducts = await _context.OrderProducts
+            var existingOrderProducts = await _context.OrderProducts
                 .Where(op => op.OrderId == request.OrderId)
                 .ToListAsync();
 
-            var productIds = request.Products.Select(p => p.ProductId).ToList();
+            var requestedProductIds = request.Products.Select(p => p.ProductId).ToHashSet();
 
-            var products = await _context.Products
-                .Where(p => productIds.Contains(p.ProductId))
+            var dbProducts = await _context.Products
+                .Where(p => requestedProductIds.Contains(p.ProductId))
                 .ToListAsync();
 
-            var productsToRemove = orderProducts
-                .Where(op => !productIds.Contains(op.ProductId))
-                .ToList();
-
-            _context.OrderProducts.RemoveRange(productsToRemove);   
+            var existingOrderProductsDict = existingOrderProducts.ToDictionary(op => op.ProductId);
+            var dbProductsDict = dbProducts.ToDictionary(p => p.ProductId);
 
             foreach (var updatedProduct in request.Products)
             {
-                if (updatedProduct.ProductAmount < 1) updatedProduct.ProductAmount = 1;
-
-                var orderProduct = orderProducts.FirstOrDefault(op => op.ProductId == updatedProduct.ProductId);
-                var product = products.FirstOrDefault(p => p.ProductId == updatedProduct.ProductId);
-
-                if (orderProduct != null)
+                if (!dbProductsDict.TryGetValue(updatedProduct.ProductId, out var dbProduct))
                 {
-                    if (product != null) 
-                    {
-                        int difference = updatedProduct.ProductAmount - orderProduct.Quantity;
-                        product.StockAmount -= difference;
-                    }
-                    orderProduct.Quantity = updatedProduct.ProductAmount;
+                    continue;
                 }
-                else if(product != null)
+
+                if (existingOrderProductsDict.TryGetValue(updatedProduct.ProductId, out var orderProductToUpdate))
                 {
+                    int difference = updatedProduct.ProductAmount - orderProductToUpdate.Quantity;
+                    dbProduct.StockAmount -= difference;
+
+                    orderProductToUpdate.Quantity = updatedProduct.ProductAmount;
+                    orderProductToUpdate.ProductPriceSnapshot = updatedProduct.ProductPrice;
+                }
+                else 
+                {
+                    dbProduct.StockAmount -= updatedProduct.ProductAmount;
+
                     var newOrderProduct = new OrderProductModel
                     {
                         OrderId = order.Id,
-                        ProductId = product.ProductId,
+                        ProductId = dbProduct.ProductId,
                         Quantity = updatedProduct.ProductAmount,
-                        ProductNameSnapshot = product.ProductName,
-                        ProductDescriptionSnapshot = product.ProductDescription ?? string.Empty,
-                        ProductPriceSnapshot = product.ProductPrice,
-                        ProductWeightSnapshot = product.ProductWeight ?? 0
+                        ProductNameSnapshot = dbProduct.ProductName,
+                        ProductDescriptionSnapshot = dbProduct.ProductDescription ?? string.Empty,
+                        ProductPriceSnapshot = updatedProduct.ProductPrice,
+                        ProductWeightSnapshot = dbProduct.ProductWeight ?? 0
                     };
                     await _context.OrderProducts.AddAsync(newOrderProduct);
                 }
             }
+
+            var productsToRemove = existingOrderProducts
+                .Where(op => !requestedProductIds.Contains(op.ProductId))
+                .ToList();
+
+            foreach (var productToRemove in productsToRemove)
+            {
+                if (dbProductsDict.TryGetValue(productToRemove.ProductId, out var dbProduct))
+                {
+                    dbProduct.StockAmount += productToRemove.Quantity;
+                }
+            }
+            _context.OrderProducts.RemoveRange(productsToRemove);
+
             await _context.SaveChangesAsync();
             return Ok(true); 
         }
