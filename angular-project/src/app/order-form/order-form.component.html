@@ -12,7 +12,7 @@
           <p>{{currentDate}}</p>
         </div>
       }
-      @if(isLoading_edit){
+      @if(isLoadingEdit){
         <div class="spinner-container">
           <div class="spinner">
           </div>
@@ -28,7 +28,7 @@
                 <div class="selected-products">
                   <div class="table-container">
                     <table class="selected-products-table">
-                      <tr *ngFor="let product of selectedProducts" class="product-row">
+                      <tr *ngFor="let product of isEditMode ? newSelectedProducts : selectedProducts" class="product-row">
                         <td style="width: 50%;"><div class="cell-content">{{ product.productName }}</div></td>
                         <td>
                           <div class="product-price-container">
@@ -243,7 +243,7 @@
       <h3>Podacie číslo objednávky</h3>
       <label for="packageCode" class="form-label">Podacie číslo vašej objednávky (Pošta)</label>
          <div class="field">
-            @if(isLoading_packageCode){
+            @if(isLoadingPackageCode){
               <div class="spinner-container">
                 <div class="spinner">
                 </div>
@@ -282,7 +282,7 @@
       <p class="default-status">
         Bez výberu objednávky je automaticky nastavený stav ako "Nezpracované - nová objednávka"!
       </p>
-      @if(statuses.length > 0){
+      @if(!isLoadingStatuses){
         @if(!isEditOrderStatus){
           <div class="order-status-grid">
             <div class="order-status-tile" *ngFor="let status of statuses"

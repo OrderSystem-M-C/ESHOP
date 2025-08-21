@@ -23,7 +23,14 @@ export class OrderDetailsComponent implements OnInit{
   orderId: number | null = null
   currentDate: string = '';
 
-  readonly DEFAULT_EMAIL: string = 'nezadany@objednavky.local';
+  readonly DEFAULTS = {
+    email: 'nezadany@objednavky.local',
+    customerName: 'Nezadany zakaznik',
+    address: 'Nezadana adresa',
+    city: 'Nezadane mesto',
+    postalCode: '00000',
+    phoneNumber: '0900000000'
+  };
 
   dialogRef!: MatDialogRef<any>; //akoby pristupujeme k otvorenemu dialogovemu oknu aby sme mohli s nim komunikovať => získať samotný výsledok
 
@@ -159,7 +166,7 @@ export class OrderDetailsComponent implements OnInit{
 
     const companyRowHTML = hasCompanyData ? `
       <tr>
-        <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">
+        <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">
           Spoločnosť, IČO, DIČ, IČ DPH
         </th>
         <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
@@ -173,7 +180,7 @@ export class OrderDetailsComponent implements OnInit{
 
     const invoiceCompanyRowHTML = hasInvoiceCompanyData ? `
       <tr>
-        <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">
+        <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">
           Spoločnosť, IČO, DIČ, IČ DPH
         </th>
         <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
@@ -287,22 +294,30 @@ export class OrderDetailsComponent implements OnInit{
       <table style="width: 100%; border: 1px solid #e0e0e0;">
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.customerName}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
+            ${this.order.customerName === this.DEFAULTS.customerName ? 'Nezadané' : this.order.customerName}
+          </td>
         </tr>
         ${companyRowHTML}
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Adresa</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.order.address}, ${this.order.postalCode}, ${this.order.city}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
+            ${this.order.address === this.DEFAULTS.address ? 'Nezadané' : this.order.address}, 
+            ${this.order.postalCode === this.DEFAULTS.postalCode ? 'Nezadané' : this.order.postalCode}, 
+            ${this.order.city === this.DEFAULTS.city ? 'Nezadané' : this.order.city}
+          </td>
         </tr>
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
-            ${this.order.email === this.DEFAULT_EMAIL ? 'Nezadané' : this.order.email}
+            ${this.order.email === this.DEFAULTS.email ? 'Nezadané' : this.order.email}
           </td>
         </tr>
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
-          <td style="padding: 8px;">${this.order.phoneNumber}</td>
+          <td style="padding: 8px;">
+            ${this.order.phoneNumber === this.DEFAULTS.phoneNumber ? 'Nezadané' : this.order.phoneNumber}
+          </td>
         </tr>
       </table>
     </div>
@@ -375,7 +390,7 @@ export class OrderDetailsComponent implements OnInit{
     this.orderService.getOrderDetails(this.orderId).subscribe((result) => {
       this.order = result;
       if(this.order){
-        this.orderService.getOrderProducts(this.order.id).subscribe((result) => {
+        this.productService.getOrderProducts(this.order.id).subscribe((result) => {
           this.order.invoiceIssueDate = this.formatDate(this.order.invoiceIssueDate);
           this.selectedProducts = result;
           

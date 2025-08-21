@@ -235,7 +235,7 @@ namespace AspNetCoreAPI.Controllers
 
             return NoContent();
         }
-        [HttpGet("get-products/{orderId}")]
+        [HttpGet("get-order-products/{orderId}")]
         public async Task<IActionResult> GetOrderProducts(int orderId)
         {
             var orderProducts = await _context.OrderProducts

@@ -1,37 +1,102 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
+  private readonly baseEndpoint = 'product';
+  private readonly jsonHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
   constructor(@Inject('BASE_URL') private baseUrl: string, private http: HttpClient) { }
 
-  createProduct(product: ProductDTO){
-    const url = `${this.baseUrl}/product/create-product`;
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post(url, product, {headers});
+  createProduct(product: ProductDTO): Observable<ProductDTO> {
+    return this.post<ProductDTO>('create-product', product);
   }
-  getProducts(): Observable<ProductDTO[]>{
-    const url = `${this.baseUrl}/product/get-products`;
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.get<ProductDTO[]>(url, {headers});
+  getProducts(): Observable<ProductDTO[]> {
+    return this.get<ProductDTO[]>('get-products');
   }
-  removeProduct(productId: number){
-    const url = `${this.baseUrl}/product/remove-product/${productId}`;
-    return this.http.delete(url);
+  getOrderProducts(orderId: number): Observable<ProductDTO[]> {
+    return this.get<ProductDTO[]>(`get-order-products/${orderId}`);
   }
-  updateProduct(updates: ProductUpdateDTO[]) {
-    const url = `${this.baseUrl}/product/update-product`;
-    return this.http.put(url, updates);
+  removeProduct(productId: number): Observable<{ success: boolean }> {
+    return this.delete<{ success: boolean }>(`remove-product/${productId}`);
   }
-  updateProductPrice(orderId: number, updates: ProductUpdateDTO[]): Observable<any> {
-    const url = `${this.baseUrl}/product/update-order-product-price/${orderId}`;
-    return this.http.put<any>(url, updates);
+  updateProduct(updates: ProductUpdateDTO[]): Observable<void> {
+    return this.put<void>('update-product', updates);
+  }
+  updateProductPrice(orderId: number, updates: ProductUpdateDTO[]): Observable<{ totalPrice: number }> {
+    return this.put<{ totalPrice: number }>(`update-order-product-price/${orderId}`, updates);
+  }
+  addProductsToOrder(orderId: number, products: ProductDTO[]): Observable<HttpResponse<any>> {
+    return this.postWithResponse('add-products-to-order', { orderId, products });
+  }
+  updateOrderProducts(orderId: number, products: ProductDTO[]): Observable<HttpResponse<any>> {
+    return this.putWithResponse('update-order-products', { orderId, products });
+  }
+
+  private get<T>(endpoint: string): Observable<T> {
+    const url = `${this.baseUrl}/${this.baseEndpoint}/${endpoint}`;
+    return this.http.get<T>(url).pipe(
+      catchError(err => {
+        console.error(`GET ${url} failed:`, err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  private post<T>(endpoint: string, body: any): Observable<T> {
+    const url = `${this.baseUrl}/${this.baseEndpoint}/${endpoint}`;
+    return this.http.post<T>(url, body, { headers: this.jsonHeaders }).pipe(
+      catchError(err => {
+        console.error(`POST ${url} failed:`, err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  private postWithResponse(endpoint: string, body: any): Observable<HttpResponse<any>> {
+    const url = `${this.baseUrl}/${this.baseEndpoint}/${endpoint}`;
+    return this.http.post(url, body, { headers: this.jsonHeaders, observe: 'response' }).pipe(
+      catchError(err => {
+        console.error(`POST ${url} failed:`, err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  private put<T>(endpoint: string, body: any): Observable<T> {
+    const url = `${this.baseUrl}/${this.baseEndpoint}/${endpoint}`;
+    return this.http.put<T>(url, body, { headers: this.jsonHeaders }).pipe(
+      catchError(err => {
+        console.error(`PUT ${url} failed:`, err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  private putWithResponse(endpoint: string, body: any): Observable<HttpResponse<any>> {
+    const url = `${this.baseUrl}/${this.baseEndpoint}/${endpoint}`;
+    return this.http.put(url, body, { headers: this.jsonHeaders, observe: 'response' }).pipe(
+      catchError(err => {
+        console.error(`PUT ${url} failed:`, err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  private delete<T>(endpoint: string): Observable<T> {
+    const url = `${this.baseUrl}/${this.baseEndpoint}/${endpoint}`;
+    return this.http.delete<T>(url).pipe(
+      catchError(err => {
+        console.error(`DELETE ${url} failed:`, err);
+        return throwError(() => err);
+      })
+    );
   }
 }
+
 export interface ProductDTO {
   productId?: number;
   productName: string,
@@ -43,6 +108,7 @@ export interface ProductDTO {
   stockAmount?: number;
   productCode?: number;
 }
+
 export interface ProductUpdateDTO {
   productId: number;
   productName?: string;

@@ -16,36 +16,35 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-direction: row;
-  text-align: left;
 }
 .title-charts h2 {
   margin: 0;
+}
+.title-charts h2,
+.title-orders h2 {
+  text-align: left;
+  font-weight: bold;
 }
 .title-container-1 {
   display: flex;
   justify-content: flex-start;
   flex-direction: column;
 }
-.button-container, .button-container button{
+.button-container,
+.button-container button {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: row;
   gap: 10px;
 }
-.sorting-container, .service-container{
+.sorting-container,
+.service-container {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
   gap: 10px;
-}
-.is-visible{
-  visibility: visible;
-}
-.is-not-visible{
-  visibility: hidden;
 }
 .visible-chart {
   visibility: visible;
@@ -57,40 +56,51 @@ h1 {
   opacity: 0;
   transition: opacity 0.3s ease;
 }
-.checkbox-dropdown-container, .filter-date-container, .copy-button, .change-status-button, .select-orders-to-remove-button, .generate-xml-file-from-orders, .cancel-selection, .select-all-orders {
+.checkbox-dropdown-container,
+.filter-date-container,
+.filter-price-container,
+.filter-name-container,
+.copy-button,
+.change-status-button,
+.select-orders-to-remove-button,
+.generate-xml-file-from-orders,
+.cancel-selection,
+.select-all-orders {
   max-width: 350px;
   position: relative;
   margin-bottom: 15px;
 }
-.cancel-selection, .select-all-orders {
+.cancel-selection,
+.select-all-orders {
   margin-left: auto;
 }
 .dropdown-label {
   display: block;
   margin-bottom: 10px;
 }
-.service-container button:not(.btn-outline-danger), .sorting-container button:not(.btn-outline-success) {
+.service-container button:not(.btn-outline-danger),
+.sorting-container button:not(.btn-outline-success) {
   background-color: #f2f2f2;
   border: 1px solid #333;
 }
-.service-container button, .sorting-container button, .button-container button {
+.orders-page-component button {
   align-items: center;
-  display: flex;  
+  display: flex;
   gap: 5px;
   flex-direction: row;
 }
-.service-container button img, .sorting-container button img, .button-container img {
+.orders-page-component button img {
   height: 20px;
   width: 20px;
 }
 .button-container img {
   filter: invert(1) brightness(2);
 }
-.button-container button:nth-child(even) img{
+.button-container button:nth-child(even) img {
   height: 23px !important;
   width: 25px !important;
 }
-.select-orders-to-remove-button button img, .generate-xml-file-from-orders button img {
+.select-orders-to-remove-button button img {
   filter: brightness(0%);
 }
 .dropdown-content {
@@ -108,8 +118,8 @@ h1 {
 }
 .dropdown-content h3 {
   margin-bottom: 0;
-  border-bottom: 1px solid #ccc; 
-  padding: 8px 0 8px 0; 
+  border-bottom: 1px solid #ccc;
+  padding: 8px 0 8px 0;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -125,18 +135,29 @@ h1 {
   padding: 4px 0;
   border-radius: 5px;
 }
-.checkbox-item:not(.checkbox-item:last-child), .status-item:not(.status-item:last-child) {
+.checkbox-item:not(.checkbox-item:last-child),
+.status-item:not(.status-item:last-child) {
   margin-bottom: 5px;
 }
-.filter-date-item{
+.filter-date-item,
+.filter-price-item,
+.filter-name-item {
   padding: 8px;
   border-radius: 5px;
 }
-.checkbox-item:hover, .filter-date-item:hover, .status-item:hover{
+.status-item {
+  padding: 8px 0;
+  border-radius: 5px;
+}
+.checkbox-item:hover,
+.filter-date-item:hover,
+.status-item:hover,
+.filter-price-item:hover,
+.filter-name-item:hover {
   background-color: #fbfbfb;
   cursor: pointer;
 }
-.checkbox-item input[type="checkbox"]{
+.checkbox-item input[type="checkbox"] {
   height: 20px;
   width: 20px;
   accent-color: #084298;
@@ -150,11 +171,8 @@ h1 {
   border-color: #084298;
   box-shadow: 0 0 0 0.25rem rgba(8, 66, 152, 0.25);
 }
-.status-item {
-  padding: 8px 0;
-  border-radius: 5px;
-}
-.checkbox-label, .status-item-link{
+.checkbox-label,
+.status-item-link {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -170,7 +188,7 @@ h1 {
   text-decoration: none;
   color: black;
 }
-.search-bar{
+.search-bar {
   display: flex;
   align-items: center;
   flex-direction: row;
@@ -193,7 +211,7 @@ tr.selected {
   border: 2px solid #084298 !important;
 }
 tr.selected td {
-  background-color: #f1f7ff !important; 
+  background-color: #f1f7ff !important;
   transition: background-color 0.3s ease;
 }
 .orders-table thead {
@@ -210,7 +228,7 @@ tr.selected td {
 .checkbox-section {
   width: 100px !important;
 }
-.orders-table td input[type="checkbox"]{
+.orders-table td input[type="checkbox"] {
   height: 25px;
   width: 25px;
   accent-color: #084298;
@@ -236,16 +254,16 @@ tr.selected td {
 .orders-table tr:nth-child(even) {
   background-color: #f9f9f9;
 }
-.order-row:hover td{
+.order-row:hover td {
   background-color: #fbfbfb;
   cursor: pointer;
 }
-.no-orders-container{
+.no-orders-container {
   width: 100%;
   text-align: center;
   margin-top: 40px;
 }
-.order-link{
+.order-link {
   text-decoration: underline;
   cursor: pointer;
 }
@@ -260,7 +278,7 @@ tr.selected td {
   margin-top: 15px;
   margin-bottom: 15px;
 }
-.canvas-chart{
+.canvas-chart {
   width: 100%;
   height: 100%;
   max-width: 350px;
@@ -269,16 +287,17 @@ tr.selected td {
   flex-direction: column;
   justify-content: center;
 }
-.canvas-chart:nth-child(1){
+.canvas-chart:nth-child(1) {
   border-right: 1px solid #ccc;
 }
-.canvas-chart:nth-child(2), .canvas-chart:nth-child(3) {
+.canvas-chart:nth-child(2),
+.canvas-chart:nth-child(3) {
   max-width: 375px;
 }
 canvas {
-  width: 100% !important; 
-  max-width: 400px;  
-  height: auto !important;  
+  width: 100% !important;
+  max-width: 400px;
+  height: auto !important;
 }
 .total-revenue {
   display: flex;
@@ -289,10 +308,6 @@ canvas {
 }
 .total-revenue-part {
   font-weight: normal;
-}
-.title-charts h2, .title-orders h2 {
-  text-align: left;
-  font-weight: bold;
 }
 .pagination-container {
   display: flex;
@@ -308,7 +323,7 @@ canvas {
   flex-direction: row;
   gap: 10px;
 }
-.select-range select{
+.select-range select {
   flex: 1;
 }
 .select-range p {
@@ -326,7 +341,7 @@ canvas {
 }
 .preview-popup {
   position: absolute;
-  top: 100%;     
+  top: 100%;
   left: 40px;
   transform: scale(0.8);
   transform-origin: top left;
@@ -343,6 +358,12 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.is-visible {
+  visibility: visible;
+}
+.is-not-visible {
+  visibility: hidden;
 }
 mat-paginator {
   background-color: #f2f2f2;

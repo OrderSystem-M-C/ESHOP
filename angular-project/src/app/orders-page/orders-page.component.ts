@@ -9,7 +9,7 @@ import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { EmailService } from '../services/email.service';
-import { catchError, EMPTY, finalize, forkJoin, of, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, filter, finalize, forkJoin, of, switchMap, tap } from 'rxjs';
 import { OrderDetailsComponent } from '../order-details/order-details.component';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { EphService } from '../services/eph.service';
@@ -33,11 +33,19 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
   currentDate: string;
 
   isLoading: boolean = true;
-  isVisibleCheckbox: boolean = false;
-  isVisibleDateFilter: boolean = false;
-  isVisibleChangeStatus: boolean = false;
+  
+  dropdownState: { [key: string]: boolean } = {
+    status: false,
+    date: false,
+    price: false,
+    name: false,
+    changeStatus: false
+  }
 
-  dateSortOrder: string = '';
+  sortConfig = {
+    field: null as 'date' | 'price' | 'name' | null,
+    order: null as 'asc' | 'desc' | 'newest' | 'oldest' | null
+  }
 
   searchText: string = '';
   searchOption: string = 'auto';
@@ -58,7 +66,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
 
   totalItems: number = 0;
   pageIndex: number = 0;
-  pageSize: number = 6;
+  pageSize: number = 10;
 
   selectedOrders: OrderDTO[] = [];
 
@@ -66,7 +74,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
 
   hoveredOrder: OrderDTO = null;
 
-  constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar, public authService: AuthenticationService, private emailService: EmailService, private ephService: EphService){}
+  constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar, public authService: AuthenticationService, private emailService: EmailService){}
 
   updatePagedOrders(): void {
     const startIndex = this.pageIndex * this.pageSize;
@@ -80,14 +88,8 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
     this.updatePagedOrders();
   }
 
-  toggleDropdown(dropdown: 'status' | 'date' | 'changeStatus'){
-    if(dropdown === 'status'){
-      this.isVisibleCheckbox = !this.isVisibleCheckbox;
-    }else if(dropdown === 'date'){
-      this.isVisibleDateFilter = !this.isVisibleDateFilter;
-    }else{
-      this.isVisibleChangeStatus = !this.isVisibleChangeStatus;
-    }
+  toggleDropdown(dropdown: 'status' | 'date' | 'changeStatus' | 'price' | 'name'){
+    this.dropdownState[dropdown] = !this.dropdownState[dropdown];
   }
 
   navigateToDetails(order: OrderDTO, event: MouseEvent){
@@ -105,7 +107,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
     this.selectedOrders = selected.length === 0 ? [] : selected;
 
     if(this.selectedOrders.length === 0){
-      this.isVisibleChangeStatus = false;
+      this.dropdownState['changeStatus'] = false;
     }
   }
 
@@ -125,9 +127,39 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
           this.clearSelection();
           return EMPTY; 
         }
+
         this.snackBar.open("Objednávka/y bola/i úspešne skopírované!", "", { duration: 1000 });
-        this.clearSelection();
-        return this.reloadOrders();
+
+        const emailDtos = this.selectedOrders.map(order => ({
+          email: order.email,
+          orderId: order.orderId,
+          packageCode: order.packageCode
+        }));
+
+        const emailObservables = this.selectedOrders.map(order => {
+          if(order.orderStatus === 'Zasielanie čísla zásielky' && order.packageCode?.trim()){
+            return this.emailService.sendPackageCodeEmails(emailDtos).pipe(
+              catchError(err => {
+                console.error('Email error.', err);
+                return of(null);
+              })
+            )
+          } else if(order.orderStatus === 'Dobierka - Info k objednávke (poslať e-mail)') {
+            return this.emailService.sendOrderConfirmationEmails(emailDtos).pipe(
+              catchError(err => {
+                console.error('Email error.', err);
+                return of(null);
+              })
+            )
+          } else {
+            return of(null);
+          }
+        })
+        
+        return forkJoin(emailObservables).pipe(
+          switchMap(() => this.reloadOrders()),
+          tap(() => this.clearSelection())
+        )
       })
     ).subscribe({
       next: () => this.isLoading = false,
@@ -190,7 +222,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
       switchMap(() => this.reloadOrders()),
       finalize(() => {
         this.isLoading = false;
-        this.isVisibleChangeStatus = false;
+        this.dropdownState['changeStatus'] = false;
         this.updateStatusChart();
       })
     ).subscribe({
@@ -563,10 +595,9 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
     }, {} as { [date: string]: { totalRevenue: number } });
   }
 
-  sortByDate(order: 'newest' | 'oldest'): void {
-   this.dateSortOrder = order;
-   this.isVisibleDateFilter = false;
-   this.applyFilters();
+  setSort(field: 'date' | 'price' | 'name', order: 'asc' | 'desc' | 'newest' | 'oldest'): void {
+    this.sortConfig = { field, order };
+    this.applyFilters();
   }
   
   applyFilters(): void {
@@ -606,12 +637,33 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
       filtered = filtered.filter(order => this.selectedStatuses.includes(order.orderStatus));
     }
 
-    if(this.dateSortOrder){
+    if(this.sortConfig.field) {
       filtered = filtered.sort((a, b) => {
-        const dateA = this.parseDate(a.orderDate).getTime();
-        const dateB = this.parseDate(b.orderDate).getTime();
-
-        return this.dateSortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+        switch(this.sortConfig.field) {
+          case 'date': {
+            const dateA = this.parseDate(a.orderDate).getTime();
+            const dateB = this.parseDate(b.orderDate).getTime();
+            return this.sortConfig.order === 'newest'
+            ? dateB - dateA
+            : dateA - dateB;
+          }
+          case 'price': {
+            const priceA = a.totalPrice ?? 0;
+            const priceB = b.totalPrice ?? 0;
+            return this.sortConfig.order === 'asc'
+            ? priceA - priceB
+            : priceB - priceA
+          }
+          case 'name': {
+            const nameA = this.removeDiacritics(a.customerName).toLowerCase();
+            const nameB = this.removeDiacritics(b.customerName).toLowerCase();
+            if (nameA < nameB) return this.sortConfig.order === 'asc' ? -1 : 1;
+            if (nameA > nameB) return this.sortConfig.order === 'asc' ? 1 : -1;
+            return 0;
+          }
+          default:
+            return 0;
+          }
       })
     }
 
@@ -695,7 +747,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
         this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
 
         console.log('%c\
-       ██╗  ██╗███████╗██╗     ██╗      ██████╗\n\
+        ██╗  ██╗███████╗██╗     ██╗      ██████╗\n\
         ██║  ██║██╔════╝██║     ██║     ██╔═══██╗\n\
         ███████║█████╗  ██║     ██║     ██║   ██║\n\
         ██╔══██║██╔══╝  ██║     ██║     ██║   ██║\n\

@@ -24,7 +24,12 @@
           </tr>
           <tr>
             <td><b>Meno a priezvisko:</b></td>
-            <td>{{order?.customerName}}</td>
+            <td [ngStyle]="{
+                  'color': order?.customerName === DEFAULTS.customerName ? 'gray' : 'black',
+                  'font-style': order?.customerName === DEFAULTS.customerName ? 'italic' : 'normal'
+                }">
+              {{ order?.customerName }}
+            </td>
           </tr>
           <tr>
             <td><b>Spoločnosť, IČO, DIČ, IČ DPH:</b></td>
@@ -32,7 +37,20 @@
           </tr>
           <tr>
             <td><b>Adresa:</b></td>
-            <td>{{ order?.address }}, {{ order?.city }}, {{ order?.postalCode }}</td>
+            <td [ngStyle]="{
+                  'color': order?.address === DEFAULTS.address ? 'gray' : 'black',
+                  'font-style': order?.address === DEFAULTS.address ? 'italic' : 'normal'
+                }">
+              {{ order?.address }}, 
+              <span [ngStyle]="{
+                      'color': order?.city === DEFAULTS.city ? 'gray' : 'black',
+                      'font-style': order?.city === DEFAULTS.city ? 'italic' : 'normal'
+                    }">{{ order?.city }}</span>, 
+              <span [ngStyle]="{
+                      'color': order?.postalCode === DEFAULTS.postalCode ? 'gray' : 'black',
+                      'font-style': order?.postalCode === DEFAULTS.postalCode ? 'italic' : 'normal'
+                    }">{{ order?.postalCode }}</span>
+            </td>
           </tr>
           <tr>
             <td><b>E-mailová adresa:</b></td>
@@ -45,7 +63,10 @@
           </tr>
           <tr>
             <td><b>Telefónne číslo:</b></td>
-            <td>{{ order?.phoneNumber }}</td>
+            <td [ngStyle]="{
+              'color': order?.phoneNumber === DEFAULTS.phoneNumber ? 'gray' : 'black',
+              'font-style': order?.phoneNumber === DEFAULTS.phoneNumber ? 'italic' : 'normal'
+            }">{{ order?.phoneNumber }}</td>
           </tr>
           <tr>
             <td><b>Stav objednávky:</b></td>

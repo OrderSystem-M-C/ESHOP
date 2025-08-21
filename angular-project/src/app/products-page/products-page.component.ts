@@ -37,7 +37,7 @@ export class ProductsPageComponent implements OnInit {
 
   totalItems: number = 0;
   pageIndex: number = 0;
-  pageSize: number = 6;
+  pageSize: number = 10;
 
   editedProducts: { [productId: number]: { stockAmount?: number; productCode?: number }} = {};
   editingProductId?: number;

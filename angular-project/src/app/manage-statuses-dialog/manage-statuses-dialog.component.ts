@@ -20,7 +20,7 @@ export class ManageStatusesDialogComponent implements OnInit {
   
   statusForm = new FormGroup({
     statusName: new FormControl('', [ Validators.required ]),
-    statusColor: new FormControl('', [Validators.required])
+    statusColor: new FormControl('#000000', [Validators.required])
   });
 
   editingOrderStatusId: number | null = null;
@@ -58,10 +58,13 @@ export class ManageStatusesDialogComponent implements OnInit {
   addOrderStatus(): void {
     if(this.statusForm.valid){
       this.isLoading = true;
+
+      const statusFormValue = this.statusForm.getRawValue();
       const status: OrderStatusDTO = {
-        statusName: this.statusForm.value.statusName,
-        statusColor: this.statusForm.value.statusColor
+        statusName: statusFormValue.statusName,
+        statusColor: statusFormValue.statusColor
       }
+
       if (this.editingOrderStatusId !== null) {
         status.statusId = this.editingOrderStatusId;
         this.orderService.updateOrderStatus(status).subscribe({

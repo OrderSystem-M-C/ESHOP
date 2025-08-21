@@ -67,7 +67,7 @@
         <div class="change-status-container">
           <div class="change-status-button">
            <button class="btn btn-light" (click)="toggleDropdown('changeStatus')"><img src="../../assets/Images/change-status-icon.png"> Rýchla zmena stavu objednávky</button>
-            <div class="dropdown-content" [ngClass]="isVisibleChangeStatus ? 'is-visible': 'is-not-visible'">
+            <div class="dropdown-content" [ngClass]="dropdownState['changeStatus'] ? 'is-visible': 'is-not-visible'">
               <h3><img src="../../assets/Images/click-icon.png" alt="click-icon"> Kliknutím zmeníte stav:</h3>
               <div class="status-item" [ngStyle]="{'border-left': '8px solid ' + status.statusColor }" *ngFor="let status of statuses">
                 <a class="status-item-link" (click)="changeOrderStatus(status.statusName)">
@@ -102,7 +102,7 @@
           <div class="checkbox-dropdown">
             <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('status')"><img src="../../assets/Images/filter-icon.png" alt="filter-icon"> Zvoľte stavy objednávok pre filtráciu</button>
           </div>
-          <div class="dropdown-content" [ngClass]="isVisibleCheckbox ? 'is-visible': 'is-not-visible'">
+          <div class="dropdown-content" [ngClass]="dropdownState['status'] ? 'is-visible': 'is-not-visible'">
             <div class="checkbox-item" [ngStyle]="{'border-left': '8px solid ' + status.statusColor }" *ngFor="let status of statuses">
               <label class="checkbox-label">
                 <input type="checkbox" class="form-check-input" id="checkbox" [value]="status.statusName" (change)="onCheckboxChange($event)" [checked]="selectedStatuses.includes(status.statusName)">
@@ -113,15 +113,49 @@
         </div>
         <div class="filter-date-container">
           <div class="filter-date-dropdown">
-            <button type="button" class="btn btn-light filter-date-dropdown-btn" (click)="toggleDropdown('date')"><img src="../../assets/Images/date-icon.png" alt="date-icon"> Zvoľte spôsob filtrácie podľa dátumu</button>
+            <button type="button" class="btn btn-light filter-date-dropdown-btn" (click)="toggleDropdown('date')"><img src="../../assets/Images/date-icon.png" alt="date-icon"> Zvoľte filtráciu podľa dátumu</button>
           </div>
-          <div class="dropdown-content" [ngClass]="isVisibleDateFilter ? 'is-visible': 'is-not-visible'">
+          <div class="dropdown-content" [ngClass]="dropdownState['date'] ? 'is-visible': 'is-not-visible'">
             <div class="filter-date-field">
-              <div class="filter-date-item" (click)="sortByDate('newest')">
+              <div class="filter-date-item" (click)="setSort('date', 'newest')">
                 <span>Najnovšie</span>
               </div>
-              <div class="filter-date-item" (click)="sortByDate('oldest')">
+              <div class="filter-date-item" (click)="setSort('date', 'oldest')">
                 <span>Najstaršie</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="filter-price-container">
+          <div class="filter-price-dropdown">
+            <button type="button" class="btn btn-light filter-price-dropdown-btn" (click)="toggleDropdown('price')">
+              <img src="../../assets/Images/price-icon.png" alt="price-icon"> Zvoľte filtráciu podľa ceny
+            </button>
+          </div>
+          <div class="dropdown-content" [ngClass]="dropdownState['price'] ? 'is-visible': 'is-not-visible'">
+            <div class="filter-price-field">
+              <div class="filter-price-item" (click)="setSort('price', 'asc')">
+                <span>Od najlacnejšieho</span>
+              </div>
+              <div class="filter-price-item" (click)="setSort('price', 'desc')">
+                <span>Od najdrahšieho</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="filter-name-container">
+          <div class="filter-name-dropdown">
+            <button type="button" class="btn btn-light filter-name-dropdown-btn" (click)="toggleDropdown('name')">
+              <img src="../../assets/Images/name-filter-icon.png" alt="name-filter-icon"> Zvoľte filtráciu podľa mena
+            </button>
+          </div>
+          <div class="dropdown-content" [ngClass]="dropdownState['name'] ? 'is-visible': 'is-not-visible'">
+            <div class="filter-name-field">
+              <div class="filter-name-item" (click)="setSort('name', 'asc')">
+                <span>Meno: A → Z</span>
+              </div>
+              <div class="filter-name-item" (click)="setSort('name', 'desc')">
+                <span>Názov: Z → A</span>
               </div>
             </div>
           </div>

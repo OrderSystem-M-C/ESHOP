@@ -33,15 +33,24 @@ export class OrderFormComponent implements OnInit {
   orderId = Math.floor(100000 + Math.random() * 900000);
   existingOrderId: number | null = null;
 
-  readonly DEFAULT_EMAIL: string = 'nezadany@objednavky.local';
+  readonly DEFAULTS = {
+    email: 'nezadany@objednavky.local',
+    customerName: 'Nezadany zakaznik',
+    address: 'Nezadana adresa',
+    city: 'Nezadane mesto',
+    postalCode: '00000',
+    phoneNumber: '0900000000'
+  };
 
   invoiceCreated: boolean = false;
 
-  isLoading: boolean = false;
   isEditMode: boolean = false;
-  isLoading_edit: boolean = false;
   isEditOrderStatus: boolean = false;
-  isLoading_packageCode: boolean = false;
+  
+  isLoading: boolean = false;
+  isLoadingEdit: boolean = false;
+  isLoadingPackageCode: boolean = false;
+  isLoadingStatuses: boolean = false;
 
   dialogRef!: MatDialogRef<any>;
   dialogClosed: boolean = true;
@@ -231,7 +240,10 @@ export class OrderFormComponent implements OnInit {
   }
 
   loadOrderStatuses(): void {
-    this.orderService.getOrderStatuses().subscribe({
+    this.isLoadingStatuses = true;
+    this.orderService.getOrderStatuses().pipe(
+      finalize(() => this.isLoadingStatuses = false)
+    ).subscribe({
       next: (response) => {
         this.statuses = response.map(s => ({ ...s }));
         this.originalStatusesOrder = response.map(s => ({ ...s }));
@@ -239,6 +251,7 @@ export class OrderFormComponent implements OnInit {
       error: (err) => console.error(err)
     })
   }
+
   openManageStatusesDialog(): void {
     const dialogRef = this.dialog.open(ManageStatusesDialogComponent, {
       width: '1100px'
@@ -250,6 +263,7 @@ export class OrderFormComponent implements OnInit {
       }
     })
   }
+  
   toggleEditOrderStatus() {
     if(this.isEditOrderStatus){
       if(this.hasOrderChanged()){
@@ -260,46 +274,54 @@ export class OrderFormComponent implements OnInit {
     }
     this.isEditOrderStatus = !this.isEditOrderStatus;
   }
+
   drop(event: CdkDragDrop<any[]>) {
-    const sorted = [...this.sortedStatuses];
-    moveItemInArray(sorted, event.previousIndex, event.currentIndex);
-    sorted.forEach((status, index) => {
-      status.sortOrder = index;
-    });
-    this.statuses = sorted;
+    moveItemInArray(this.statuses, event.previousIndex, event.currentIndex);
+    this.statuses.forEach((status, index) => status.sortOrder = index);
   }
+
   get sortedStatuses(): OrderStatusDTO[] {
     return this.statuses.slice().sort((a, b) => a.sortOrder - b.sortOrder);
   }
+
   saveStatusOrder(){
-    this.orderService.saveOrderStatusesSortOrder(this.statuses).subscribe({
+    this.isLoadingStatuses = true;
+    this.orderService.saveOrderStatusesSortOrder(this.statuses).pipe(
+      finalize(() => this.isLoadingStatuses = false)
+    ).subscribe({
       next: () => {
         this.snackBar.open("Poradie stavov bolo úspešne zmenené!", "", {
           duration: 2000
-        })
+        });
+        this.originalStatusesOrder = this.sortedStatuses.map(s => ({ ...s }));
+        this.loadOrderStatuses();
       },
       error: (err) => console.error(err)
     })
   }
+
   hasOrderChanged(): boolean {
+    if(this.statuses.length !== this.originalStatusesOrder.length) return true;
     for(let i = 0; i < this.statuses.length; i++){
-      if(this.statuses[i].sortOrder !== i) return true;
+      if(this.statuses[i].statusId !== this.originalStatusesOrder[i].statusId) return true;
     }
     return false;
   }
+
   cancelEditOrderStatus(): void {
     this.statuses = this.originalStatusesOrder;
     this.isEditOrderStatus = false;
     this.snackBar.open("Úpravy poradia boli zrušené.", "", {
       duration: 2000
-    })
+    });
   }
+  
   trackByStatusId(index: number, status: OrderStatusDTO): number {
     return status.statusId;
   }
 
   isSelected(product: ProductDTO): boolean {
-    return this.selectedProducts.some(p => p.productId === product.productId);
+    return this.selectedProducts.some(p => p.productId === product.productId) || this.newSelectedProducts.some(p => p.productId === product.productId);
   }
 
   searchProducts() {
@@ -389,7 +411,6 @@ export class OrderFormComponent implements OnInit {
     this.isLoading = true;
 
     const hadNoProductsBefore = this.selectedProducts.length === 0;
-    this.newSelectedProducts = JSON.parse(JSON.stringify(this.selectedProducts));
 
     this.dialogRef = this.dialog.open(selectProductsDialog, {
       disableClose: true
@@ -431,25 +452,27 @@ export class OrderFormComponent implements OnInit {
       this.recalculateTotalPrice();
     });
   }
-  toggleProductSelection(product: ProductDTO){
-    const index = this.selectedProducts.findIndex(p => p.productId === product.productId);
-    if(index != -1){
-      this.selectedProducts.splice(index, 1);
+  toggleProductSelection(product: ProductDTO) {
+  if (this.isEditMode) {
+    const index = this.newSelectedProducts.findIndex(p => p.productId === product.productId);
+    if (index !== -1) {
+      this.newSelectedProducts.splice(index, 1);
       this.totalPrice -= product.productPrice;
-    }else{
-      this.selectedProducts.push(product);
+    } else {
+      this.newSelectedProducts.push({ ...product });
       this.totalPrice += product.productPrice;
     }
-
-    if(this.isEditMode){
-      const newIndex = this.newSelectedProducts.findIndex(p => p.productId === product.productId);
-      if(newIndex !== -1){
-        this.newSelectedProducts.splice(newIndex, 1);
-      }else{
-        this.newSelectedProducts.push(product);
-      }
+  } else {
+    const index = this.selectedProducts.findIndex(p => p.productId === product.productId);
+    if (index !== -1) {
+      this.selectedProducts.splice(index, 1);
+      this.totalPrice -= product.productPrice;
+    } else {
+      this.selectedProducts.push({ ...product });
+      this.totalPrice += product.productPrice;
     }
   }
+}
   confirmSelection() {
     if(this.selectedProducts.length > 0){
       const isEdit = this.isEditingProducts === true;
@@ -487,20 +510,17 @@ export class OrderFormComponent implements OnInit {
            [...newMap.keys()].some(productId => !originalMap.has(productId))
   }
 
-  removeProduct(productId: number): void{
-    const index = this.selectedProducts.findIndex(p => p.productId === productId);
-    this.totalPrice -= this.selectedProducts[index].productAmount * this.selectedProducts[index].productPrice;
-    if(index !== -1){
-      this.selectedProducts.splice(index, 1);
+  removeProduct(productId: number): void {
+    const targetArray = this.isEditMode ? this.newSelectedProducts : this.selectedProducts;
+    const index = targetArray.findIndex(p => p.productId === productId);
+
+    if (index !== -1) {
+      this.totalPrice -= targetArray[index].productAmount * targetArray[index].productPrice;
+      targetArray.splice(index, 1);
       this.snackBar.open('Produkt bol odstránený!', '', { duration: 1500 });
     }
-    if(this.isEditMode){
-      const newIndex = this.newSelectedProducts.findIndex(p => p.productId === productId);
-      if (newIndex !== -1) {
-        this.newSelectedProducts.splice(newIndex, 1);
-      }
-    }
   }
+
 
   clearProducts(): void{
     this.selectedProducts = [];
@@ -509,18 +529,18 @@ export class OrderFormComponent implements OnInit {
   }
 
   updateAmount(productId: number, productAmount: number) {
-    const product = this.selectedProducts.find(p => p.productId === productId);
-    if(product && productAmount > 0){
+    if (productAmount <= 0) return;
+
+    const targetArray = this.isEditingProducts ? this.newSelectedProducts : this.selectedProducts;
+    const product = targetArray.find(p => p.productId === productId);
+
+    if (product) {
       product.productAmount = productAmount;
       this.recalculateTotalPrice();
     }
-    if (this.isEditingProducts) {
-      const newProduct = this.newSelectedProducts.find(p => p.productId === productId);
-      if (newProduct) {
-        newProduct.productAmount = productAmount;
-      }
-    }
   }
+
+
   onDeliveryOptionChange(): void {
     const deliveryOption = this.orderForm.get('deliveryOption')?.value;
     if (deliveryOption === 'Kuriér') {
@@ -543,9 +563,12 @@ export class OrderFormComponent implements OnInit {
     }
     this.recalculateTotalPrice();
   }
+
   recalculateTotalPrice(): void {
+    const targetArray = this.isEditMode ? this.newSelectedProducts : this.selectedProducts;
+
     let productsTotal = 0;
-    this.selectedProducts.forEach(product => {
+    targetArray.forEach(product => {
       productsTotal += (product.productPrice * product.productAmount);
     });
     this.productsTotalPrice = productsTotal; 
@@ -584,8 +607,8 @@ export class OrderFormComponent implements OnInit {
     const packageCode = packageCodeControl?.value;
 
     if (orderStatus === 'Zasielanie čísla zásielky' && !packageCode) {
-      this.orderForm.get('packageCode')?.setErrors({ required: true });
-      this.orderForm.get('packageCode')?.markAsTouched();
+      packageCodeControl?.setErrors({ required: true });
+      packageCodeControl?.markAsTouched();
       this.snackBar.open('Pre tento stav objednávky je potrebné zadať podacie číslo!', '', { duration: 3000 });
       this.isLoading = false;
       return; 
@@ -602,16 +625,14 @@ export class OrderFormComponent implements OnInit {
       }
     }
 
-    const emailControl = this.orderForm.get('email');
-    if (!emailControl?.value || emailControl.value.trim() === '') {
-      emailControl?.setValue(this.DEFAULT_EMAIL);
-    }
+    this.fillDefaultValues();
 
     const arrayChanged = this.checkChanges(this.selectedProducts, this.newSelectedProducts);
 
     if(this.orderForm.valid && this.invoiceForm.valid){
       if(this.orderForm.pristine && !arrayChanged){
         this.snackBar.open('Nebola vykonaná žiadna zmena v objednávke!', '', { duration: 1500 });
+        this.isLoading = false;
       }else{
         let order = this.createOrderDTO();
 
@@ -631,7 +652,7 @@ export class OrderFormComponent implements OnInit {
         this.orderService.updateOrder(this.existingOrderId, order).subscribe((response) => {
           const response_obj = response
           if(arrayChanged){
-            this.orderService.updateOrderProducts(response_obj.id, this.selectedProducts).subscribe((response: HttpResponse<boolean>) => {
+            this.productService.updateOrderProducts(response_obj.id, this.newSelectedProducts).subscribe((response: HttpResponse<boolean>) => {
               if(response.status === 200 || response.status === 204){
                 this.checkOrderStatusAndSendEmails(order);
                 this.snackBar.open('Objednávka bola úspešne upravená!', '', { duration: 2000 });
@@ -664,6 +685,17 @@ export class OrderFormComponent implements OnInit {
     }
   }
 
+  private fillDefaultValues() {
+    const fields = ['email', 'customerName', 'address', 'city', 'postalCode', 'phoneNumber'];
+
+    fields.forEach(field => {
+      const control = this.orderForm.get(field);
+      if (!control?.value || control.value.trim() === '') {
+        control.setValue(this.DEFAULTS[field]);
+      }
+    });
+  }
+
   private checkOrderStatusAndSendEmails(order: OrderDTO){
     const orderStatus = this.orderForm.get('orderStatus')?.value || order.orderStatus;
 
@@ -681,7 +713,7 @@ export class OrderFormComponent implements OnInit {
   }
 
   loadOrder(orderId: number){
-    this.isLoading_edit = true;
+    this.isLoadingEdit = true;
     this.orderService.getOrderDetails(orderId).subscribe((order) => {
       this.orderForm.patchValue(order); //patchValue robi ze vyplni hodnoty objednavky
 
@@ -704,10 +736,13 @@ export class OrderFormComponent implements OnInit {
         invoicePhoneNumber: order.invoicePhoneNumber,
       });
 
-      this.orderService.getOrderProducts(order.id).subscribe((result) => {
+      this.productService.getOrderProducts(order.id).subscribe((result) => {
         this.selectedProducts = result;
+        this.newSelectedProducts = JSON.parse(JSON.stringify(this.selectedProducts));
+
         this.recalculateTotalPrice();
-        this.isLoading_edit = false;
+
+        this.isLoadingEdit = false;
       });
     })
   }
@@ -774,10 +809,7 @@ export class OrderFormComponent implements OnInit {
       }
     }
 
-    const emailControl = this.orderForm.get('email');
-    if (!emailControl?.value || emailControl.value.trim() === '') {
-      emailControl?.setValue(this.DEFAULT_EMAIL);
-    }
+    this.fillDefaultValues();
 
     this.orderForm.get('packageCode')?.setErrors(null);
 
@@ -797,7 +829,7 @@ export class OrderFormComponent implements OnInit {
 
       this.orderService.createOrder(order).subscribe((response: OrderDTO) => {
         if(response){
-          this.orderService.addProductsToOrder(response.id, this.selectedProducts).subscribe({
+          this.productService.addProductsToOrder(response.id, this.selectedProducts).subscribe({
             next: (res) => {
               if (res.status === 204) {
                 this.checkOrderStatusAndSendEmails(order);
@@ -887,31 +919,31 @@ export class OrderFormComponent implements OnInit {
   }
 
   validatePackageCode(packageCode: string): void {
-    this.isLoading_packageCode = true;
+    this.isLoadingPackageCode = true;
 
     this.orderForm.get('packageCode')?.markAsTouched();
 
     if(!packageCode){
       this.orderForm.get('packageCode')?.setErrors({ required: true });
       this.snackBar.open('Podacie číslo nebolo zadané!', '', { duration: 2000 });
-      this.isLoading_packageCode = false;
+      this.isLoadingPackageCode = false;
       return;
     }
 
     if (this.isEditMode && packageCode === this.originalPackageCode) {
       this.orderForm.get('packageCode')?.setErrors(null);
       this.snackBar.open('Podacie číslo ostáva nezmenené a je platné.', '', { duration: 2000 });
-      this.isLoading_packageCode = false;
+      this.isLoadingPackageCode = false;
       return;
     }
 
     if (!this.checkPackageCodeFormat(packageCode)) {
-      this.isLoading_packageCode = false;
+      this.isLoadingPackageCode = false;
       return;
     }
 
     this.ephService.validatePackageCode(packageCode)
-      .pipe(finalize(() => this.isLoading_packageCode = false))
+      .pipe(finalize(() => this.isLoadingPackageCode = false))
       .subscribe({
         next: (response) => {
           setTimeout(() => {
@@ -936,7 +968,7 @@ export class OrderFormComponent implements OnInit {
 
   validatePackageCodeForSubmit(packageCode: string): Observable<boolean> {
     if (!this.checkPackageCodeFormat(packageCode)) {
-      this.isLoading_packageCode = false;
+      this.isLoadingPackageCode = false;
       return of(false);
     }
     return this.ephService.validatePackageCode(packageCode).pipe(
@@ -960,9 +992,9 @@ export class OrderFormComponent implements OnInit {
   }
 
   generatePackageCode(){
-    this.isLoading_packageCode = true;
+    this.isLoadingPackageCode = true;
     this.ephService.generatePackageCode().pipe(
-      finalize(() => this.isLoading_packageCode = false)
+      finalize(() => this.isLoadingPackageCode = false)
     ).subscribe({
       next: (response) => {
         this.orderForm.patchValue({
@@ -1006,7 +1038,7 @@ export class OrderFormComponent implements OnInit {
 
     const companyRowHTML = hasCompanyData ? `
       <tr>
-        <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">
+        <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">
           Spoločnosť, IČO, DIČ, IČ DPH
         </th>
         <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
@@ -1020,7 +1052,7 @@ export class OrderFormComponent implements OnInit {
 
     const invoiceCompanyRowHTML = hasInvoiceCompanyData ? `
       <tr>
-        <th style="padding: 8px; text-align: left; background-color: #f8f9fa;">
+        <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">
           Spoločnosť, IČO, DIČ, IČ DPH
         </th>
         <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
@@ -1140,22 +1172,30 @@ export class OrderFormComponent implements OnInit {
       <table style="width: 100%; border: 1px solid #e0e0e0;">
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.customerName}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
+            ${this.orderForm.value.customerName === this.DEFAULTS.customerName ? 'Nezadané' : this.orderForm.value.customerName}
+          </td>
         </tr>
         ${companyRowHTML}
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Adresa</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.orderForm.value.address}, ${this.orderForm.value.postalCode}, ${this.orderForm.value.city}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
+            ${this.orderForm.value.address === this.DEFAULTS.address ? 'Nezadané' : this.orderForm.value.address}, 
+            ${this.orderForm.value.postalCode === this.DEFAULTS.postalCode ? 'Nezadané' : this.orderForm.value.postalCode}, 
+            ${this.orderForm.value.city === this.DEFAULTS.city ? 'Nezadané' : this.orderForm.value.city}
+          </td>
         </tr>
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
           <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
-            ${this.orderForm.value.email === this.DEFAULT_EMAIL ? 'Nezadané' : this.orderForm.value.email}
+            ${this.orderForm.value.email === this.DEFAULTS.email ? 'Nezadané' : this.orderForm.value.email}
           </td>
         </tr>
         <tr>
           <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
-          <td style="padding: 8px;">${this.orderForm.value.phoneNumber}</td>
+          <td style="padding: 8px;">
+            ${this.orderForm.value.phoneNumber === this.DEFAULTS.phoneNumber ? 'Nezadané' : this.orderForm.value.phoneNumber}
+          </td>
         </tr>
       </table>
     </div>

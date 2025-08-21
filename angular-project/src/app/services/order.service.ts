@@ -1,106 +1,98 @@
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 import { ProductDTO } from './product.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
+  private readonly baseEndpoint = 'order';
+  private readonly jsonHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
   constructor(@Inject('BASE_URL') private baseUrl: string, private http: HttpClient) { }
 
-  createOrder(order: OrderDTO){
-    const url = `${this.baseUrl}/order/create-order`;
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post(url, order, {headers});
+  createOrder(order: OrderDTO): Observable<OrderDTO> {
+    return this.post<OrderDTO>('create-order', order);
   }
-  getOrders(): Observable<OrderDTO[]>{
-    const url = `${this.baseUrl}/order/get-orders`;
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.get<OrderDTO[]>(url, {headers});
+  getOrders(): Observable<OrderDTO[]> {
+    return this.get<OrderDTO[]>('get-orders');
   }
-  getOrderDetails(orderId: number){
-    const url = `${this.baseUrl}/order/get-order-details/${orderId}`;
-    return this.http.get<OrderDTO>(url);
+  getOrderDetails(orderId: number): Observable<OrderDTO> {
+    return this.get<OrderDTO>(`get-order-details/${orderId}`);
   }
-  deleteOrder(rowId: number){
-    const url = `${this.baseUrl}/order/delete-order/${rowId}`;
-    return this.http.delete(url);
+  deleteOrder(rowId: number): Observable<void> {
+    return this.delete<void>(`delete-order/${rowId}`);
   }
-  updateOrder(orderId: number, order: OrderDTO): Observable<any>{
-    const url = `${this.baseUrl}/order/update-order/${orderId}`;
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.put(url, order, {headers, responseType: 'json'}); //znamena ze Angular bude ocakavat textovu spravu a nie JSON takze sa spravne spracuje
+  updateOrder(orderId: number, order: OrderDTO): Observable<OrderDTO> {
+    return this.put<OrderDTO>(`update-order/${orderId}`, order);
   }
-  addProductsToOrder(orderId: number, products: ProductDTO[]): Observable<HttpResponse<any>>{
-    const url = `${this.baseUrl}/product/add-products-to-order`;
-    const body = {
-      orderId, 
-      products
-    }
-    return this.http.post(url, body, { observe: 'response' });
+  copyOrders(orderIds: number[], currentDate: string): Observable<void> {
+    return this.post<void>('copy-orders', { OrderIds: orderIds, OrderDate: currentDate });
   }
-  getOrderProducts(orderId: number){
-    const url = `${this.baseUrl}/product/get-products/${orderId}`;
-    return this.http.get<ProductDTO[]>(url);
+  changeOrderStatus(orderIds: number[], orderStatus: string): Observable<any> {
+    return this.put<any>('change-order-status', { OrderIds: orderIds, OrderStatus: orderStatus });
   }
-  updateOrderProducts(orderId: number, products: ProductDTO[]){
-    const url = `${this.baseUrl}/product/update-order-products`;
-    const body = {
-      orderId, 
-      products
-    }
-    return this.http.put(url, body, { observe: 'response' });
-  }
-  copyOrders(orderIds: number[], currentDate: string){
-    const url = `${this.baseUrl}/order/copy-orders`;
-    const body = {
-      OrderIds: orderIds,
-      OrderDate: currentDate
-    }
-    return this.http.post(url, body);
-  }
-  changeOrderStatus(orderIds: number[], orderStatus: string){
-    const url = `${this.baseUrl}/order/change-order-status`;
-    let body = {
-      OrderIds: orderIds,
-      OrderStatus: orderStatus
-    }
-    return this.http.put(url, body);
-  }
-  removeSelectedOrders(orderIds: number[]){
-    const url = `${this.baseUrl}/order/remove-selected-orders`;
-    let body = {
-      OrderIds: orderIds
-    };
-    return this.http.delete(url, { body: body });
+  removeSelectedOrders(orderIds: number[]): Observable<any> {
+    return this.delete<any>('remove-selected-orders', { orderIds });
   }
   getOrdersXmlFile(orderIds: number[]): Observable<ExportXmlResponseDTO> {
-    const url = `${this.baseUrl}/order/export-orders-to-xml`;
-    const body = { OrderIds: orderIds };
-    return this.http.post<ExportXmlResponseDTO>(url, body);
+    return this.post<ExportXmlResponseDTO>('export-orders-to-xml', { OrderIds: orderIds });
   }
-  getOrderStatuses(): Observable<OrderStatusDTO[]>{
-    const url = `${this.baseUrl}/order/get-order-statuses`;
-    return this.http.get<OrderStatusDTO[]>(url);
+  getOrderStatuses(): Observable<OrderStatusDTO[]> {
+    return this.get<OrderStatusDTO[]>('get-order-statuses');
   }
-  saveOrderStatusesSortOrder(statuses: OrderStatusDTO[]) {
-    const url = `${this.baseUrl}/order/save-order-statuses-sort-order`;
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.put(url, statuses, { headers: headers });
+  saveOrderStatusesSortOrder(statuses: OrderStatusDTO[]): Observable<void> { // *
+    return this.put<void>('save-order-statuses-sort-order', statuses);
   }
-  addOrderStatus(status: OrderStatusDTO) {
-    const url = `${this.baseUrl}/order/add-order-status`;
-    return this.http.post(url, status);
+  addOrderStatus(status: OrderStatusDTO): Observable<OrderStatusDTO> {
+    return this.post<OrderStatusDTO>('add-order-status', status);
   }
-  deleteOrderStatus(statusId: number) {
-    const url = `${this.baseUrl}/order/delete-order-status/${statusId}`;
-    return this.http.delete(url);
+  deleteOrderStatus(statusId: number): Observable<void> {
+    return this.delete<void>(`delete-order-status/${statusId}`);
   }
-  updateOrderStatus(status: OrderStatusDTO) {
-    const url = `${this.baseUrl}/order/update-order-status`;
-    return this.http.put(url, status);
+  updateOrderStatus(status: OrderStatusDTO): Observable<OrderStatusDTO> {
+    return this.put<OrderStatusDTO>('update-order-status', status);
+  }
+
+  private get<T>(endpoint: string): Observable<T> {
+    const url = `${this.baseUrl}/${this.baseEndpoint}/${endpoint}`;
+    return this.http.get<T>(url).pipe(
+      catchError(err => {
+        console.error(`GET ${url} failed:`, err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  private post<T>(endpoint: string, body: any): Observable<T> {
+    const url = `${this.baseUrl}/${this.baseEndpoint}/${endpoint}`;
+    return this.http.post<T>(url, body, { headers: this.jsonHeaders }).pipe(
+      catchError(err => {
+        console.error(`POST ${url} failed:`, err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  private put<T>(endpoint: string, body: any): Observable<T> {
+    const url = `${this.baseUrl}/${this.baseEndpoint}/${endpoint}`;
+    return this.http.put<T>(url, body, { headers: this.jsonHeaders }).pipe(
+      catchError(err => {
+        console.error(`PUT ${url} failed:`, err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  private delete<T>(endpoint: string, body?: any): Observable<T> {
+    const url = `${this.baseUrl}/${this.baseEndpoint}/${endpoint}`;
+    return this.http.delete<T>(url, { body }).pipe(
+      catchError(err => {
+        console.error(`DELETE ${url} failed:`, err);
+        return throwError(() => err);
+      })
+    );
   }
 }
 export interface OrderDTO {

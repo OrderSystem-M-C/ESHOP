@@ -6,9 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Text;
-using System.Transactions;
 using System.Xml.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AspNetCoreAPI.Controllers
 {
@@ -80,7 +78,7 @@ namespace AspNetCoreAPI.Controllers
             }
         }
         [HttpGet("get-orders")]
-        public async Task<ActionResult<IEnumerable<OrderDTO[]>>> getOrders()
+        public async Task<ActionResult<IEnumerable<OrderDTO[]>>> GetOrdersAsync()
         {
             try
             {
