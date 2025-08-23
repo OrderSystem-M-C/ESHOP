@@ -19,7 +19,7 @@ import { PageNotFoundComponent } from './app/page-not-found/page-not-found.compo
 import { EphSettingsComponent } from './app/eph-settings/eph-settings.component';
 
 export function getBaseUrl() {
-  return 'https://web1244125.bsite.net/api';
+  return 'https://web1244125.bsite.net/api'; 
 }
 
 export function tokenGetter() {

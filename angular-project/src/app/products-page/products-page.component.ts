@@ -366,6 +366,8 @@ export class ProductsPageComponent implements OnInit {
   }
 
   openCreateDialog(createProductDialog: TemplateRef<any>){
+    if(this.isEditingProducts) this.cancelEditing();
+    
     this.creationSuccessful = this.isEditMode = false; 
     this.dialogRef = this.dialog.open(createProductDialog, {
         autoFocus: false

@@ -9,10 +9,11 @@ import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { EmailService } from '../services/email.service';
-import { catchError, EMPTY, filter, finalize, forkJoin, of, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, finalize, forkJoin, map, of, switchMap, tap } from 'rxjs';
 import { OrderDetailsComponent } from '../order-details/order-details.component';
-import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { EphService } from '../services/eph.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { InvoiceService } from '../services/invoice.service';
+import { ProductService } from '../services/product.service';
 
 @Component({
   selector: 'app-orders-page',
@@ -74,7 +75,16 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
 
   hoveredOrder: OrderDTO = null;
 
-  constructor(private orderService: OrderService, private datePipe: DatePipe, private router: Router, private snackBar: MatSnackBar, public authService: AuthenticationService, private emailService: EmailService){}
+  constructor(
+    private orderService: OrderService, 
+    private datePipe: DatePipe, 
+    private router: Router, 
+    private snackBar: MatSnackBar, 
+    public authService: AuthenticationService, 
+    private emailService: EmailService,
+    private invoiceService: InvoiceService,
+    private productService: ProductService
+  ){}
 
   updatePagedOrders(): void {
     const startIndex = this.pageIndex * this.pageSize;
@@ -258,7 +268,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
     })
   }
 
-  downloadXmlFile(){
+  downloadXmlFiles(){
     if(!this.selectedOrders?.length){
       this.snackBar.open("Nemáte zvolenú/é objednávku/y na kopírovanie!", "", { duration: 1000 });
       return;
@@ -312,8 +322,58 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
         } else {
           this.snackBar.open("Chyba pri generovaní alebo sťahovaní XML.", "", { duration: 3000 });
         }
+
+        this.clearSelection();
       }
     })
+  }
+
+  downloadInvoices(): void {
+    this.isLoading = true;
+
+    if(!this.selectedOrders || this.selectedOrders.length === 0) {
+      this.snackBar.open('Zabudli ste vybrať objednávky!', '', { duration: 3000 });
+      this.isLoading = false;
+      return;
+    }
+
+    const loadingSnack = this.snackBar.open('Generuje sa faktúra...', '', { duration: undefined });
+
+    const observables = this.selectedOrders.map(selected =>
+      this.orderService.getOrderDetails(selected.orderId).pipe(
+        switchMap(order => 
+          this.productService.getOrderProducts(order.id!).pipe(
+            map(products => ({
+              order: order,
+              products
+            }))
+          )
+        )
+      )
+    );
+
+    forkJoin(observables).subscribe({
+      next: async results => {
+        try {
+          await this.invoiceService.generateInvoices(results);
+          this.snackBar.open('PDF faktúry boli úspešne stiahnuté!', '', { duration: 2000 });
+        } catch (err) {
+          console.error(err);
+          this.snackBar.open('Nastala chyba pri generovaní faktúr!', '', { duration: 3000 });
+        } finally {
+          this.isLoading = false;
+          
+          loadingSnack.dismiss();
+          this.clearSelection();
+        }
+      },
+      error: err => {
+        console.error(err);
+        this.snackBar.open('Nastala chyba pri načítaní objednávok!', '', { duration: 3000 });
+        this.isLoading = false;
+        loadingSnack.dismiss();
+      }
+    });
   }
 
   private reloadOrders() {

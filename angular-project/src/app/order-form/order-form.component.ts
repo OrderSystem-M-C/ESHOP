@@ -1,7 +1,6 @@
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
-import * as html2pdf from 'html2pdf.js';
 import { OrderDTO, OrderService, OrderStatusDTO } from '../services/order.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -15,6 +14,8 @@ import { EphService, EphSettingsDTO } from '../services/eph.service';
 import { catchError, finalize, map, Observable, of } from 'rxjs';
 import { CdkDrag, DragDropModule, moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ManageStatusesDialogComponent } from '../manage-statuses-dialog/manage-statuses-dialog.component';
+import * as html2pdf from 'html2pdf.js';
+import { InvoiceService } from '../services/invoice.service';
 
 @Component({
   selector: 'app-order-form',
@@ -87,7 +88,18 @@ export class OrderFormComponent implements OnInit {
   isEditingProductPrices: boolean = false;
   hasShownEditingSnackbar: boolean = false;
 
-  constructor(private datePipe: DatePipe, private route: ActivatedRoute, public orderService: OrderService, private router: Router, private snackBar: MatSnackBar, private dialog: MatDialog, private productService: ProductService, private emailService: EmailService, private ephService: EphService){}
+  constructor(
+    private datePipe: DatePipe, 
+    private route: ActivatedRoute, 
+    public orderService: OrderService, 
+    private router: Router, 
+    private snackBar: MatSnackBar, 
+    private dialog: MatDialog, 
+    private productService: ProductService, 
+    private emailService: EmailService, 
+    private ephService: EphService,
+    private invoiceService: InvoiceService
+  ){}
 
   updatePagedProducts(): void {
     const startIndex = this.pageIndex * this.pageSize;
@@ -836,7 +848,7 @@ export class OrderFormComponent implements OnInit {
                 this.isLoading = false;
 
                 if (!this.invoiceCreated) {
-                  this.createInvoice();
+                  this.downloadInvoice();
                   this.router.navigate(['/orders-page']);
                 } else {
                   this.snackBar.open('Objednávka bola úspešne vytvorená!', '', { duration: 1500 });
@@ -1021,210 +1033,39 @@ export class OrderFormComponent implements OnInit {
     });
   }
 
-  async createInvoice(){
+  async downloadInvoice(){
+    if (this.selectedProducts.length === 0) {
+      this.snackBar.open('Zabudli ste na výber produktov!', '', { duration: 3000 });
+      return;
+    }
+
+    if (!this.orderForm.valid || !this.invoiceForm.valid){
+      this.validateAllFormFields(this.orderForm);
+      this.validateAllFormFields(this.invoiceForm);
+      this.snackBar.open(
+        'Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!',
+        '', 
+        { duration: 3000 }
+      );
+      return;
+    }
+
     this.invoiceCreated = true;
-    const formattedInvoiceIssueDate = this.invoiceForm.value.invoiceIssueDate.split('-').reverse().join('.');
-    
-    const hasCompanyData = this.orderForm.value.company || this.orderForm.value.ico || this.orderForm.value.dic;
-    const hasInvoiceCompanyData = this.invoiceForm.value.invoiceCompany || this.invoiceForm.value.invoiceICO || this.invoiceForm.value.invoiceDIC;
-
-    const invoiceName = this.invoiceForm.value.invoiceName;
-    const invoiceEmail = this.invoiceForm.value.invoiceEmail;
-    const invoicePhoneNumber = this.invoiceForm.value.invoicePhoneNumber;
-
-    const hasInvoiceBasicData = invoiceName && invoiceEmail && invoicePhoneNumber;  
-
     const loadingSnack = this.snackBar.open('Sťahuje sa faktúra...', '', { duration: undefined });
 
-    const companyRowHTML = hasCompanyData ? `
-      <tr>
-        <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">
-          Spoločnosť, IČO, DIČ, IČ DPH
-        </th>
-        <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
-          ${this.orderForm.value.company || 'Nie je zadané'}, 
-          ${this.orderForm.value.ico || 'Nie je zadané'}, 
-          ${this.orderForm.value.dic || 'Nie je zadané'}, 
-          ${this.orderForm.value.icDph || 'Nie je zadané'}
-        </td>
-      </tr>
-` : '';
+    try {
+      const orderData = this.createOrderDTO();
 
-    const invoiceCompanyRowHTML = hasInvoiceCompanyData ? `
-      <tr>
-        <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">
-          Spoločnosť, IČO, DIČ, IČ DPH
-        </th>
-        <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
-          ${ this.invoiceForm.value.invoiceCompany || 'Nie je zadané'}, 
-          ${ this.invoiceForm.value.invoiceICO || 'Nie je zadané'}, 
-          ${ this.invoiceForm.value.invoiceDIC || 'Nie je zadané'}
-        </td>
-      </tr>
-` : '';
+      console.log(orderData);
 
-    const invoiceDataHTML = hasInvoiceBasicData ? `
-      <div>
-        <h3 style="margin-bottom: 10px; font-weight: bold;">Fakturačné údaje</h3>
-        <table style="width: 100%; border: 1px solid #e0e0e0;">
-          <tr>
-            <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
-            <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${invoiceName}</td>
-          </tr>
-          ${invoiceCompanyRowHTML}
-          <tr>
-            <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
-            <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${invoiceEmail}</td>
-          </tr>
-          <tr>
-            <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
-            <td style="padding: 8px;">${invoicePhoneNumber}</td>
-          </tr>
-        </table>
-      </div>
-    ` : '';
-
-    if(this.invoiceForm.valid && this.orderForm.valid && this.selectedProducts.length > 0){
-      const invoiceHTML = `
-<div style="width: 100%; margin: 10px auto; box-sizing: border-box; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333;">
-  <div style="background-color: #e4e4e4ff; padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
-    <h2 style="margin-top: 14px;">Číslo objednávky: <strong>${this.isEditMode ? this.existingOrderId : this.orderId}</strong></h2>
-  </div>
-  <div style="padding: 20px;">
-    <div style="margin-bottom: 20px;">
-      <table style="width: 100%; border-collapse: collapse;">
-        <tr>
-          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0; width: 40%;">Dátum vystavenia faktúry</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${formattedInvoiceIssueDate}</td>
-        </tr>
-        <tr>
-          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Číslo faktúry</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.invoiceForm.value.invoiceNumber}</td>
-        </tr>
-        <tr>
-          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Celkový počet produktov</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.selectedProducts.reduce((sum, product) => sum + product.productAmount, 0)} ks</td>
-        </tr>
-        <tr>
-          <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Celková hmotnosť</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">1 kg</td>
-        </tr>
-      </table>
-    </div>
-
-    <div style="margin-bottom: 20px;">
-      <h3 style="margin-bottom: 10px; font-weight: bold;">Objednané produkty</h3>
-      <table style="width: 100%; border: 1px solid #e0e0e0;">
-        <thead style="background-color: #e4e4e4ff;">
-          <tr>
-            <th style="padding: 8px; text-align: left;">Názov produktu</th>
-            <th style="padding: 8px; text-align: center; text-wrap: nowrap;">Cena/ks</th>
-            <th style="padding: 8px; text-align: center;">Množstvo</th>
-            <th style="padding: 8px; text-align: center; text-wrap: nowrap;">Celkom (€)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${this.selectedProducts.map(product => `
-            <tr>
-              <td style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">${product.productName}</td>
-              <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${product.productPrice} €</td>
-              <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${product.productAmount} ks</td>
-              <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
-                ${product.productPrice * product.productAmount} €
-              </td>
-            </tr>
-          `).join('')}
-
-          <tr style="border-top: 1px solid #000; background-color: #f8f9fa;">
-            <td colspan="2" style="padding: 8px; text-align: left;">Zvolený spôsob dopravy</td>
-            <td style="padding: 8px; text-align: center;">Poštovné (${this.orderForm.get('deliveryOption').value}):</td>
-            <td style="padding: 8px; text-align: center;">
-              ${(this.orderForm.get('deliveryCost')?.value || 0).toFixed(2)} €
-            </td>
-          </tr>
-
-          <tr style="border-bottom: 1px solid #000; background-color: #f8f9fa;">
-            <td colspan="2" style="padding: 8px; text-align: left;">Zvolený spôsob platby</td>
-            <td style="padding: 8px; text-align: center;">Poplatok za platbu (${this.orderForm.get('paymentOption').value}):</td>
-            <td style="padding: 8px; text-align: center;">
-              ${(this.orderForm.get('paymentCost')?.value || 0).toFixed(2)} €
-            </td>
-          </tr>
-
-
-          <tr>
-            <td colspan="2" style="padding: 8px; text-align: left;">Celková cena objednávky</td>
-            <td style="padding: 8px; font-weight: bold; text-align: center;">CELKOM:</td>
-            <td style="padding: 8px; font-weight: bold; text-align: center;">
-              ${
-                this.orderForm.get('discountAmount')?.value > 0
-                  ? (this.totalPrice.toFixed(2) + ' € <span style="color: #6c757d;">(zľava: -' + (this.orderForm.get('discountAmount')?.value || 0) + '%)</span>')
-                  : (this.totalPrice.toFixed(2) + ' €')
-              }
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div style="margin-bottom: 20px;">
-      <h3 style="margin-bottom: 10px; font-weight: bold;">Objednávateľ</h3>
-      <table style="width: 100%; border: 1px solid #e0e0e0;">
-        <tr>
-          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
-            ${this.orderForm.value.customerName === this.DEFAULTS.customerName ? 'Nezadané' : this.orderForm.value.customerName}
-          </td>
-        </tr>
-        ${companyRowHTML}
-        <tr>
-          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Adresa</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
-            ${this.orderForm.value.address === this.DEFAULTS.address ? 'Nezadané' : this.orderForm.value.address}, 
-            ${this.orderForm.value.postalCode === this.DEFAULTS.postalCode ? 'Nezadané' : this.orderForm.value.postalCode}, 
-            ${this.orderForm.value.city === this.DEFAULTS.city ? 'Nezadané' : this.orderForm.value.city}
-          </td>
-        </tr>
-        <tr>
-          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
-          <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
-            ${this.orderForm.value.email === this.DEFAULTS.email ? 'Nezadané' : this.orderForm.value.email}
-          </td>
-        </tr>
-        <tr>
-          <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
-          <td style="padding: 8px;">
-            ${this.orderForm.value.phoneNumber === this.DEFAULTS.phoneNumber ? 'Nezadané' : this.orderForm.value.phoneNumber}
-          </td>
-        </tr>
-      </table>
-    </div>
-    ${invoiceDataHTML}
-  </div>
-</div>
-`
-      const orderIdForInvoice = this.isEditMode ? this.existingOrderId : this.orderId;
-      const options = {
-        margin: [5, 5, 5, 5],
-        filename: `Faktúra_č${orderIdForInvoice}.pdf`,
-        html2canvas: { scale: 2 },
-        jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'}
-      };
-
-      if(invoiceHTML){
-        await html2pdf().set(options).from(invoiceHTML).save();
-        setTimeout(() => {
-          this.invoiceCreated = false;
-        }, 2000);
-        loadingSnack.dismiss();
-        this.snackBar.open('Faktúra bola úspešne stiahnutá!', '', { duration: 2000 });
-      }
-    }else{
-      this.validateAllFormFields(this.invoiceForm);
-      this.validateAllFormFields(this.orderForm);
+      await this.invoiceService.generateInvoice(orderData, this.selectedProducts);
+      this.snackBar.open('Faktúra bola úspešne stiahnutá!', '', { duration: 2000 });
+    } catch (err) {
+      console.error(err);
+      this.snackBar.open('Nastala chyba pri sťahovaní faktúry!', '', { duration: 2000 });
+    } finally {
       this.invoiceCreated = false;
       loadingSnack.dismiss();
-      this.snackBar.open('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!', '', { duration: 3000 });
     }
   }
 

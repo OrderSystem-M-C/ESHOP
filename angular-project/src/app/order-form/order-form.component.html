@@ -191,7 +191,7 @@
         </div>
         <div class="invoice-settings">
             <h3>Nastavenia faktúry</h3>
-            <form [formGroup]="invoiceForm" (ngSubmit)="createInvoice()">
+            <form [formGroup]="invoiceForm" (ngSubmit)="downloadInvoice()">
               <div class="field">
                 <label for="invoiceNumber" class="form-label">Číslo faktúry* (automaticky vyplnené z č. objednávky)</label>
                 <input type="number" id="invoiceNumber" class="form-control" value="{{orderId}}" readonly placeholder="Zadajte číslo faktúry" formControlName="invoiceNumber" [ngClass]="{'is-invalid': invoiceForm.get('invoiceNumber').invalid && invoiceForm.get('invoiceNumber').touched}">
@@ -234,7 +234,7 @@
             </div>
             <div class="field">
               <p><strong>Poznámka:</strong> Faktúra bude automaticky vygenerovaná pri odoslaní objednávky. Toto tlačidlo slúži na jej náhľad a kontrolu.</p>
-              <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn" (click)="createInvoice()" [disabled]="invoiceCreated">Vytvoriť faktúru</button>
+              <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn" (click)="downloadInvoice()" [disabled]="invoiceCreated">Vytvoriť faktúru</button>
             </div>
             </form>
         </div>

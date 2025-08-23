@@ -95,6 +95,7 @@ export class OrderService {
     );
   }
 }
+
 export interface OrderDTO {
   id?: number;
   orderId: number;
@@ -129,11 +130,13 @@ export interface OrderDTO {
   orderSelected?: boolean;
   packageCode?: string;
 }
+
 export interface ExportXmlResponseDTO {
   fileContentBase64: string;
   fileName: string;
   generatedCodes: { [key: number]: string };
 }
+
 export interface OrderStatusDTO {
   statusId?: number;
   statusName: string;

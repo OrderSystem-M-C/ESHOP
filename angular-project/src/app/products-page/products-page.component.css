@@ -198,8 +198,8 @@ h1 {
   border-radius: 10px;
   overflow-y: auto;
   z-index: 10;
-  border-width: 0px 1px 1px 1px;
   border: 1px solid #333;
+  border-width: 0px 1px 1px 1px;
 }
 .alphabetical-field, .price-field {
   border-radius: 5px;

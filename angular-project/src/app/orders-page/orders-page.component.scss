@@ -64,6 +64,7 @@ h1 {
 .change-status-button,
 .select-orders-to-remove-button,
 .generate-xml-file-from-orders,
+.download-invoice,
 .cancel-selection,
 .select-all-orders {
   max-width: 350px;
@@ -99,6 +100,10 @@ h1 {
 .button-container button:nth-child(even) img {
   height: 23px !important;
   width: 25px !important;
+}
+.download-icon {
+  height: 22.5px !important;
+  width: 22.5px !important;
 }
 .select-orders-to-remove-button button img {
   filter: brightness(0%);
