@@ -60,44 +60,44 @@
       </div>
       <div class="service-container">
         <div class="copy-container">
-          <div class="copy-button">
-            <button class="btn btn-light" (click)="copySelectedOrders()"><img src="../../assets/Images/copy-icon.png" alt="copy-icon"> Skopírovať objednávku/y</button>
-          </div>
+          <button class="btn btn-light" (click)="copySelectedOrders()"><img src="../../assets/Images/copy-icon.png" alt="copy-icon"> 
+            Skopírovať objednávku/y
+          </button>
         </div>
         <div class="change-status-container">
-          <div class="change-status-button">
-           <button class="btn btn-light" (click)="toggleDropdown('changeStatus')"><img src="../../assets/Images/change-status-icon.png"> Rýchla zmena stavu objednávky</button>
-            <div class="dropdown-content" [ngClass]="dropdownState['changeStatus'] ? 'is-visible': 'is-not-visible'">
-              <h3><img src="../../assets/Images/click-icon.png" alt="click-icon"> Kliknutím zmeníte stav:</h3>
-              <div class="status-item" [ngStyle]="{'border-left': '8px solid ' + status.statusColor }" *ngFor="let status of statuses">
-                <a class="status-item-link" (click)="changeOrderStatus(status.statusName)">
-                  {{status.statusName}}
-                </a>
-              </div>
+          <button class="btn btn-light" (click)="toggleDropdown('changeStatus')">
+            <img src="../../assets/Images/change-status-icon.png"> Rýchla zmena stavu objednávky
+          </button>
+          <div class="dropdown-content" [ngClass]="dropdownState['changeStatus'] ? 'is-visible': 'is-not-visible'">
+            <h3>
+              <img src="../../assets/Images/click-icon.png" alt="click-icon"> Kliknutím zmeníte stav:
+            </h3>
+            <div class="status-item" [ngStyle]="{'border-left': '8px solid ' + status.statusColor}" *ngFor="let status of statuses">
+              <a class="status-item-link" (click)="changeOrderStatus(status.statusName)">
+                {{status.statusName}}
+              </a>
             </div>
           </div>
         </div>
-        <div class="select-orders-to-remove">
-          <div class="select-orders-to-remove-button">
-            <button class="btn btn-light" (click)="removeSelectedOrders()"><img src="../../assets/Images/bin-icon.png" alt="bit-icon"> Odstrániť zvolenú/é objednávku/y</button>
-          </div>
+        <div class="select-orders-to-remove-container">
+          <button class="btn btn-light" (click)="removeSelectedOrders()"><img src="../../assets/Images/bin-icon.png" alt="bit-icon"> 
+            Odstrániť zvolenú/é objednávku/y
+          </button>
         </div>
-        <div class="generate-xml-file-from-orders">
-          <div class="generate-xml-file-from-orders-button">
-            <button class="btn btn-light" (click)="downloadXmlFiles()"><img src="../../assets/Images/xml-icon.png" alt="xml-icon"> Vygenerovať XML súbor</button>
-          </div>
+        <div class="generate-xml-file-from-orders-container">
+          <button class="btn btn-light" (click)="downloadXmlFiles()"><img src="../../assets/Images/xml-icon.png" alt="xml-icon"> 
+            Vygenerovať XML
+          </button>
         </div>
-        <div class="download-invoice">
-          <div class="download-invoice-button">
-            <button class="btn btn-light" (click)="downloadInvoices()">
-              <img src="../../assets/Images/download-icon.png" alt="download-icon" class="download-icon"> Stiahnuť faktúru/y
-            </button>
-          </div>
+        <div class="download-invoice-container">
+          <button class="btn btn-light" (click)="downloadInvoices()">
+            <img src="../../assets/Images/download-file-icon.png" alt="download-icon" class="download-icon"> Stiahnuť faktúru/y
+          </button>
         </div>
-        <div class="cancel-selection">
-          <div class="cancel-selection-button">
-            <button class="btn btn-outline-danger" (click)="clearSelection(true)">Zrušiť výber</button>
-          </div>
+        <div class="cancel-selection-container">
+          <button class="btn btn-outline-danger" (click)="clearSelection(true)">
+            Zrušiť výber
+          </button>
         </div>
       </div>
     }@else{
@@ -106,11 +106,14 @@
       </div>
       <div class="sorting-container">
         <div class="checkbox-dropdown-container">
-          <div class="checkbox-dropdown">
-            <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('status')"><img src="../../assets/Images/filter-icon.png" alt="filter-icon"> Zvoľte stavy objednávok pre filtráciu</button>
-          </div>
+          <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('status')"><img src="../../assets/Images/filter-icon.png" alt="filter-icon"> 
+            Zvoľte stavy objednávok pre filtráciu
+          </button>
           <div class="dropdown-content" [ngClass]="dropdownState['status'] ? 'is-visible': 'is-not-visible'">
-            <div class="checkbox-item" [ngStyle]="{'border-left': '8px solid ' + status.statusColor }" *ngFor="let status of statuses">
+            <div class="checkbox-item" 
+              [ngStyle]="{'border-left': '8px solid ' + status.statusColor }" 
+              [ngClass]="{ 'selected-status': selectedStatuses.includes(status.statusName) }"
+              *ngFor="let status of statuses">
               <label class="checkbox-label">
                 <input type="checkbox" class="form-check-input" id="checkbox" [value]="status.statusName" (change)="onCheckboxChange($event)" [checked]="selectedStatuses.includes(status.statusName)">
                 {{ status.statusName }}
@@ -119,9 +122,9 @@
           </div>
         </div>
         <div class="filter-date-container">
-          <div class="filter-date-dropdown">
-            <button type="button" class="btn btn-light filter-date-dropdown-btn" (click)="toggleDropdown('date')"><img src="../../assets/Images/date-icon.png" alt="date-icon"> Zvoľte filtráciu podľa dátumu</button>
-          </div>
+          <button type="button" class="btn btn-light filter-date-dropdown-btn" (click)="toggleDropdown('date')"><img src="../../assets/Images/date-icon.png" alt="date-icon"> 
+            Zvoľte filtráciu podľa dátumu
+          </button>
           <div class="dropdown-content" [ngClass]="dropdownState['date'] ? 'is-visible': 'is-not-visible'">
             <div class="filter-date-field">
               <div class="filter-date-item" (click)="setSort('date', 'newest')">
@@ -134,11 +137,9 @@
           </div>
         </div>
         <div class="filter-price-container">
-          <div class="filter-price-dropdown">
-            <button type="button" class="btn btn-light filter-price-dropdown-btn" (click)="toggleDropdown('price')">
-              <img src="../../assets/Images/price-icon.png" alt="price-icon"> Zvoľte filtráciu podľa ceny
-            </button>
-          </div>
+          <button type="button" class="btn btn-light filter-price-dropdown-btn" (click)="toggleDropdown('price')">
+            <img src="../../assets/Images/price-icon.png" alt="price-icon"> Zvoľte filtráciu podľa ceny
+          </button>
           <div class="dropdown-content" [ngClass]="dropdownState['price'] ? 'is-visible': 'is-not-visible'">
             <div class="filter-price-field">
               <div class="filter-price-item" (click)="setSort('price', 'asc')">
@@ -151,11 +152,9 @@
           </div>
         </div>
         <div class="filter-name-container">
-          <div class="filter-name-dropdown">
-            <button type="button" class="btn btn-light filter-name-dropdown-btn" (click)="toggleDropdown('name')">
-              <img src="../../assets/Images/name-filter-icon.png" alt="name-filter-icon"> Zvoľte filtráciu podľa mena
-            </button>
-          </div>
+          <button type="button" class="btn btn-light filter-name-dropdown-btn" (click)="toggleDropdown('name')">
+            <img src="../../assets/Images/name-filter-icon.png" alt="name-filter-icon"> Zvoľte filtráciu podľa mena
+          </button>
           <div class="dropdown-content" [ngClass]="dropdownState['name'] ? 'is-visible': 'is-not-visible'">
             <div class="filter-name-field">
               <div class="filter-name-item" (click)="setSort('name', 'asc')">
@@ -167,10 +166,10 @@
             </div>
           </div>
         </div>
-        <div class="select-all-orders">
-          <div class="select-all-orders-button">
-            <button class="btn btn-outline-success" (click)="selectAllOrders()" *ngIf="ordersData.length > 0">Zvoliť všetky</button>
-          </div>
+        <div class="select-all-orders-container">
+          <button class="btn btn-outline-success" (click)="selectAllOrders()" *ngIf="ordersData.length > 0"> 
+            Zvoliť všetky
+          </button>
         </div>
       </div>
     }

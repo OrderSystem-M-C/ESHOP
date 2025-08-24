@@ -184,10 +184,6 @@ h1 {
   position: relative;
   margin-bottom: 15px;
 }
-.dropdown-button {
-  background-color: #f2f2f2;
-  border: 1px solid #333;
-}
 .dropdown-content{
   background-color: #f2f2f2;
   padding: 10px;
@@ -217,11 +213,15 @@ h1 {
   text-align: center;
   margin-top: 40px;
 }
-.is-visible{
-  display: block;
+.is-visible {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.15s ease;
 }
-.is-not-visible{
-  display: none;
+.is-not-visible {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 .pagination-container {
   display: flex;

@@ -24,9 +24,9 @@
   }@else{
     <div class="sorting-container">
       <div class="alphabetical-dropdown-container">
-        <div class="alphabetical-dropdown">
-          <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('alphabetical')"><img src="../../assets/Images/filter-icon.png" alt="filter-icon"> Zvoľte filtráciu podľa abecedy</button>
-        </div>
+        <button type="button" class="btn btn-light" (click)="toggleDropdown('alphabetical')"><img src="../../assets/Images/filter-icon.png" alt="filter-icon"> 
+          Zvoľte filtráciu podľa abecedy
+        </button>
         <div class="dropdown-content" [ngClass]="isVisibleAlphabetical ? 'is-visible': 'is-not-visible'">
           <div class="alphabetical-field">
             <div class="alphabetical-item" (click)="sortProducts('alphabeticalAsc')">
@@ -39,9 +39,9 @@
         </div>
       </div>
       <div class="price-dropdown-container">
-        <div class="price-dropdown">
-          <button type="button" class="btn btn-light dropdown-button" (click)="toggleDropdown('price')"><img src="../../assets/Images/price-icon.png" alt="price-icon"> Zvoľte filtráciu podľa veľkosti ceny</button>
-        </div>
+        <button type="button" class="btn btn-light" (click)="toggleDropdown('price')"><img src="../../assets/Images/price-icon.png" alt="price-icon"> 
+          Zvoľte filtráciu podľa veľkosti ceny
+        </button>
         <div class="dropdown-content" [ngClass]="isVisiblePrice ? 'is-visible': 'is-not-visible'">
           <div class="price-field">
             <div class="price-item" (click)="sortProducts('priceDesc')">

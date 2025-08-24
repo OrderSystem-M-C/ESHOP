@@ -33,6 +33,14 @@ input::placeholder {
   border-color: #06357a;
   color: #ffffff;
 }
+.btn-light {
+  border: 1px solid #333 !important;
+}
+.btn-light:hover,
+.btn-light:focus,
+.btn-light:active {
+  border: 1px solid #333 !important;
+}
 .spinner-container {
   display: flex;
   justify-content: center;
