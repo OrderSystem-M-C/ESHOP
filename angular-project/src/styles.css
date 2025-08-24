@@ -2,10 +2,14 @@ html,
 body {
   height: 100%;
 }
-body {
+body.default-layout {
   width: 1400px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0 auto;
+}
+body.login-layout {
+  width: auto;
+  max-width: unset;
+  margin: 0;
 }
 input::placeholder {
   font-size: 15px;
@@ -17,21 +21,26 @@ input::placeholder {
   transition: all 0.15s ease;
 }
 .form-control:focus {
-  border-color: #084298;
-  box-shadow: 0 0 5px #084298;
+  border-color: #198754;
+  box-shadow: 0 0 5px #198754;
   outline: none;
 }
 .btn-primary {
-  background-color: #084298;
-  border-color: #084298;
+  background-color: #198754;
+  border-color: #198754;
   color: #ffffff;
+  transition: all 0.15s ease;
 }
 .btn-primary:hover,
-.btn-primary:focus,
-.btn-primary:active {
-  background-color: #06357a; 
-  border-color: #06357a;
+.btn-primary:focus {
+  background-color: #146c43; 
+  border-color: #146c43;
   color: #ffffff;
+}
+.btn-primary:active {
+  background-color: #146c43 !important; 
+  border-color: #146c43 !important;
+  color: #ffffff !important;
 }
 .btn-light {
   border: 1px solid #333 !important;
@@ -51,8 +60,8 @@ input::placeholder {
 }
 .spinner {
   border: 6px solid white;
-  border-top: 6px solid #084298;
-  border-right: 6px solid #084298;
+  border-top: 6px solid #198754;
+  border-right: 6px solid #198754;
   border-radius: 50%;
   width: 45px;
   height: 45px;

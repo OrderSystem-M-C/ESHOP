@@ -103,7 +103,7 @@ h1 {
   border-bottom: 1px solid #ccc;
 }
 .products-table th {
-  background-color: #084298;
+  background-color: #198754;
   font-weight: bold;
   color: white;
 }
@@ -253,10 +253,10 @@ mat-paginator {
   color: red;
 }
 tr.editing {
-  border: 2px solid #084298 !important;
+  border: 2px solid #198754 !important;
 }
 tr.editing td {
-  background-color: #f1f7ff !important; 
+  background-color: #e8f5f0 !important; 
   transition: background-color 0.3s ease;
 }
 /*Pre neplatné polia*/
@@ -270,6 +270,6 @@ tr.editing td {
 }
 /*Pre platné polia*/
 .form-control.ng-valid:not(:placeholder-shown):not([type="search"]):not(select):not(.stock-input):not(.product-code-input) {
-  border-color: #28a745;
+  border-color: #198754;
   box-shadow: 0 0 0 0.1rem rgba(40, 167, 69, 0.25);
 }

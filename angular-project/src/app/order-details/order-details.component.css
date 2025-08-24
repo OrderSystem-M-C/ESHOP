@@ -57,7 +57,7 @@ h1 {
 }
 .details-container h3 {
   font-size: 20px;
-  color: #084298;
+  color: #198754;
   font-weight: bold;
 }
 .order-table {
@@ -74,7 +74,7 @@ h1 {
   font-size: 18px;
   font-weight: bold;
   width: 30%;
-  background-color: #084298;
+  background-color: #198754;
 }
 .order-table td {
   padding: 9px;
@@ -114,7 +114,7 @@ h1 {
   font-weight: 500;
 }
 .total-price-invoice a:hover {
-  color: #084298;
+  color: #198754;
 }
 .total-price-invoice img {
   height: 25px;
@@ -216,6 +216,6 @@ h1 {
 }
 /*Pre platné polia*/
 .form-control.ng-valid:not(:placeholder-shown):not([type="search"]):not(select):not(.stock-input):not(.product-code-input) {
-  border-color: #28a745;
+  border-color: #198754;
   box-shadow: 0 0 0 0.1rem rgba(40, 167, 69, 0.25);
 }

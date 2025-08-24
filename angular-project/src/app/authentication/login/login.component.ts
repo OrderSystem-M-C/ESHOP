@@ -93,8 +93,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    document.body.style.maxWidth = 'unset';
-    document.body.style.width = 'auto';
+    document.body.classList.add('login-layout');
+    document.body.classList.remove('default-layout');
 
     this.setDefaultFeesInLocalStorage();
 
@@ -107,7 +107,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    document.body.style.maxWidth = '1200px';
-    document.body.style.width = '100%';
+    document.body.classList.remove('login-layout');
+    document.body.classList.add('default-layout');
   }
 }

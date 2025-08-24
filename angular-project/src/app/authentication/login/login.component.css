@@ -6,6 +6,7 @@
   background-image: url(../../../assets/Images/login-background.png);
   background-position: center;
   background-size: cover;
+  background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;

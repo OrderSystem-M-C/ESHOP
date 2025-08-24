@@ -210,7 +210,7 @@ textarea {
   align-items: center;
   flex-direction: row;
   margin-top: 10px;
-  background-color: #084298;
+  background-color: #198754;
   padding: 10px;
   color: white;
   border-radius: 10px;
@@ -293,13 +293,13 @@ textarea {
     background-color: #e0e0e0;
   }
   &.selected {
-    border-color: #084298;
+    border-color: #198754;
     font-weight: 600;
   }
 }
 .cdk-drag-preview {
   border-radius: 8px;
-  border-color: #084298;
+  border-color: #198754;
   font-weight: bold;
   background-color: #e0e0e0;
 }
@@ -353,10 +353,10 @@ textarea {
   border-radius: 5px;
 }
 tr.selectedProduct {
-  border: 2px solid #084298 !important;
+  border: 2px solid #198754 !important;
 }
 tr.selectedProduct td {
-  background-color: #f1f7ff !important; 
+  background-color: #e8f5f0 !important; 
   transition: background-color 0.3s ease;
 }
 .products-table th {
@@ -368,7 +368,7 @@ tr.selectedProduct td {
   border-bottom: 1px solid #ccc;
 }
 .products-table th {
-  background-color: #084298;
+  background-color: #198754;
   font-weight: bold;
   color: white;
 }
@@ -385,15 +385,15 @@ tr.selectedProduct td {
 .product-row td input[type="checkbox"]{
   height: 22.5px;
   width: 22.5px;
-  accent-color: #084298;
+  accent-color: #198754;
   cursor: pointer;
   margin: 0;
 }
 .product-row input[type="checkbox"]:checked {
-  background-color: #084298;
+  background-color: #198754;
 }
 .product-row input[type="checkbox"]:focus {
-  border-color: #084298;
+  border-color: #198754;
   box-shadow: 0 0 0 0.25rem rgba(8, 66, 152, 0.25);
 }
 .product-row:hover td {
@@ -434,6 +434,6 @@ mat-paginator {
 .form-control.ng-valid:not(:placeholder-shown):not([type="search"]):not(
     .product-amount-control
   ):not(.search-select) {
-  border-color: #28a745;
+  border-color: #198754;
   box-shadow: 0 0 0 0.1rem rgba(40, 167, 69, 0.25)
 }

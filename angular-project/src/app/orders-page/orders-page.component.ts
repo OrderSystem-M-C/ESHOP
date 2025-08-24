@@ -509,8 +509,8 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
           datasets: [{
             label: 'Počet objednávok',
             data: orderCounts, 
-            backgroundColor: '#084298',
-            borderColor: '#1e88e5',
+            backgroundColor: '#198754',
+            borderColor: '#198754',
             borderWidth: 1
           }]
         },
@@ -553,8 +553,8 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
           datasets: [{
             label: 'Denná tržba (€)',
             data: [0, ...data], 
-            backgroundColor: '#084298',
-            borderColor: '#1e88e5',
+            backgroundColor: '#198754',
+            borderColor: '#198754',
             borderWidth: 1
           }]
         },

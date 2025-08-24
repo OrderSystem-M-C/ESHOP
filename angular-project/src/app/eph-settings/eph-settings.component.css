@@ -125,6 +125,6 @@ h1 {
   box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.25);
 }
 .form-control.ng-valid:not(:placeholder-shown) {
-  border-color: #28a745;
+  border-color: #198754;
   box-shadow: 0 0 0 0.1rem rgba(40, 167, 69, 0.25);
 }

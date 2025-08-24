@@ -126,8 +126,8 @@ h1 {
   border-radius: 5px;
 }
 .checkbox-item.selected-status {
-  background-color: #f1f7ff;
-  box-shadow: 0 0 0 2px #084298;
+  background-color: #e8f5f0;
+  box-shadow: 0 0 0 2px #198754;
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 .checkbox-item {
@@ -159,13 +159,13 @@ h1 {
 }
 .checkbox-item input[type="checkbox"]:checked,
 .orders-table td input[type="checkbox"]:checked {
-  accent-color: #084298;
-  background-color: #084298;
+  accent-color: #198754;
+  background-color: #198754;
   cursor: pointer;
 }
 .checkbox-item input[type="checkbox"]:focus,
 .orders-table td input[type="checkbox"]:focus {
-  border-color: #084298; 
+  border-color: #198754; 
   box-shadow: 0 0 0 0.25rem rgba(8, 66, 152, 0.25);
 }
 .checkbox-label,
@@ -208,7 +208,7 @@ h1 {
   border-bottom: 1px solid #ccc;
 }
 .orders-table th {
-  background-color: #084298;
+  background-color: #198754;
   font-weight: bold;
   color: white;
   cursor: default;
@@ -220,14 +220,14 @@ h1 {
   background-color: #f9f9f9;
 }
 tr.selected {
-  border: 2px solid #084298 !important;
+  border: 2px solid #198754 !important;
 }
 tr.selected td {
-  background-color: #f1f7ff !important;
+  background-color: #e8f5f0 !important;
   transition: background-color 0.3s ease;
 }
 .orders-table thead {
-  border-right: 8px solid #084298;
+  border-right: 8px solid #198754;
 }
 .order-row:hover td {
   background-color: #fbfbfb;
