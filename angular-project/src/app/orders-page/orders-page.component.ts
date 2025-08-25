@@ -382,6 +382,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
         this.filteredOrders = this.ordersData = result;
         this.pageIndex = 0;
         this.totalItems = this.filteredOrders.length;
+
         this.updatePagedOrders();
 
         this.updateOrdersChart();
@@ -793,7 +794,9 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
         );
         this.totalItems = orders.length;
         this.pageIndex = 0;
+
         this.applyFilters();
+        
         this.createChart('status');
         this.createChart('orders');
         this.createChart('revenue');

@@ -24,8 +24,8 @@ export class OrderService {
   deleteOrder(rowId: number): Observable<void> {
     return this.delete<void>(`delete-order/${rowId}`);
   }
-  updateOrder(orderId: number, order: OrderDTO): Observable<OrderDTO> {
-    return this.put<OrderDTO>(`update-order/${orderId}`, order);
+  updateOrder(orderId: number, order: OrderDTO): Observable<HttpResponse<any>> {
+    return this.putWithResponse<any>(`update-order/${orderId}`, order);
   }
   copyOrders(orderIds: number[], currentDate: string): Observable<void> {
     return this.post<void>('copy-orders', { OrderIds: orderIds, OrderDate: currentDate });
@@ -78,6 +78,19 @@ export class OrderService {
   private put<T>(endpoint: string, body: any): Observable<T> {
     const url = `${this.baseUrl}/${this.baseEndpoint}/${endpoint}`;
     return this.http.put<T>(url, body, { headers: this.jsonHeaders }).pipe(
+      catchError(err => {
+        console.error(`PUT ${url} failed:`, err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  putWithResponse<T>(endpoint: string, body: any): Observable<HttpResponse<T>> {
+    const url = `${this.baseUrl}/${this.baseEndpoint}/${endpoint}`;
+    return this.http.put<T>(url, body, {
+      headers: this.jsonHeaders,
+      observe: 'response'
+    }).pipe(
       catchError(err => {
         console.error(`PUT ${url} failed:`, err);
         return throwError(() => err);

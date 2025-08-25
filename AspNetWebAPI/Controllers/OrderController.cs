@@ -96,7 +96,15 @@ namespace AspNetCoreAPI.Controllers
                         PackageCode = o.PackageCode
                     }).ToListAsync();
 
-                return Ok(orders);
+                var sortedOrders = orders
+                    .OrderByDescending(o => DateTime.ParseExact(
+                        o.OrderDate,
+                        "dd.MM.yyyy HH:mm:ss",
+                        CultureInfo.InvariantCulture
+                        ))
+                    .ToList();
+
+                return Ok(sortedOrders);
             }
             catch (Exception ex)
             {
@@ -539,7 +547,7 @@ namespace AspNetCoreAPI.Controllers
                     new XElement(tns + "PSC", order.PostalCode),
                     new XElement(tns + "Krajina", "SK"),
                     new XElement(tns + "Telefon", order.PhoneNumber),
-                    new XElement(tns + "Email", order.Email),
+                    new XElement(tns + "Email", order.Email == "nezadany@objednavky.local" ? "" : order.Email),
                     string.IsNullOrEmpty(order.ICO) ? null : new XElement(tns + "ICO", order.ICO),
                     string.IsNullOrEmpty(order.DIC) ? null : new XElement(tns + "DIC", order.DIC),
                     string.IsNullOrEmpty(order.ICDPH) ? null : new XElement(tns + "ICDPH", order.ICDPH)

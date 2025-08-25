@@ -317,16 +317,16 @@ canvas {
 }
 .preview-popup {
   position: absolute;
-  top: 100%;
-  left: 40px;
-  min-width: 1250px;
+  top: 85%;
+  left: 30px;
+  min-width: 1300px;
   background: white;
   border: 1px solid #ddd;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   padding: 0 8px;
   z-index: 1000;
   pointer-events: auto;
-  transform: scale(0.8);
+  transform: scale(1);
   transform-origin: top left;
 }
 .is-visible {

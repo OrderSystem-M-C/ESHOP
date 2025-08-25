@@ -34,31 +34,34 @@ export class InvoiceService {
   async generateInvoices(orders: { order: OrderDTO, products: ProductDTO[] }[]): Promise<void> {
     if (!orders || orders.length === 0) return;
 
+    const container = document.getElementById('hidden-invoice-container');
+
+    container.innerHTML = '';
+
+    orders.forEach(({ order, products }, index) => {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = this.buildInvoiceHtml(order, products);
+      if (index > 0) wrapper.style.pageBreakBefore = 'always';
+      container.appendChild(wrapper);
+    });
+
+    await document.fonts.ready;
+
+    await Promise.all(Array.from(container.querySelectorAll('img')).map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(res => { img.onload = img.onerror = res; });
+    }));
+
     const options = {
       margin: [5, 5, 5, 5],
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      filename: 'Hromadne_faktury.pdf'
     };
 
-    let worker: any = null;
+    await html2pdf().set(options).from(container).save();
 
-    for(let i = 0; i < orders.length; i++){
-      const { order, products } = orders[i];
-      const invoiceHTML = this.buildInvoiceHtml(order, products);
-
-      if(i == 0) {
-        worker = html2pdf().set({
-          ...options,
-          filename: `Hromadne_faktury.pdf`
-        }).from(invoiceHTML).toPdf();
-      } else {
-        worker = worker.get('pdf').then((pdf: any) => {
-          pdf.addPage();
-        }).from(invoiceHTML).toPdf();
-      }
-    }
-
-    await worker.save();
+    container.innerHTML = '';
   }
 
   private buildInvoiceHtml(order: OrderDTO, selectedProducts: ProductDTO[]): string {
