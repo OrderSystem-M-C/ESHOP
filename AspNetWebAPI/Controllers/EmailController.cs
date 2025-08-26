@@ -23,8 +23,6 @@ namespace AspNetCoreAPI.Controllers
             _context = context;
         }
 
-        public object Encoding { get; private set; }
-
         [HttpPost("send-package-code-emails")]
         public async Task<IActionResult> SendPackageCodeEmails([FromBody] List<EmailDTO> emailDTOs)
         {

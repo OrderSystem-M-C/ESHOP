@@ -1,9 +1,11 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { EphService, EphSettingsDTO } from '../services/eph.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
+import { SystemSettingsDTO, SystemSettingsService } from '../services/system-settings.service';
+import { finalize, forkJoin, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-eph-settings',
@@ -18,13 +20,16 @@ export class EphSettingsComponent implements OnInit {
   isLoading: boolean = false;
 
   ephSettings: EphSettingsDTO | null = null;
+  systemSettings: SystemSettingsDTO | null = null;
 
   totalPackageCodes: number = 0;
 
-  deliveryFeeFromStorage = signal<number | null>(null);
-  paymentFeeFromStorage = signal<number | null>(null);
-
-  constructor(private datePipe: DatePipe, private ephService: EphService, private snackBar: MatSnackBar){}
+  constructor(
+    private datePipe: DatePipe, 
+    private ephService: EphService, 
+    private systemSettingsService: SystemSettingsService,
+    private snackBar: MatSnackBar
+  ){}
 
   ephForm = new FormGroup({
     ephPrefix: new FormControl('EB', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)]),
@@ -35,9 +40,10 @@ export class EphSettingsComponent implements OnInit {
     validators: this.endingNumberGreaterThanStarting
   });
   
-  settingsForm = new FormGroup({
+  systemSettingsForm = new FormGroup({
     deliveryFee: new FormControl(0, [Validators.required, Validators.min(0)]),
-    paymentFee: new FormControl(0, [Validators.required, Validators.min(0)])
+    paymentFee: new FormControl(0, [Validators.required, Validators.min(0)]),
+    bankAccount: new FormControl('', [Validators.required, this.ibanValidator])
   });
 
   private endingNumberGreaterThanStarting(control: FormGroup){
@@ -63,93 +69,102 @@ export class EphSettingsComponent implements OnInit {
       return null;
     }
   }
+  private ibanValidator(control: AbstractControl): ValidationErrors | null {
+    const iban = control.value?.replace(/\s+/g, '').toUpperCase() || '';
+    if(!iban) return null;
+
+    const ibanRegex = /^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$/;
+    if(!ibanRegex.test(iban)) return { iban: 'Neplatný formát IBAN' };
+
+    const rearranged = iban.slice(4) + iban.slice(0, 4);
+    const numbericIban = rearranged.replace(/[A-Z]/g, ch => (ch.charCodeAt(0) - 55).toString());
+
+    const remainder = BigInt(numbericIban) % 97n;
+    return remainder === 1n ? null : { iban: 'Neplatný IBAN' };
+  }
+
+  onIbanInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/\s+/g, '').toUpperCase();
+    value = value.match(/.{1,4}/g)?.join(' ') ?? value;
+    input.value = value;
+    this.systemSettingsForm.get('bankAccount')?.setValue(value, { emitEvent: false });
+  }
 
   saveSettings(): void {
-    if(this.ephForm.valid && this.settingsForm.valid){
-      this.isLoading = true;
-      const ephSettings: EphSettingsDTO = {
-         ephPrefix: this.ephForm.value.ephPrefix,
-         ephStartingNumber: Number(this.ephForm.value.ephStartingNumber),
-         ephEndingNumber: Number(this.ephForm.value.ephEndingNumber),
-         ephSuffix: this.ephForm.value.ephSuffix
-      }
-      this.ephService.saveEphSettings(ephSettings).subscribe({
-        next: (response) => {
-          this.snackBar.open("Nastavenia EPH boli úspešne uložené!", "", {
-            duration: 2000
-          });
-
-          this.ephSettings = response;
-
-          const { deliveryFee, paymentFee } = this.settingsForm.value;
-          localStorage.setItem('deliveryFee', (deliveryFee).toString());
-          localStorage.setItem('paymentFee', (paymentFee).toString());
-
-          this.deliveryFeeFromStorage.update(value => Number(deliveryFee));
-          this.paymentFeeFromStorage.update(value => Number(paymentFee));
-
-          this.ephService.countAvailablePackageCode().subscribe({
-            next: (response) => {
-              this.totalPackageCodes = response.availableCount;
-              this.isLoading = false;
-            },
-            error: (err) => {
-              console.error(err);
-              this.isLoading = false;
-            }
-          })
-        },
-        error: (err) => {
-          console.error("An error has occurred while trying to save EPH settings.", err);
-          this.isLoading = false;
-        }
-      })
-    }else{
-      this.snackBar.open("Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!", "", {
-        duration: 2000
-      });
+    if (!this.ephForm.valid || !this.systemSettingsForm.valid) {
+      this.snackBar.open(
+        "Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!",
+        "",
+        { duration: 2000 }
+      );
       this.ephForm.markAllAsTouched();
+      this.systemSettingsForm.markAllAsTouched();
+      return;
     }
+
+    this.isLoading = true;
+
+    const ephSettings: EphSettingsDTO = {
+      ephPrefix: this.ephForm.value.ephPrefix!,
+      ephStartingNumber: Number(this.ephForm.value.ephStartingNumber),
+      ephEndingNumber: Number(this.ephForm.value.ephEndingNumber),
+      ephSuffix: this.ephForm.value.ephSuffix!
+    };
+
+    const systemSettings: SystemSettingsDTO = this.systemSettingsForm.value as SystemSettingsDTO;
+
+    this.ephService.saveEphSettings(ephSettings).pipe(
+      switchMap((savedEph) => {
+        this.ephSettings = savedEph;
+        return this.systemSettingsService.saveSystemSettings(systemSettings);
+      }),
+      switchMap((savedSystem) => {
+        this.systemSettings = savedSystem;
+        return this.ephService.countAvailablePackageCode();
+      }),
+      finalize(() => {
+        this.isLoading = false;
+      })
+    ).subscribe({
+      next: (countRes) => {
+        this.totalPackageCodes = countRes.availableCount;
+        this.snackBar.open("Všetky nastavenia boli úspešne uložené!", "", { duration: 2000 });
+      },
+      error: (err) => {
+        console.error("Chyba pri ukladaní nastavení:", err);
+        this.snackBar.open("Chyba pri ukladaní nastavení!", "", { duration: 2000 });
+      }
+    });
   }
   
   ngOnInit(): void {
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
 
-    if(!this.ephSettings){
-      this.isLoading = true;
-      this.ephService.getEphSettings().subscribe({
-        next: (response) => {
-          this.ephSettings = response;
+    this.isLoading = true;
 
-          this.ephForm.patchValue({
-            ephPrefix: this.ephSettings.ephPrefix,
-            ephStartingNumber: String(this.ephSettings.ephStartingNumber),
-            ephEndingNumber: String(this.ephSettings.ephEndingNumber),
-            ephSuffix: this.ephSettings.ephSuffix
-          })
+    forkJoin({
+      eph: this.ephService.getEphSettings(),
+      system: this.systemSettingsService.getSystemSettings(),
+      codes: this.ephService.countAvailablePackageCode()
+    }).subscribe({
+      next: ({ eph, system, codes }) => {
+        this.ephSettings = eph;
+        this.systemSettings = system;
 
-          this.deliveryFeeFromStorage.set(Number(localStorage.getItem('deliveryFee')));
-          this.paymentFeeFromStorage.set(Number(localStorage.getItem('paymentFee')));
+        this.ephForm.patchValue({
+          ephPrefix: eph.ephPrefix,
+          ephStartingNumber: String(eph.ephStartingNumber),
+          ephEndingNumber: String(eph.ephEndingNumber),
+          ephSuffix: eph.ephSuffix
+        });
 
-          this.settingsForm.patchValue({
-            deliveryFee: this.deliveryFeeFromStorage() || 0,
-            paymentFee: this.paymentFeeFromStorage() || 0
-          })
-
-          this.ephService.countAvailablePackageCode().subscribe({
-            next: (response) => {
-              this.totalPackageCodes = response.availableCount;
-              this.isLoading = false;
-            },
-            error: (err) => console.error(err)
-          });
-        },
-        error: (err) => {
-          console.error("An error has occurred while trying to fetch EPH settings.", err);
-          this.isLoading = false;
-        }
-      })
-    }
+        this.systemSettingsForm.patchValue(system);
+        this.totalPackageCodes = codes.availableCount;
+      },
+      error: (err) => console.error("Chyba pri načítaní nastavení:", err),
+      complete: () => this.isLoading = false
+    });
   }
 }

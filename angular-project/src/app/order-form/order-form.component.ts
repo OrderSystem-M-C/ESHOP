@@ -16,6 +16,7 @@ import { CdkDrag, DragDropModule, moveItemInArray, CdkDragDrop } from '@angular/
 import { ManageStatusesDialogComponent } from '../manage-statuses-dialog/manage-statuses-dialog.component';
 import * as html2pdf from 'html2pdf.js';
 import { InvoiceService } from '../services/invoice.service';
+import { SystemSettingsDTO, SystemSettingsService } from '../services/system-settings.service';
 
 @Component({
   selector: 'app-order-form',
@@ -83,6 +84,7 @@ export class OrderFormComponent implements OnInit {
   private originalStatusesOrder: OrderStatusDTO[] = [];
 
   ephSettings: EphSettingsDTO;
+  systemSettings: SystemSettingsDTO;
 
   editedProducts: { [productId: number]: { productPrice?: number }} = {};
   isEditingProductPrices: boolean = false;
@@ -98,6 +100,7 @@ export class OrderFormComponent implements OnInit {
     private productService: ProductService, 
     private emailService: EmailService, 
     private ephService: EphService,
+    private systemSettingsService: SystemSettingsService,
     private invoiceService: InvoiceService
   ){}
 
@@ -553,28 +556,17 @@ export class OrderFormComponent implements OnInit {
   }
 
 
-  onDeliveryOptionChange(): void {
-    const deliveryOption = this.orderForm.get('deliveryOption')?.value;
-    if (deliveryOption === 'Kuriér') {
-      const deliveryFeeStr = localStorage.getItem('deliveryFee');
-      const deliveryFee = deliveryFeeStr ? parseFloat(deliveryFeeStr) : 0;
-      this.orderForm.patchValue({ deliveryCost: deliveryFee });
+  updateCost(optionType: 'delivery' | 'payment'): void {
+    if(optionType === 'delivery') {
+      const deliveryOption = this.orderForm.get('deliveryOption')?.value;
+      this.orderForm.patchValue({ deliveryCost: deliveryOption === 'Kuriér' ? this.systemSettings.deliveryFee : 0 });
     } else {
-      this.orderForm.patchValue({ deliveryCost: 0 });
+      const paymentOption = this.orderForm.get('paymentOption')?.value;
+      this.orderForm.patchValue({ paymentCost: paymentOption === 'Hotovosť' ? this.systemSettings.paymentFee : 0 });
     }
     this.recalculateTotalPrice();
   }
-  onPaymentOptionChange(): void {
-    const paymentOption = this.orderForm.get('paymentOption')?.value;
-    if (paymentOption === 'Hotovosť') {
-      const paymentFeeStr = localStorage.getItem('paymentFee');
-      const paymentFee = paymentFeeStr ? parseFloat(paymentFeeStr) : 0;
-      this.orderForm.patchValue({ paymentCost: paymentFee });
-    } else {
-      this.orderForm.patchValue({ paymentCost: 0 });
-    }
-    this.recalculateTotalPrice();
-  }
+
 
   recalculateTotalPrice(): void {
     const targetArray = this.isEditMode ? this.newSelectedProducts : this.selectedProducts;
@@ -1075,6 +1067,20 @@ export class OrderFormComponent implements OnInit {
     })
   }
 
+  loadSystemSettings(): void {
+    this.systemSettingsService.getSystemSettings().subscribe({
+      next: (response) => {
+        this.systemSettings = response;
+
+        this.orderForm.patchValue({
+          deliveryCost: this.systemSettings.deliveryFee,
+          paymentCost: this.systemSettings.paymentFee
+        })
+      },
+      error: (err) => console.error("Chyba pri načítaní systémových nastavení:", err)
+    });
+  }
+
   ngOnInit(): void {
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
@@ -1090,6 +1096,7 @@ export class OrderFormComponent implements OnInit {
     this.loadOrderStatuses();
 
     this.loadEphSettings();
+    this.loadSystemSettings();
 
     if(this.existingOrderId){
       this.isEditMode = true;

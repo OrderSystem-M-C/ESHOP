@@ -67,15 +67,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
   }
 
-  private setDefaultFeesInLocalStorage(): void {
-    if (!localStorage.getItem('deliveryFee')) {
-      localStorage.setItem('deliveryFee', '5');
-    }
-    if (!localStorage.getItem('paymentFee')) {
-      localStorage.setItem('paymentFee', '1.50');
-    }
-  }
-
   validateAllFormFields(formGroup: FormGroup){
     Object.keys(formGroup.controls).forEach(field => {
       const control = formGroup.get(field);
@@ -95,8 +86,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     document.body.classList.add('login-layout');
     document.body.classList.remove('default-layout');
-
-    this.setDefaultFeesInLocalStorage();
 
     this.authService.getRecaptchaSiteKey().subscribe({
       next: (response) => {

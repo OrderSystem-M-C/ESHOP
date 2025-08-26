@@ -34,20 +34,25 @@ export class InvoiceService {
   async generateInvoices(orders: { order: OrderDTO, products: ProductDTO[] }[]): Promise<void> {
     if (!orders || orders.length === 0) return;
 
-    const container = document.getElementById('hidden-invoice-container');
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.top = '-10000px';
+    document.body.appendChild(iframe);
 
-    container.innerHTML = '';
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) return;
 
-    orders.forEach(({ order, products }, index) => {
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = this.buildInvoiceHtml(order, products);
-      if (index > 0) wrapper.style.pageBreakBefore = 'always';
-      container.appendChild(wrapper);
-    });
+    doc.open();
+    doc.write(
+      orders.map(({ order, products }, index) => 
+        `<div style="${index > 0 ? 'page-break-before: always;' : ''}">${this.buildInvoiceHtml(order, products)}</div>`
+      ).join('')
+    );
+    doc.close();
 
-    await document.fonts.ready;
+    await doc.fonts.ready;
 
-    await Promise.all(Array.from(container.querySelectorAll('img')).map(img => {
+    await Promise.all(Array.from(doc.querySelectorAll('img')).map(img => {
       if (img.complete) return Promise.resolve();
       return new Promise(res => { img.onload = img.onerror = res; });
     }));
@@ -59,9 +64,9 @@ export class InvoiceService {
       filename: 'Hromadne_faktury.pdf'
     };
 
-    await html2pdf().set(options).from(container).save();
+    await html2pdf().set(options).from(doc.body).save();
 
-    container.innerHTML = '';
+    iframe.remove();
   }
 
   private buildInvoiceHtml(order: OrderDTO, selectedProducts: ProductDTO[]): string {
@@ -145,12 +150,12 @@ export class InvoiceService {
                 </tr>
               </thead>
               <tbody>
-                ${selectedProducts.map(p => `
+                ${selectedProducts.map((p, i) => `
                   <tr>
-                    <td style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">${p.productName}</td>
-                    <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${p.productPrice} €</td>
-                    <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${p.productAmount} ks</td>
-                    <td style="padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">${(p.productPrice*p.productAmount).toFixed(2)} €</td>
+                    <td style="padding: 8px; text-align: left; border-bottom: ${i === selectedProducts.length - 1 ? 'none' : '1px solid #e0e0e0'};">${p.productName}</td>
+                    <td style="padding: 8px; text-align: center; border-bottom: ${i === selectedProducts.length - 1 ? 'none' : '1px solid #e0e0e0'};">${p.productPrice} €</td>
+                    <td style="padding: 8px; text-align: center; border-bottom: ${i === selectedProducts.length - 1 ? 'none' : '1px solid #e0e0e0'};">${p.productAmount} ks</td>
+                    <td style="padding: 8px; text-align: center; border-bottom: ${i === selectedProducts.length - 1 ? 'none' : '1px solid #e0e0e0'};">${(p.productPrice*p.productAmount).toFixed(2)} €</td>
                   </tr>
                 `).join('')}
                 <tr style="border-top: 1px solid #000; background-color: #f8f9fa;">

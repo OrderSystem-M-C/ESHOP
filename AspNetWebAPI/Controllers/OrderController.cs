@@ -410,14 +410,15 @@ namespace AspNetCoreAPI.Controllers
 
             try
             {
-                var settings = await _context.EphSettings.FirstOrDefaultAsync();
+                var ephSettings = await _context.EphSettings.FirstOrDefaultAsync();
+                var systemSettings = await _context.SystemSettings.FirstOrDefaultAsync();
 
-                if (settings == null)
+                if (ephSettings == null)
                 {
                     return NotFound("EPH settings were not found. Please create them first.");
                 }
 
-                if (settings.EphEndingNumber < settings.EphStartingNumber)
+                if (ephSettings.EphEndingNumber < ephSettings.EphStartingNumber)
                 {
                     return BadRequest("Ending number must be greater than or equal to starting number.");
                 }
@@ -507,7 +508,7 @@ namespace AspNetCoreAPI.Controllers
                             new XElement(tns + "Krajina", "SK"),
                             new XElement(tns + "Telefon", ""),
                             new XElement(tns + "Email", "ephdobierky@gmail.com"),
-                            new XElement(tns + "CisloUctu", "SK84 6500 0000 0036 5285 9471")
+                            new XElement(tns + "CisloUctu", systemSettings.BankAccount)
                         )
                     ),
                     new XElement(tns + "Zasielky", zasielkyElements)

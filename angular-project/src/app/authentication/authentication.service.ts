@@ -9,17 +9,17 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthenticationService {
-  private httpClient = inject(HttpClient);
+  private http = inject(HttpClient);
   private jwtHelper = inject(JwtHelperService);
 
   constructor(@Inject('BASE_URL') private baseUrl: string, private router: Router) {  }
 
   loginUser(userData: UserLogin): Observable<UserLoginResponse> {
-    return this.httpClient.post<UserLoginResponse>(this.baseUrl + '/user/login', userData);
+    return this.http.post<UserLoginResponse>(this.baseUrl + '/user/login', userData);
   }
 
   getRecaptchaSiteKey(): Observable<string> {
-    return this.httpClient.get(this.baseUrl + '/user/get-recaptcha-site-key', { responseType: 'text'});
+    return this.http.get(this.baseUrl + '/user/get-recaptcha-site-key', { responseType: 'text'});
   }
 
   logout() {

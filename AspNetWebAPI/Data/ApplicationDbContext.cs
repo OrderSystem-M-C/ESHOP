@@ -1,8 +1,6 @@
 ﻿using AspNetCoreAPI.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 namespace AspNetCoreAPI.Data
 {
@@ -17,8 +15,8 @@ namespace AspNetCoreAPI.Data
         public DbSet<OrderProductModel> OrderProducts { get; set; }
         public DbSet<ProductModel> Products { get; set; }
         public DbSet<EphSettingsModel> EphSettings { get; set; }
+        public DbSet<SystemSettingsModel> SystemSettings { get; set; }
         public DbSet<OrderStatusModel> OrderStatuses { get; set; }
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<OrderModel>()

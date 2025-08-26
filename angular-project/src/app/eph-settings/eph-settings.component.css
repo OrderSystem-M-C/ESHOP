@@ -67,12 +67,24 @@ h1 {
   flex-direction: row;
   gap: 10px;
 }
+.delivery-payment-container {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 10px;
+}
 .delivery-fee, .payment-fee {
   display: flex;
   align-items: center;
   flex-direction: row;
   justify-content: center;
   gap: 5px;
+}
+.bank-account-container input {
+  text-transform: uppercase;
+}
+.bank-account-container input::placeholder {
+  text-transform: none;
 }
 .field p {
   margin: 0;
@@ -87,7 +99,7 @@ h1 {
 .user-eph-settings p {
   margin: 0;
 }
-.eph-prefix-suffix-container, .field:nth-child(1) {
+.eph-prefix-suffix-container, .delivery-payment-container {
   margin-bottom: 15px;
 }
 .eph-prefix, .eph-suffix {

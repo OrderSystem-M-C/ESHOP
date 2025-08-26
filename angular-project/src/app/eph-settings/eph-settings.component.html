@@ -1,8 +1,8 @@
-<title>Nastavenia systému EPH a poplatkov</title>
+<title>Nastavenia EPH a obchodných údajov</title>
 <div class="eph-settings-component">
   <div class="title">
     <div class="title-container-1">
-      <h1>Nastavenia systému EPH a poplatkov</h1>
+      <h1>Nastavenia EPH a obchodných údajov</h1>
       <p>{{currentDate}}</p>
     </div>
     <div class="button-container">
@@ -40,38 +40,56 @@
               <p><strong>Poznámka:</strong> Kontrolné číslo „x“ dopočíta program automaticky.</p>
           </div>
       </form>
-      <form [formGroup]="settingsForm">
+      <form [formGroup]="systemSettingsForm">
         <div class="settings-form-container">
-          <h3>Formulár poplatkov</h3>
+          <h3>Formulár obchodných nastavení</h3>
             <div class="delivery-payment-container">
                 <div class="field">
                   <label for="deliveryFee" class="form-label">Poplatok za doručenie*</label>
                   <div class="delivery-fee">
-                    <input formControlName="deliveryFee" id="deliveryFee" type="number" class="form-control" min="0" step="0.10" placeholder="Zadajte sumu, napr. 3.50" [ngClass]="{'is-invalid': settingsForm.get('deliveryFee').invalid && settingsForm.get('deliveryFee').touched}">
+                    <input formControlName="deliveryFee" id="deliveryFee" type="number" class="form-control" min="0" step="0.10" placeholder="Zadajte sumu, napr. 3.50" [ngClass]="{'is-invalid': systemSettingsForm.get('deliveryFee').invalid && systemSettingsForm.get('deliveryFee').touched}">
                     <p>€</p>
                   </div>
                 </div>
                 <div class="field">
                   <label for="paymentFee" class="form-label">Poplatok za dobierku*</label>
                   <div class="payment-fee">
-                    <input formControlName="paymentFee" id="paymentFee" type="number" class="form-control" min="0" step="0.10" placeholder="Zadajte sumu, napr. 1.20" [ngClass]="{'is-invalid': settingsForm.get('paymentFee').invalid && settingsForm.get('paymentFee').touched}">
+                    <input formControlName="paymentFee" id="paymentFee" type="number" class="form-control" min="0" step="0.10" placeholder="Zadajte sumu, napr. 1.20" [ngClass]="{'is-invalid': systemSettingsForm.get('paymentFee').invalid && systemSettingsForm.get('paymentFee').touched}">
                     <p>€</p>
                   </div>
                 </div>
+            </div>
+            <div class="bank-account-container">
+              <div class="field">
+                <label for="bankAccount" class="form-label">Číslo bankového účtu v XML súbore (IBAN)*</label>
+                <input formControlName="bankAccount" 
+                       (input)="onIbanInput($event)" 
+                       maxlength="29" 
+                       id="bankAccount" 
+                       type="text" 
+                       class="form-control" 
+                       placeholder="Zadajte IBAN" 
+                       [ngClass]="{'is-invalid': systemSettingsForm.get('bankAccount').invalid && systemSettingsForm.get('bankAccount').touched}">
+              </div>
             </div>
         </div>
       </form>
     <div class="user-eph-settings">
       <h3>Aktuálna konfigurácia podacích čísel (EPH)</h3>
-      @if(ephSettings != null || (deliveryFeeFromStorage && paymentFeeFromStorage)){
+      @if(ephSettings != null && systemSettings != null){
         <p [ngClass]="{ 'warning-text': totalPackageCodes === 0, 'success-text': totalPackageCodes > 0 }">
           <strong>Celkový počet dostupných podacích čísel:</strong> {{ totalPackageCodes }}
         </p>
         <p class="info-text"><strong>EPH Prefix:</strong> {{ ephSettings.ephPrefix }}</p>
         <p class="info-text"><strong>EPH rozsah (od - do):</strong> {{ ephSettings.ephStartingNumber }} - {{ ephSettings.ephEndingNumber }}</p>
         <p class="info-text"><strong>EPH Suffix:</strong> {{ ephSettings.ephSuffix }}</p>
-        <p class="info-text"><strong>Poplatok za dopravu:</strong> {{ deliveryFeeFromStorage().toFixed(2) || 'neuvedený' }} €</p>
-        <p class="info-text"><strong>Poplatok za dobierku:</strong> {{ paymentFeeFromStorage().toFixed(2) || 'neuvedený' }} €</p>
+        <p class="info-text">
+          <strong>Poplatky: </strong>
+          <span class="fee">Doprava: {{ systemSettings?.deliveryFee?.toFixed(2) || 'neuvedený' }} €</span>
+          &nbsp;|&nbsp;
+          <span class="fee">Platba: {{ systemSettings?.paymentFee?.toFixed(2) || 'neuvedený' }} €</span>
+        </p>
+        <p class="info-text"><strong>IBAN v XML súbore:</strong> {{ systemSettings.bankAccount || 'neuvedený' }}</p>
       }@else{
          <p>Systém nenašiel žiadne uložené nastavenia pre EPH a poplatky!</p>
       }
