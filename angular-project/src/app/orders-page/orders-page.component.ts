@@ -500,16 +500,16 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
       const filteredOrders = this.filterOrdersByRange();
       const ordersByDate = this.groupOrdersByDate(filteredOrders);
 
-      const dates = Object.keys(ordersByDate);
-      const orderCounts = Object.values(ordersByDate);
+      const labels = Object.keys(ordersByDate);
+      const data = Object.values(ordersByDate).map(o => o.totalCount);
 
       this.orders_chartInstance = new Chart(this.orders_ctx, {
         type: 'bar',
         data: {
-          labels: dates,
+          labels:labels,
           datasets: [{
             label: 'Počet objednávok',
-            data: orderCounts, 
+            data: data, 
             backgroundColor: '#198754',
             borderColor: '#198754',
             borderWidth: 1
@@ -611,7 +611,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
   updateOrdersChart(): void {
     const ordersByDate = this.groupOrdersByDate(this.filteredOrders);
     const dates = Object.keys(ordersByDate);
-    const orderCounts = Object.values(ordersByDate);
+    const orderCounts = Object.values(ordersByDate).map(o => o.totalCount);
 
     this.orders_chartInstance.data.labels = dates;
     this.orders_chartInstance.data.datasets[0].data = orderCounts;
@@ -627,33 +627,45 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
     this.revenue_chartInstance.update();
   }
 
-  groupOrdersByDate(orders: OrderDTO[]) {
-    return orders.reduce((acc, order) => {
+  groupOrdersByDate(orders: OrderDTO[]): { [date: string] : { totalCount: number } } {
+    const grouped = orders.reduce((acc, order) => {
       const [datePart] = order.orderDate.split(' ');
       const [day, month, year] = datePart.split('.').map(Number);
       const formattedDate = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
 
       if(!acc[formattedDate]){
-        acc[formattedDate] = 0;
+        acc[formattedDate] = { totalCount: 0};
       }
-      acc[formattedDate] += 1;
+      acc[formattedDate].totalCount += 1;
 
       return acc;
-    }, {});
+    }, {} as { [date: string]: { totalCount: number }});
+
+    return this.sortObjectsByDateAsc(grouped);
   }
   groupOrdersByDateRevenue(orders: OrderDTO[]): { [date: string]: { totalRevenue: number } } {
-    return orders.reduce((acc, order) => {
+    const grouped = orders.reduce((acc, order) => {
       const [datePart] = order.orderDate.split(' ');
       const [day, month, year] = datePart.split('.').map(Number);
       const formattedDate = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
 
-      if(!acc[formattedDate]){
-        acc[formattedDate] = { totalRevenue: 0 };
-      }
+      if (!acc[formattedDate]) acc[formattedDate] = { totalRevenue: 0 };
       acc[formattedDate].totalRevenue += parseFloat(order.totalPrice.toFixed(2));
 
       return acc;
     }, {} as { [date: string]: { totalRevenue: number } });
+
+    return this.sortObjectsByDateAsc(grouped);
+  }
+
+  private sortObjectsByDateAsc<T>(obj: { [date: string]: T}): { [date: string]: T } {
+    return Object.fromEntries(
+      Object.entries(obj).sort((a, b) => {
+        const [dateA, monthA, yearA] = a[0].split('.').map(Number);
+        const [dateB, monthB, yearB] = b[0].split('.').map(Number);
+        return new Date(yearA, monthA - 1, dateA).getTime() - new Date(yearB, monthB - 1, dateB).getTime();
+      })
+    )
   }
 
   setSort(field: 'date' | 'price' | 'name', order: 'asc' | 'desc' | 'newest' | 'oldest'): void {
@@ -672,6 +684,10 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
         const noteNormalized = this.removeDiacritics(order.note);
         const orderIdStr = order.orderId.toString();
 
+        const productNamesNormalized = order.productNames
+          ? order.productNames.map(p => this.removeDiacritics(p))
+          : [];
+
         switch(this.searchOption) {
           case 'customerName':
             return customerNameNormalized.includes(searchNormalized);
@@ -679,6 +695,10 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
             return orderIdStr.startsWith(searchNormalized);
           case 'email':
             return emailNormalized.includes(searchNormalized);
+          case 'product':
+            return productNamesNormalized.some(p => 
+              p.includes(searchNormalized)
+            );
           case 'note':
             return noteNormalized.includes(searchNormalized);
           case 'auto':
@@ -686,7 +706,10 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
               customerNameNormalized.includes(searchNormalized) ||
               orderIdStr.startsWith(searchNormalized) ||
               emailNormalized.includes(searchNormalized) ||
-              noteNormalized.includes(searchNormalized)
+              productNamesNormalized.some(p => 
+              p.includes(searchNormalized)
+              ) ||
+              noteNormalized.includes(searchNormalized) 
             )
           default:
             return false;

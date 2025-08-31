@@ -13,7 +13,10 @@ export class InvoiceService {
     address: 'Nezadana adresa',
     city: 'Nezadane mesto',
     postalCode: '00000',
-    phoneNumber: '0900000000'
+    phoneNumber: '0900000000',
+    ico: '00000000',
+    dic: '00000000',
+    icdph: '00000'
   };
 
   constructor() { }
@@ -78,7 +81,7 @@ export class InvoiceService {
       <tr>
         <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Spoločnosť, IČO, DIČ, IČ DPH</th>
         <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
-          ${order.company || 'Nie je zadané'}, ${order.ico || 'Nie je zadané'}, ${order.dic || 'Nie je zadané'}, ${order.icDph || 'Nie je zadané'}
+          ${order.company || 'Nezadané'}, ${this.displayValue(order.ico, this.DEFAULTS.ico)}, ${this.displayValue(order.dic, this.DEFAULTS.dic)}, ${this.displayValue(order.icdph, this.DEFAULTS.icdph)}
         </td>
       </tr>` : '';
 
@@ -86,7 +89,7 @@ export class InvoiceService {
       <tr>
         <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Spoločnosť, IČO, DIČ, IČ DPH</th>
         <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
-          ${order.invoiceCompany || 'Nie je zadané'}, ${order.invoiceICO || 'Nie je zadané'}, ${order.invoiceDIC || 'Nie je zadané'}
+          ${order.invoiceCompany || 'Nezadané'}, ${this.displayValue(order.invoiceICO, this.DEFAULTS.ico)}, ${this.displayValue(order.invoiceDIC, this.DEFAULTS.dic)}
         </td>
       </tr>` : '';
 
@@ -96,16 +99,16 @@ export class InvoiceService {
         <table style="width: 100%; border: 1px solid #e0e0e0;">
           <tr>
             <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
-            <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${order.invoiceName || 'Nie je zadané'}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${order.invoiceName || 'Nezadané'}</td>
           </tr>
           ${invoiceCompanyRowHTML}
           <tr>
             <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
-            <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${order.invoiceEmail || 'Nie je zadané'}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${order.invoiceEmail || 'Nezadané'}</td>
           </tr>
           <tr>
             <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
-            <td style="padding: 8px;">${order.invoicePhoneNumber || 'Nie je zadané'}</td>
+            <td style="padding: 8px;">${order.invoicePhoneNumber || 'Nezadané'}</td>
           </tr>
         </table>
       </div>` : '';
@@ -186,24 +189,24 @@ export class InvoiceService {
             <table style="width: 100%; border: 1px solid #e0e0e0;">
               <tr>
                 <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
-                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${order.customerName === this.DEFAULTS.customerName ? 'Nezadané' : order.customerName}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.displayValue(order.customerName, this.DEFAULTS.customerName)}</td>
               </tr>
               ${companyRowHTML}
               <tr>
                 <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Adresa</th>
                 <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
-                  ${order.address === this.DEFAULTS.address ? 'Nezadané' : order.address}, 
-                  ${order.postalCode === this.DEFAULTS.postalCode ? 'Nezadané' : order.postalCode}, 
-                  ${order.city === this.DEFAULTS.city ? 'Nezadané' : order.city}
+                  ${this.displayValue(order.address, this.DEFAULTS.address)}, 
+                  ${this.displayValue(order.postalCode, this.DEFAULTS.postalCode)}, 
+                  ${this.displayValue(order.city, this.DEFAULTS.city)}
                 </td>
               </tr>
               <tr>
                 <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
-                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${order.email === this.DEFAULTS.customerName ? 'Nezadané' : order.email}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.displayValue(order.email, this.DEFAULTS.email)}</td>
               </tr>
               <tr>
                 <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
-                <td style="padding: 8px;">${order.phoneNumber === this.DEFAULTS.phoneNumber ? 'Nezadané' : order.phoneNumber}</td>
+                <td style="padding: 8px;">${this.displayValue(order.phoneNumber, this.DEFAULTS.phoneNumber)}</td>
               </tr>
             </table>
           </div>
@@ -213,7 +216,12 @@ export class InvoiceService {
         </div>
       </div>`;
   }
+
   private formatDate(dateString: string): string {
     return dateString ? dateString.split('-').reverse().join('.') : '';
+  }
+
+  private displayValue(value: string, defaultValue: string = ''): string {
+    return !value || value === defaultValue ? 'Nezadané' : value;
   }
 }

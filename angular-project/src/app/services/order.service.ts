@@ -1,7 +1,6 @@
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { catchError, Observable, throwError } from 'rxjs';
-import { ProductDTO } from './product.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +10,10 @@ export class OrderService {
   private readonly jsonHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
   constructor(@Inject('BASE_URL') private baseUrl: string, private http: HttpClient) { }
-
+  
+  generateOrderId(): Observable<number> {
+    return this.get<number>('generate-order-id');
+  }
   createOrder(order: OrderDTO): Observable<OrderDTO> {
     return this.post<OrderDTO>('create-order', order);
   }
@@ -116,7 +118,7 @@ export interface OrderDTO {
   company?: string;
   ico?: string;
   dic?: string;
-  icDph?: string;
+  icdph?: string;
   address: string;
   city: string;
   postalCode: string;
@@ -131,7 +133,7 @@ export interface OrderDTO {
   orderStatus: string;
   orderDate?: string;
   totalPrice: number;
-  invoiceNumber: string;
+  invoiceNumber: number;
   variableSymbol: string;
   invoiceIssueDate: string; 
   invoiceName: string;
@@ -142,6 +144,7 @@ export interface OrderDTO {
   invoicePhoneNumber: string;
   orderSelected?: boolean;
   packageCode?: string;
+  productNames?: string[];
 }
 
 export interface ExportXmlResponseDTO {

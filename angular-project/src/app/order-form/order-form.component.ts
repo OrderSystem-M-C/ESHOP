@@ -11,7 +11,7 @@ import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/materi
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { EmailService } from '../services/email.service';
 import { EphService, EphSettingsDTO } from '../services/eph.service';
-import { catchError, finalize, map, Observable, of } from 'rxjs';
+import { catchError, finalize, forkJoin, map, Observable, of } from 'rxjs';
 import { CdkDrag, DragDropModule, moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ManageStatusesDialogComponent } from '../manage-statuses-dialog/manage-statuses-dialog.component';
 import * as html2pdf from 'html2pdf.js';
@@ -32,7 +32,7 @@ export class OrderFormComponent implements OnInit {
   userMessage: string = '';
   charactersCount: number = 0;
 
-  orderId = Math.floor(100000 + Math.random() * 900000);
+  orderId: number | null = null;
   existingOrderId: number | null = null;
 
   readonly DEFAULTS = {
@@ -41,7 +41,10 @@ export class OrderFormComponent implements OnInit {
     address: 'Nezadana adresa',
     city: 'Nezadane mesto',
     postalCode: '00000',
-    phoneNumber: '0900000000'
+    phoneNumber: '0900000000',
+    ico: '00000000',
+    dic: '00000000',
+    icdph: '00000'
   };
 
   invoiceCreated: boolean = false;
@@ -119,16 +122,13 @@ export class OrderFormComponent implements OnInit {
   orderForm = new FormGroup({
     customerName: new FormControl('', Validators.required),
     company: new FormControl(''),
-    ico: new FormControl(''),
-    dic: new FormControl(''),
-    icDph: new FormControl('', [
+    ico: new FormControl('', Validators.pattern(/^\d{8}$/)),
+    dic: new FormControl('', Validators.pattern(/^\d{8,10}$/)),
+    icdph: new FormControl('', [
       control => {
         const value = control.value;
-
-        if(!value){
-          return null;
-        }
-        return /^[1-9]\d*$/.test(value) ? null : { invalidIcDph: true };
+        if (!value || value === this.DEFAULTS.icdph) return null;
+        return /^[A-Z0-9]{8,12}$/.test(value) ? null : { invalidIcDph: true }; 
       }
     ]),
     address: new FormControl('', Validators.required),
@@ -147,13 +147,16 @@ export class OrderFormComponent implements OnInit {
   });
 
   invoiceForm = new FormGroup({
-    invoiceNumber: new FormControl(`${this.orderId}`, Validators.required),
-    invoiceVariable: new FormControl(`${this.orderId}`, Validators.required),
+    invoiceNumber: new FormControl<string>('000000', [
+      Validators.required,
+      Validators.pattern(/^\d+$/) 
+    ]),
+    invoiceVariable: new FormControl('000000', Validators.required),
     invoiceIssueDate: new FormControl('', Validators.required),
     invoiceName: new FormControl(''),
     invoiceCompany: new FormControl(''),
-    invoiceICO: new FormControl(''),
-    invoiceDIC: new FormControl(''),
+    invoiceICO: new FormControl('', Validators.pattern(/^\d{8}$/)),
+    invoiceDIC: new FormControl('', Validators.pattern(/^\d{8,10}$/)),
     invoiceEmail: new FormControl('', [this.emailValidator]),
     invoicePhoneNumber: new FormControl('', [this.phoneValidator]),
   }, { validators: this.conditionalInvoiceValidator() });
@@ -226,7 +229,7 @@ export class OrderFormComponent implements OnInit {
       company: this.orderForm.value.company || '',
       ico: this.orderForm.value.ico || '',
       dic: this.orderForm.value.dic || '',
-      icDph: this.orderForm.value.icDph || '',
+      icdph: this.orderForm.value.icdph || '',
       address: this.orderForm.value.address,
       city: this.orderForm.value.city,
       postalCode: this.orderForm.value.postalCode,
@@ -242,7 +245,7 @@ export class OrderFormComponent implements OnInit {
       ...(this.isEditMode ? {} : {orderDate: this.currentDate}),
       packageCode: this.orderForm.value.packageCode,
       totalPrice: this.totalPrice,
-      invoiceNumber: this.invoiceForm.value.invoiceNumber,
+      invoiceNumber: Number(this.invoiceForm.value.invoiceNumber),
       variableSymbol: this.invoiceForm.value.invoiceVariable,
       invoiceIssueDate: this.invoiceForm.value.invoiceIssueDate,
       invoiceName: this.invoiceForm.value.invoiceName,
@@ -699,6 +702,25 @@ export class OrderFormComponent implements OnInit {
   private fillDefaultValues() {
     const fields = ['email', 'customerName', 'address', 'city', 'postalCode', 'phoneNumber'];
 
+    if (this.orderForm.get('company')?.value) {
+      ['ico', 'dic', 'icdph'].forEach(field => {
+        const control = this.orderForm.get(field);
+        if (!control?.value || control.value.trim() === '') {
+          control.setValue(this.DEFAULTS[field]);
+        }
+      });
+    }
+
+    if (this.invoiceForm.get('invoiceCompany')?.value) {
+      ['invoiceICO', 'invoiceDIC'].forEach(field => {
+        const control = this.invoiceForm.get(field);
+        if (!control?.value || control.value.trim() === '') {
+          const defaultField = field.replace('invoice', '').toLowerCase(); 
+          control.setValue(this.DEFAULTS[defaultField]);
+        }
+      });
+    }
+
     fields.forEach(field => {
       const control = this.orderForm.get(field);
       if (!control?.value || control.value.trim() === '') {
@@ -736,7 +758,7 @@ export class OrderFormComponent implements OnInit {
       this.totalPrice = order.totalPrice;
 
       this.invoiceForm.patchValue({
-        invoiceNumber: order.invoiceNumber,
+        invoiceNumber: String(order.invoiceNumber),
         invoiceVariable: order.variableSymbol,
         invoiceIssueDate: order.invoiceIssueDate,
         invoiceName: order.invoiceName,
@@ -1058,51 +1080,50 @@ export class OrderFormComponent implements OnInit {
     }
   }
 
-  loadEphSettings(): void {
-    this.ephService.getEphSettings().subscribe({
-      next: (response) => {
-        this.ephSettings = response;
-      }, 
-      error: (err) => console.error(err)
-    })
-  }
-
-  loadSystemSettings(): void {
-    this.systemSettingsService.getSystemSettings().subscribe({
-      next: (response) => {
-        this.systemSettings = response;
-
-        this.orderForm.patchValue({
-          deliveryCost: this.systemSettings.deliveryFee,
-          paymentCost: this.systemSettings.paymentFee
-        })
-      },
-      error: (err) => console.error("Chyba pri načítaní systémových nastavení:", err)
-    });
-  }
-
   ngOnInit(): void {
     const now = new Date();
     this.currentDate = this.datePipe.transform(now, 'dd.MM.yyyy HH:mm:ss');
 
     const invoiceIssueDate = now.toISOString().split('T')[0];
 
-    this.invoiceForm.patchValue({
-      invoiceIssueDate: invoiceIssueDate
-    })
+    this.invoiceForm.patchValue({ invoiceIssueDate: invoiceIssueDate })
     
     this.existingOrderId = Number(this.route.snapshot.paramMap.get('orderId')) ?? null;
+    this.isEditMode = !!this.existingOrderId;
+
+    this.isLoading = true;
 
     this.loadOrderStatuses();
 
-    this.loadEphSettings();
-    this.loadSystemSettings();
+    forkJoin({
+      ephSettings: this.ephService.getEphSettings(),
+      systemSettings: this.systemSettingsService.getSystemSettings(),
+      orderId: this.orderService.generateOrderId()
+    }).pipe(
+      finalize(() => this.isLoading = false)
+    ).subscribe({
+      next: ({ ephSettings, systemSettings, orderId }) => {
+        this.ephSettings = ephSettings;
+        this.systemSettings = systemSettings;
+        this.orderId = orderId;
 
-    if(this.existingOrderId){
-      this.isEditMode = true;
+        this.orderForm.patchValue({
+          deliveryCost: systemSettings.deliveryFee,
+          paymentCost: systemSettings.paymentFee
+        });
+
+        if (!this.isEditMode) {
+          this.invoiceForm.patchValue({
+            invoiceNumber: String(this.orderId),
+            invoiceVariable: String(this.orderId)
+          });
+        }
+      },
+      error: (err) => console.error("An error has occurred:", err)
+    })
+
+    if (this.isEditMode) {
       this.loadOrder(this.existingOrderId);
-    }else{
-      this.isEditMode = false;
     }
   }
 }

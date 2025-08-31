@@ -8,7 +8,7 @@
       </div>
       }@else{
         <div class="title-date">
-          <h1>Vytvoriť objednávku č. {{orderId}}</h1>
+          <h1>Vytvoriť objednávku č. {{orderId || '000000' }}</h1>
           <p>{{currentDate}}</p>
         </div>
       }
@@ -155,8 +155,8 @@
                 <input formControlName="dic" type="text" id="dic" class="form-control" placeholder="Zadajte DIČ" [ngClass]="{'is-invalid': orderForm.get('company').value?.trim().length > 0 && orderForm.get('dic').invalid && orderForm.get('dic').touched}">
             </div>
             <div class="field">
-                <label for="icDph" class="form-label">IČ DPH (ak má firma)</label>
-                <input formControlName="icDph" type="text" id="icDph" class="form-control" placeholder="Zadajte IČ DPH" [ngClass]="{'is-invalid': orderForm.get('icDph').invalid}">
+                <label for="icdph" class="form-label">IČ DPH (ak má firma)</label>
+                <input formControlName="icdph" type="text" id="icdph" class="form-control" placeholder="Zadajte IČ DPH" [ngClass]="{'is-invalid': orderForm.get('icdph').invalid}">
             </div>
             <div class="field">
                 <label for="address" class="form-label">Adresa*</label>
@@ -194,11 +194,11 @@
             <form [formGroup]="invoiceForm" (ngSubmit)="downloadInvoice()">
               <div class="field">
                 <label for="invoiceNumber" class="form-label">Číslo faktúry* (automaticky vyplnené z č. objednávky)</label>
-                <input type="number" id="invoiceNumber" class="form-control" value="{{orderId}}" readonly placeholder="Zadajte číslo faktúry" formControlName="invoiceNumber" [ngClass]="{'is-invalid': invoiceForm.get('invoiceNumber').invalid && invoiceForm.get('invoiceNumber').touched}">
+                <input type="number" id="invoiceNumber" class="form-control" readonly placeholder="Zadajte číslo faktúry" formControlName="invoiceNumber" [ngClass]="{'is-invalid': invoiceForm.get('invoiceNumber').invalid && invoiceForm.get('invoiceNumber').touched}">
             </div>
             <div class="field">
                 <label for="variableSymbol" class="form-label">Variabilný symbol* (Ak je iný ako číslo faktúry)</label>
-                <input type="text" id="variableSymbol" class="form-control" value="{{orderId}}" placeholder="Zadajte variabilný symbol" formControlName="invoiceVariable" [ngClass]="{'is-invalid': invoiceForm.get('invoiceVariable').invalid && invoiceForm.get('invoiceVariable').touched}">
+                <input type="number" id="variableSymbol" class="form-control" readonly placeholder="Zadajte variabilný symbol" formControlName="invoiceVariable" [ngClass]="{'is-invalid': invoiceForm.get('invoiceVariable').invalid && invoiceForm.get('invoiceVariable').touched}">
             </div>
             <div class="field">
                 <label for="documentType">Typ dokladu*</label>

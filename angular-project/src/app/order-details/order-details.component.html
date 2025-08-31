@@ -33,7 +33,21 @@
           </tr>
           <tr>
             <td><b>Spoločnosť, IČO, DIČ, IČ DPH:</b></td>
-            <td>{{ order?.company ? order.company : 'Nezadané' }}, {{ order?.ico ? order.ico : 'Nezadané'}}, {{ order?.dic ? order.dic: 'Nezadané'}}, {{ order?.icDph ? order.icDph : 'Nezadané' }}</td>
+            <td>
+              <span>{{ order?.company || 'Nezadané' }}</span>, 
+              <span [ngStyle]="{
+                    'color': order?.ico === DEFAULTS.ico ? 'gray' : 'black',
+                    'font-style': order?.ico === DEFAULTS.ico ? 'italic' : 'normal'
+                  }">{{ order?.ico || 'Nezadané' }}</span>, 
+              <span [ngStyle]="{
+                    'color': order?.dic === DEFAULTS.dic ? 'gray' : 'black',
+                    'font-style': order?.dic === DEFAULTS.dic ? 'italic' : 'normal'
+                  }">{{ order?.dic || 'Nezadané' }}</span>, 
+              <span [ngStyle]="{
+                    'color': order?.icdph === DEFAULTS.icdph ? 'gray' : 'black',
+                    'font-style': order?.icdph === DEFAULTS.icdph ? 'italic' : 'normal'
+                  }">{{ order?.icdph || 'Nezadané' }}</span>
+            </td>
           </tr>
           <tr>
             <td><b>Adresa:</b></td>
@@ -165,7 +179,17 @@
           </tr>
           <tr>
             <td><b>Spoločnosť, IČO, DIČ:</b></td>
-            <td>{{ order?.invoiceCompany ? order.invoiceCompany : 'Nezadané' }}, {{ order?.invoiceICO ? order.invoiceICO : 'Nezadané'}}, {{ order?.invoiceDIC ? order.invoiceDIC: 'Nezadané'}}</td>
+            <td>
+              {{ order?.invoiceCompany || 'Nezadané' }}, 
+              <span [ngStyle]="{
+                    'color': order?.invoiceICO === DEFAULTS.ico ? 'gray' : 'black',
+                    'font-style': order?.invoiceICO === DEFAULTS.ico ? 'italic' : 'normal'
+                  }">{{ order?.invoiceICO || 'Nezadané' }}</span>, 
+              <span [ngStyle]="{
+                    'color': order?.invoiceDIC === DEFAULTS.dic ? 'gray' : 'black',
+                    'font-style': order?.invoiceDIC === DEFAULTS.dic ? 'italic' : 'normal'
+                  }">{{ order?.invoiceDIC || 'Nezadané' }}</span>
+            </td>
           </tr>
           <tr>
             <td><b>E-mailová adresa:</b></td>

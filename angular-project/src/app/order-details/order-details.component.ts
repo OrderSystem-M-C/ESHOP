@@ -30,7 +30,10 @@ export class OrderDetailsComponent implements OnInit{
     address: 'Nezadana adresa',
     city: 'Nezadane mesto',
     postalCode: '00000',
-    phoneNumber: '0900000000'
+    phoneNumber: '0900000000',
+    ico: '00000000',
+    dic: '00000000',
+    icdph: '00000'
   };
 
   dialogRef!: MatDialogRef<any>; //akoby pristupujeme k otvorenemu dialogovemu oknu aby sme mohli s nim komunikovať => získať samotný výsledok

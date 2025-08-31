@@ -52,5 +52,6 @@ namespace AspNetCoreAPI.DTOs
         public string? InvoiceEmail { get; set; }
         public string? InvoicePhoneNumber { get; set; }
         public string PackageCode { get; set; } = string.Empty;
+        public List<string> ProductNames { get; set; } = new List<string>();
     }
 }

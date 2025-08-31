@@ -21,6 +21,29 @@ namespace AspNetCoreAPI.Controllers
             _context = context;
         }
 
+        [HttpGet("generate-order-id")]
+        public async Task<ActionResult<int>> GenerateRandomOrderIdAsync()
+        {
+            try
+            {
+                int newOrderId;
+                var random = new Random();
+                bool isUnique;
+
+                do
+                {
+                    newOrderId = random.Next(100000, 1000000);
+                    isUnique = await _context.Orders.AnyAsync(o => o.OrderId == newOrderId);
+
+                } while (isUnique); 
+
+                return Ok(newOrderId);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"An error occurred while generating random orderId: {ex.Message}" });
+            }
+        }
         [HttpPost("create-order")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDTO orderDto)
         {
@@ -83,6 +106,8 @@ namespace AspNetCoreAPI.Controllers
             try
             {
                 var orders = await _context.Orders
+                    .Include(o => o.OrderProducts)
+                        .ThenInclude(op => op.Product)
                     .Select(o => new OrderDTO
                     {
                         Id = o.Id,
@@ -93,12 +118,15 @@ namespace AspNetCoreAPI.Controllers
                         OrderStatus = o.OrderStatus,
                         OrderDate = o.OrderDate,
                         TotalPrice = o.TotalPrice,
-                        PackageCode = o.PackageCode
+                        PackageCode = o.PackageCode ?? "",
+                        ProductNames = o.OrderProducts
+                            .Select(op => op.ProductNameSnapshot)
+                            .ToList()
                     }).ToListAsync();
 
                 var sortedOrders = orders
                     .OrderByDescending(o => DateTime.ParseExact(
-                        o.OrderDate,
+                        o.OrderDate ?? "01.01.2025 00:00:00",
                         "dd.MM.yyyy HH:mm:ss",
                         CultureInfo.InvariantCulture
                         ))
@@ -271,8 +299,8 @@ namespace AspNetCoreAPI.Controllers
                         DiscountAmount = original.DiscountAmount,
                         OrderStatus = original.OrderStatus,
                         TotalPrice = original.TotalPrice,
-                        InvoiceNumber = original.InvoiceNumber,
-                        VariableSymbol = original.VariableSymbol,
+                        InvoiceNumber = newOrderId,
+                        VariableSymbol = newOrderId.ToString(),
                         InvoiceIssueDate = original.InvoiceIssueDate,
                         InvoiceName = original.InvoiceName,
                         InvoiceCompany = original.InvoiceCompany,
