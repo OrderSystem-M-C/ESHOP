@@ -1,169 +1,172 @@
 <title>Detaily objednávky č. {{orderId}}</title>
 <div class="order-details-component">
-    <div class="title">
-        <div class="title-container-1">
-          <h1>Objednávka č. {{orderId}}</h1>
-          <p>{{currentDate}}</p>
-        </div>
-        <div class="button-container">
-          <button class="btn btn-secondary remove-btn" (click)="removeOrder(confirmDialog)"><img src="../../assets/Images/bin-icon.png" class="remove-btn-icon" alt="remove-btn-icon"> Vymazať objednávku</button>
-          <button class="btn btn-primary" (click)="editOrder()"><img src="../../assets/Images/edit-icon.png" class="edit-icon" alt="edit-icon"> Upraviť objednávku</button>
-        </div>
+  <div class="title">
+    <div class="title-container-1">
+      <h1>Objednávka č. {{orderId}}</h1>
+      <p>{{currentDate}}</p>
     </div>
-    @if(isLoading){
-      <div class="spinner-container">
-        <div class="spinner">
-        </div>
-        Načítava sa
+    <div class="button-container">
+      <button class="btn btn-secondary remove-btn" (click)="removeOrder(confirmDialog)">
+        <img src="../../assets/Images/bin-icon.png" class="remove-btn-icon" alt="remove-btn-icon">
+        Vymazať objednávku
+      </button>
+      <button class="btn btn-primary" (click)="editOrder()">
+        <img src="../../assets/Images/edit-icon.png" class="edit-icon" alt="edit-icon">
+        Upraviť objednávku
+      </button>
     </div>
-    }@else{
-      <div class="details-container">
-        <table class="order-table">
-          <tr>
-            <th colspan="2" class="main-title">Informácie o objednávke</th>
-          </tr>
-          <tr>
-            <td><b>Meno a priezvisko:</b></td>
-            <td [ngStyle]="{
-                  'color': order?.customerName === DEFAULTS.customerName ? 'gray' : 'black',
-                  'font-style': order?.customerName === DEFAULTS.customerName ? 'italic' : 'normal'
-                }">
-              {{ order?.customerName }}
-            </td>
-          </tr>
-          <tr>
-            <td><b>Spoločnosť, IČO, DIČ, IČ DPH:</b></td>
-            <td>
-              <span>{{ order?.company || 'Nezadané' }}</span>, 
-              <span [ngStyle]="{
-                    'color': order?.ico === DEFAULTS.ico ? 'gray' : 'black',
-                    'font-style': order?.ico === DEFAULTS.ico ? 'italic' : 'normal'
-                  }">{{ order?.ico || 'Nezadané' }}</span>, 
-              <span [ngStyle]="{
-                    'color': order?.dic === DEFAULTS.dic ? 'gray' : 'black',
-                    'font-style': order?.dic === DEFAULTS.dic ? 'italic' : 'normal'
-                  }">{{ order?.dic || 'Nezadané' }}</span>, 
-              <span [ngStyle]="{
-                    'color': order?.icdph === DEFAULTS.icdph ? 'gray' : 'black',
-                    'font-style': order?.icdph === DEFAULTS.icdph ? 'italic' : 'normal'
-                  }">{{ order?.icdph || 'Nezadané' }}</span>
-            </td>
-          </tr>
-          <tr>
-            <td><b>Adresa:</b></td>
-            <td [ngStyle]="{
-                  'color': order?.address === DEFAULTS.address ? 'gray' : 'black',
-                  'font-style': order?.address === DEFAULTS.address ? 'italic' : 'normal'
-                }">
-              {{ order?.address }}, 
-              <span [ngStyle]="{
-                      'color': order?.city === DEFAULTS.city ? 'gray' : 'black',
-                      'font-style': order?.city === DEFAULTS.city ? 'italic' : 'normal'
-                    }">{{ order?.city }}</span>, 
-              <span [ngStyle]="{
-                      'color': order?.postalCode === DEFAULTS.postalCode ? 'gray' : 'black',
-                      'font-style': order?.postalCode === DEFAULTS.postalCode ? 'italic' : 'normal'
-                    }">{{ order?.postalCode }}</span>
-            </td>
-          </tr>
-          <tr>
-            <td><b>E-mailová adresa:</b></td>
-            <td [ngStyle]="{
-                  'color': order?.email === 'nezadany@objednavky.local' ? 'gray' : 'black',
-                  'font-style': order?.email === 'nezadany@objednavky.local' ? 'italic' : 'normal'
-                }">
-              {{ order?.email }}
-            </td>
-          </tr>
-          <tr>
-            <td><b>Telefónne číslo:</b></td>
-            <td [ngStyle]="{
-              'color': order?.phoneNumber === DEFAULTS.phoneNumber ? 'gray' : 'black',
-              'font-style': order?.phoneNumber === DEFAULTS.phoneNumber ? 'italic' : 'normal'
-            }">{{ order?.phoneNumber }}</td>
-          </tr>
-          <tr>
-            <td><b>Stav objednávky:</b></td>
-            <td>{{ order?.orderStatus }}</td>
-          </tr>
-          <tr>
-            <td><b>Dátum vytvorenia objednávky:</b></td>
-            <td>{{ order?.orderDate }}</td>
-          </tr>
-          <tr>
-            <td><b>Zľava:</b></td>
-            <td>{{order?.discountAmount > 0 ? 'Áno (-' + order?.discountAmount + '%)' : 'Nezadané'}}</td>
-          </tr>
-          <tr>
-            <td><b>Poznámka:</b></td>
-            <td>{{ order?.note ? order.note : 'Nezadané' }}</td>
-          </tr>
-        </table>
-        <div class="products-information">
-          <table class="selected-products-table">
-            <thead>
-               <tr>
-                 <th colspan="6" class="main-title">
-                    <div class="main-title-save-container">
-                      Objednané produkty a súvisiace informácie
-                      @if(isEditingProducts){
-                        <div class="button-container">
-                          <button class="btn btn-secondary" (click)="saveAllChanges()"><img src="../../assets/Images/save-icon.png" alt="save-icon"> Uložiť zmeny</button>
-                          <button class="btn btn-danger" (click)="cancelEditing()">Zahodiť zmeny</button>
-                        </div>
-                      } 
+  </div>
+  @if(isLoading){
+    <div class="spinner-container">
+      <div class="spinner"></div>
+      Načítava sa
+    </div>
+  }@else{
+    <div class="details-container">
+      <div class="products-information">
+        <table class="selected-products-table">
+          <thead>
+            <tr>
+              <th colspan="6" class="main-title">
+                <div class="main-title-save-container">
+                  Objednané produkty a súvisiace informácie
+                  @if(isEditingProducts){
+                    <div class="button-container">
+                      <button class="btn btn-secondary" (click)="saveAllChanges()">
+                        <img src="../../assets/Images/save-icon.png" alt="save-icon">
+                        Uložiť zmeny
+                      </button>
+                      <button class="btn btn-danger" (click)="cancelEditing()">Zahodiť zmeny</button>
                     </div>
-                 </th>
-               </tr>
-            </thead>
-            <tbody>
-                <tr class="products-table-title">
-                    <th>Názov produktu</th>
-                    <th>Cena/ks</th>
-                    <th>Hmotnosť</th>
-                    <th>Množstvo</th>
-                    <th>Celkom (kg)</th>
-                    <th>Celkom (€)</th>
-                </tr>
-                <tr class="product-row" *ngFor="let product of selectedProducts">
-                    <td>{{product.productName}}</td>
-                    <td>
-                      <div class="product-price-container">
-                        <input type="number" 
-                        class="form-control" 
-                        [ngModel]="isProductEdited(product.productId) ? editedProducts[product.productId].productPrice : product.productPrice" 
-                        step="0.01"
-                        (ngModelChange)="onProductFieldChange(product.productId, $event)"
-                        min="1">
-                        €
-                      </div>
-                    </td>
-                    <td>{{product.productWeight.toFixed(2)}} kg</td>
-                    <td>{{product.productAmount}} ks</td>
-                    <td>{{(product.productWeight * product.productAmount).toFixed(2)}} kg</td>
-                    <td>{{(product.productPrice * product.productAmount).toFixed(2)}} €</td>
-                </tr>
-            </tbody>
-            <tfoot>
-              <tr style="border-top: 2px solid #000;">
-                <td colspan="4" style="border: none">Zvolený spôsob dopravy pre objednávku (vrátane poštovného):</td>
-                <td style="border: none">{{order?.deliveryOption}} + cena poštovného:</td>
-                <td style="border: none">{{order?.deliveryCost.toFixed(2)}} €</td>
-              </tr>
-              <tr style="border-bottom: 2px solid #000;">
-                <td colspan="4" style="border: none">Zvolený spôsob platby pre objednávku (vrátane poplatku):</td>
-                <td style="border: none">{{order?.paymentOption}} + poplatok za platbu:</td>
-                <td style="border: none">{{order?.paymentCost.toFixed(2)}} €</td>
-              </tr>
-              <tr class="total-row">
-                  <td colspan="3"><strong>CELKOVÝ POČET KUSOV, VÁHA A CENA OBJEDNÁVKY:</strong></td>
-                  <td><strong>{{calculateTotalAmount()}} ks</strong></td>
-                  <td><strong>{{calculateTotalWeight().toFixed(2)}} kg</strong></td>
-                  <td><strong>{{this.order.discountAmount ? (this.order.totalPrice.toFixed(2) + ' € (-' + this.order.discountAmount + '%)') : (this.order.totalPrice.toFixed(2) + ' €')}}</strong></td>
-              </tr>
+                  }
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="products-table-title">
+              <th>Názov produktu</th>
+              <th>Cena/ks</th>
+              <th>Hmotnosť</th>
+              <th>Množstvo</th>
+              <th>Celkom (kg)</th>
+              <th>Celkom (€)</th>
+            </tr>
+            <tr class="product-row" *ngFor="let product of selectedProducts">
+              <td>{{product.productName}}</td>
+              <td>
+                <div class="product-price-container">
+                  <input type="number"
+                         class="form-control"
+                         [ngModel]="isProductEdited(product.productId) ? editedProducts[product.productId].productPrice : product.productPrice"
+                         step="0.01"
+                         (ngModelChange)="onProductFieldChange(product.productId, $event)"
+                         min="1">
+                  €
+                </div>
+              </td>
+              <td>{{product.productWeight.toFixed(2)}} kg</td>
+              <td>{{product.productAmount}} ks</td>
+              <td>{{(product.productWeight * product.productAmount).toFixed(2)}} kg</td>
+              <td>{{(product.productPrice * product.productAmount).toFixed(2)}} €</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr style="border-top: 2px solid #000;">
+              <td colspan="4" style="border: none">
+                Zvolený spôsob dopravy pre objednávku (vrátane poštovného):
+              </td>
+              <td style="border: none">{{order?.deliveryOption}} + cena poštovného:</td>
+              <td style="border: none">{{order?.deliveryCost.toFixed(2)}} €</td>
+            </tr>
+            <tr style="border-bottom: 2px solid #000;">
+              <td colspan="4" style="border: none">
+                Zvolený spôsob platby pre objednávku (vrátane poplatku):
+              </td>
+              <td style="border: none">{{order?.paymentOption}} + poplatok za platbu:</td>
+              <td style="border: none">{{order?.paymentCost.toFixed(2)}} €</td>
+            </tr>
+            <tr class="total-row">
+              <td colspan="3"><strong>CELKOVÝ POČET KUSOV, VÁHA A CENA OBJEDNÁVKY:</strong></td>
+              <td><strong>{{calculateTotalAmount()}} ks</strong></td>
+              <td><strong>{{calculateTotalWeight().toFixed(2)}} kg</strong></td>
+              <td>
+                <strong>
+                  {{this.order.discountAmount ? (this.order.totalPrice.toFixed(2) + ' € (-' + this.order.discountAmount + '%)') : (this.order.totalPrice.toFixed(2) + ' €')}}
+                </strong>
+              </td>
+            </tr>
           </tfoot>
         </table>
-        </div>
+      </div>
+      <table class="order-table">
+        <tr>
+          <th colspan="2" class="main-title">Informácie o objednávke</th>
+        </tr>
+        <tr>
+          <td><b>Meno a priezvisko:</b></td>
+          <td [ngClass]="{ 'order-placeholder': order?.customerName === DEFAULTS.customerName }">
+            {{ order?.customerName }}
+          </td>
+        </tr>
+        <tr>
+          <td><b>Spoločnosť, IČO, DIČ, IČ DPH:</b></td>
+          <td>
+            <span>{{ order?.company || 'Nezadané' }}</span>,
+            <span [ngClass]="{ 'order-placeholder': order?.ico === DEFAULTS.ico }">
+              {{ order?.ico || 'Nezadané' }}
+            </span>,
+            <span [ngClass]="{ 'order-placeholder': order?.dic === DEFAULTS.dic }">
+              {{ order?.dic || 'Nezadané' }}
+            </span>,
+            <span [ngClass]="{ 'order-placeholder': order?.icdph === DEFAULTS.icdph }">
+              {{ order?.icdph || 'Nezadané' }}
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td><b>Adresa:</b></td>
+          <td [ngClass]="{ 'order-placeholder': order?.address === DEFAULTS.address }">
+            {{ order?.address }},
+            <span [ngClass]="{ 'order-placeholder': order?.city === DEFAULTS.city }">
+              {{ order?.city }}
+            </span>,
+            <span [ngClass]="{ 'order-placeholder': order?.postalCode === DEFAULTS.postalCode }">
+              {{ order?.postalCode }}
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td><b>E-mailová adresa:</b></td>
+          <td [ngClass]="{ 'order-placeholder': order?.email === 'nezadany@objednavky.local' }">
+            {{ order?.email }}
+          </td>
+        </tr>
+        <tr>
+          <td><b>Telefónne číslo:</b></td>
+          <td [ngClass]="{ 'order-placeholder': order?.phoneNumber === DEFAULTS.phoneNumber }">
+            {{ order?.phoneNumber }}
+          </td>
+        </tr>
+        <tr>
+          <td><b>Stav objednávky:</b></td>
+          <td>{{ order?.orderStatus }}</td>
+        </tr>
+        <tr>
+          <td><b>Dátum vytvorenia objednávky:</b></td>
+          <td>{{ order?.orderDate }}</td>
+        </tr>
+        <tr>
+          <td><b>Zľava:</b></td>
+          <td>
+            {{order?.discountAmount > 0 ? 'Áno (-' + order?.discountAmount + '%)' : 'Nezadané'}}
+          </td>
+        </tr>
+        <tr>
+          <td><b>Poznámka:</b></td>
+          <td>{{ order?.note ? order.note : 'Nezadané' }}</td>
+        </tr>
+      </table>
       <div class="total-price-invoice">
         <table class="order-table">
           <tr>
@@ -180,15 +183,13 @@
           <tr>
             <td><b>Spoločnosť, IČO, DIČ:</b></td>
             <td>
-              {{ order?.invoiceCompany || 'Nezadané' }}, 
-              <span [ngStyle]="{
-                    'color': order?.invoiceICO === DEFAULTS.ico ? 'gray' : 'black',
-                    'font-style': order?.invoiceICO === DEFAULTS.ico ? 'italic' : 'normal'
-                  }">{{ order?.invoiceICO || 'Nezadané' }}</span>, 
-              <span [ngStyle]="{
-                    'color': order?.invoiceDIC === DEFAULTS.dic ? 'gray' : 'black',
-                    'font-style': order?.invoiceDIC === DEFAULTS.dic ? 'italic' : 'normal'
-                  }">{{ order?.invoiceDIC || 'Nezadané' }}</span>
+              {{ order?.invoiceCompany || 'Nezadané' }},
+              <span [ngClass]="{ 'order-placeholder': order?.invoiceICO === DEFAULTS.ico }">
+                {{ order?.invoiceICO || 'Nezadané' }}
+              </span>,
+              <span [ngClass]="{ 'order-placeholder': order?.invoiceDIC === DEFAULTS.dic }">
+                {{ order?.invoiceDIC || 'Nezadané' }}
+              </span>
             </td>
           </tr>
           <tr>
@@ -198,7 +199,7 @@
           <tr>
             <td><b>Telefónne číslo:</b></td>
             <td>{{ order?.invoicePhoneNumber ? order.invoicePhoneNumber : 'Nezadané' }}</td>
-          </tr>     
+          </tr>
         </table>
         <table class="order-table">
           <tr>
@@ -206,7 +207,12 @@
           </tr>
           <tr>
             <td><b>Kliknutím na odkaz stiahnete aktuálnu faktúru k objednávke vo formáte PDF:</b></td>
-            <td><a (click)="getInvoice()" title="Kliknutím stiahnete faktúru objednávky"><img src="../../assets/Images/download-icon.png" alt="download-icon">Prevziať faktúru</a></td>
+            <td>
+              <a (click)="getInvoice()" title="Kliknutím stiahnete faktúru objednávky">
+                <img src="../../assets/Images/download-icon.png" alt="download-icon">
+                Prevziať faktúru
+              </a>
+            </td>
           </tr>
           <tr>
             <td><b>Podacie číslo objednávky:</b></td>
@@ -215,10 +221,13 @@
         </table>
       </div>
       <div class="return-home">
-        <button class="btn btn-secondary" (click)="returnHome()"><img src="../../assets/Images/return-home-icon.png" alt="return-home-icon" class="return-home-icon">Vrátiť sa späť na objednávky</button>
+        <button class="btn btn-secondary" (click)="returnHome()">
+          <img src="../../assets/Images/return-home-icon.png" alt="return-home-icon" class="return-home-icon">
+          Vrátiť sa späť na objednávky
+        </button>
       </div>
-      </div>
-    }
+    </div>
+  }
 </div>
 <ng-template #confirmDialog>
   <div class="confirm-dialog">

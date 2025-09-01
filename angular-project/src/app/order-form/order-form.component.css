@@ -22,8 +22,18 @@ h3 {
   margin-top: 10px;
 }
 .field,
+.phone-number-field,
 .form-group {
   margin-bottom: 15px;
+}
+.phone-number-field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+::ng-deep .phone-number-field .iti {
+  width: 100% !important;
+  display: flex;
 }
 textarea {
   resize: vertical;
@@ -430,6 +440,10 @@ mat-paginator {
   border-color: red;
   box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.25);
 }
+::ng-deep .phone-number-field .iti__tel-input.is-invalid {
+  border-color: red !important;
+  box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.25);
+}
 /*Pre platné polia*/
 .form-control.ng-valid:not(:placeholder-shown):not([type="search"]):not(
     .product-amount-control
@@ -437,3 +451,8 @@ mat-paginator {
   border-color: #198754;
   box-shadow: 0 0 0 0.1rem rgba(40, 167, 69, 0.25)
 }
+::ng-deep .phone-number-field .iti__tel-input.is-valid {
+  border-color: #198754 !important;
+  box-shadow: 0 0 0 0.1rem rgba(40, 167, 69, 0.25);
+}
+

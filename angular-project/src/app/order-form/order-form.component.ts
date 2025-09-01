@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { OrderDTO, OrderService, OrderStatusDTO } from '../services/order.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -14,14 +14,14 @@ import { EphService, EphSettingsDTO } from '../services/eph.service';
 import { catchError, finalize, forkJoin, map, Observable, of } from 'rxjs';
 import { CdkDrag, DragDropModule, moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ManageStatusesDialogComponent } from '../manage-statuses-dialog/manage-statuses-dialog.component';
-import * as html2pdf from 'html2pdf.js';
 import { InvoiceService } from '../services/invoice.service';
 import { SystemSettingsDTO, SystemSettingsService } from '../services/system-settings.service';
+import { NgxIntlTelInputModule, CountryISO, SearchCountryField } from 'ngx-intl-tel-input';
 
 @Component({
   selector: 'app-order-form',
   standalone: true,
-  imports: [DatePipe, CommonModule, FormsModule, ReactiveFormsModule, MatSnackBarModule, NgClass, MatPaginatorModule, DragDropModule, CdkDrag],
+  imports: [DatePipe, CommonModule, FormsModule, ReactiveFormsModule, MatSnackBarModule, NgClass, MatPaginatorModule, DragDropModule, CdkDrag, NgxIntlTelInputModule],
   providers: [DatePipe, OrderService, { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
   templateUrl: './order-form.component.html',
   styleUrl: './order-form.component.css'
@@ -34,6 +34,17 @@ export class OrderFormComponent implements OnInit {
 
   orderId: number | null = null;
   existingOrderId: number | null = null;
+
+  preferredCountries: CountryISO[] = [
+    CountryISO.Slovakia, CountryISO.CzechRepublic, CountryISO.Germany,
+    CountryISO.Austria, CountryISO.Poland, CountryISO.Hungary, CountryISO.Switzerland
+  ];
+
+  CountryISO = CountryISO;
+  SearchCountryField = SearchCountryField;
+
+  fullPhoneNumber: string = '';
+  fullInvoicePhoneNumber: string = '';
 
   readonly DEFAULTS = {
     email: 'nezadany@objednavky.local',
@@ -135,7 +146,7 @@ export class OrderFormComponent implements OnInit {
     city: new FormControl('', Validators.required),
     postalCode: new FormControl('', [Validators.required, Validators.pattern(/^\d+$/)]),
     email: new FormControl('', [Validators.required, this.emailValidator]),
-    phoneNumber: new FormControl('', [Validators.required, this.phoneValidator]),
+    phoneNumber: new FormControl('', Validators.required),
     note: new FormControl(''),
     deliveryOption: new FormControl('', Validators.required),
     deliveryCost: new FormControl(0, [Validators.required, Validators.min(0)]),
@@ -158,7 +169,7 @@ export class OrderFormComponent implements OnInit {
     invoiceICO: new FormControl('', Validators.pattern(/^\d{8}$/)),
     invoiceDIC: new FormControl('', Validators.pattern(/^\d{8,10}$/)),
     invoiceEmail: new FormControl('', [this.emailValidator]),
-    invoicePhoneNumber: new FormControl('', [this.phoneValidator]),
+    invoicePhoneNumber: new FormControl(''),
   }, { validators: this.conditionalInvoiceValidator() });
 
   conditionalInvoiceValidator(): ValidatorFn {
@@ -169,7 +180,7 @@ export class OrderFormComponent implements OnInit {
 
       const nameValue = nameControl?.value?.trim() || '';
       const emailValue = emailControl?.value?.trim() || '';
-      const phoneValue = phoneControl?.value?.trim() || '';
+      const phoneValue = phoneControl?.value?.number?.trim() || '';
 
       const isAnyFieldFilled = nameValue.length > 0 || emailValue.length > 0 || phoneValue.length > 0;
 
@@ -202,10 +213,12 @@ export class OrderFormComponent implements OnInit {
           clearConditionalError(emailControl)
         }
 
-        if(phoneControl && phoneValue.length === 0) {
-          setConditionalError(phoneControl)
-        }else {
-          clearConditionalError(phoneControl)
+        if(phoneControl) {
+          if(phoneValue.length === 0) {
+            setConditionalError(phoneControl);
+          } else {
+            clearConditionalError(phoneControl);
+          }
         }
 
         return hasError ? { incompleteInvoiceContactData: true } : null;
@@ -222,7 +235,14 @@ export class OrderFormComponent implements OnInit {
     }
   }
 
-  createOrderDTO(): OrderDTO{
+  onPhoneNumberChange(value: any) {
+    this.fullPhoneNumber = value?.nationalNumber || '';
+  }
+  onInvoicePhoneNumberChange(value: any) {
+    this.fullInvoicePhoneNumber = value?.nationalNumber || '';
+  }
+
+  createOrderDTO(): OrderDTO {
     return {
       orderId: this.isEditMode ? this.existingOrderId : this.orderId,
       customerName: this.orderForm.value.customerName,
@@ -234,7 +254,7 @@ export class OrderFormComponent implements OnInit {
       city: this.orderForm.value.city,
       postalCode: this.orderForm.value.postalCode,
       email: this.orderForm.value.email,
-      phoneNumber: this.orderForm.value.phoneNumber,
+      phoneNumber: this.fullPhoneNumber || '', 
       note: this.orderForm.value.note || '',
       deliveryOption: this.orderForm.value.deliveryOption,
       deliveryCost: this.orderForm.value.deliveryCost,
@@ -248,13 +268,13 @@ export class OrderFormComponent implements OnInit {
       invoiceNumber: Number(this.invoiceForm.value.invoiceNumber),
       variableSymbol: this.invoiceForm.value.invoiceVariable,
       invoiceIssueDate: this.invoiceForm.value.invoiceIssueDate,
-      invoiceName: this.invoiceForm.value.invoiceName,
+      invoiceName: this.invoiceForm.value.invoiceName || '',
       invoiceCompany: this.invoiceForm.value.invoiceCompany || '',
       invoiceICO: this.invoiceForm.value.invoiceICO || '',
       invoiceDIC: this.invoiceForm.value.invoiceDIC || '',
-      invoiceEmail: this.invoiceForm.value.invoiceEmail,
-      invoicePhoneNumber: this.invoiceForm.value.invoicePhoneNumber,
-    }
+      invoiceEmail: this.invoiceForm.value.invoiceEmail || '',
+      invoicePhoneNumber: this.fullInvoicePhoneNumber || '',
+    };
   }
 
   loadOrderStatuses(): void {
@@ -562,7 +582,7 @@ export class OrderFormComponent implements OnInit {
   updateCost(optionType: 'delivery' | 'payment'): void {
     if(optionType === 'delivery') {
       const deliveryOption = this.orderForm.get('deliveryOption')?.value;
-      this.orderForm.patchValue({ deliveryCost: deliveryOption === 'Kuriér' ? this.systemSettings.deliveryFee : 0 });
+      this.orderForm.patchValue({ deliveryCost: deliveryOption === 'Kuriér' || deliveryOption === 'Zahraničie' ? this.systemSettings.deliveryFee : 0 });
     } else {
       const paymentOption = this.orderForm.get('paymentOption')?.value;
       this.orderForm.patchValue({ paymentCost: paymentOption === 'Hotovosť' ? this.systemSettings.paymentFee : 0 });
@@ -639,48 +659,50 @@ export class OrderFormComponent implements OnInit {
 
     const arrayChanged = this.checkChanges(this.selectedProducts, this.newSelectedProducts);
 
-    if (this.orderForm.valid && this.invoiceForm.valid) {
-      if (this.orderForm.pristine && !arrayChanged) {
-        return this.showSnack('Nebola vykonaná žiadna zmena v objednávke!', 1500);
+    setTimeout(() => {
+      if (this.orderForm.valid && this.invoiceForm.valid) {
+        if (this.orderForm.pristine && !arrayChanged) {
+          return this.showSnack('Nebola vykonaná žiadna zmena v objednávke!', 1500);
+        }
+
+        const order = this.createOrderDTO();
+
+        if (order.orderStatus === 'Zasielanie čísla zásielky' && !order.packageCode?.trim()) {
+          const packageCodeControl = this.orderForm.get('packageCode');
+          packageCodeControl?.setErrors({ invalid: true });
+          packageCodeControl?.markAsTouched();
+          return this.showSnack('Pre odoslanie e-mailu je potrebné zadať podacie číslo!');
+        }
+
+        this.invoiceCreated = true;
+
+        this.orderService.updateOrder(this.existingOrderId, order).subscribe({
+          next: (response) => {
+            if (arrayChanged) {
+              this.productService.updateOrderProducts(response.body.id, this.newSelectedProducts).subscribe({
+                next: (resp: HttpResponse<boolean>) => {
+                  if (resp.status === 200 || resp.status === 204) {
+                    this.checkOrderStatusAndSendEmails(order);
+                    this.showSuccessAndNavigate('Objednávka bola úspešne upravená!');
+                  }
+                },
+                error: (err) => this.handleError("An error occurred while trying to update order products", err)
+              });
+            } else {
+              this.checkOrderStatusAndSendEmails(order);
+              this.showSuccessAndNavigate('Objednávka bola úspešne upravená!');
+            }
+          },
+          error: (err) => this.handleError("An error occurred while trying to update order", err)
+        });
+      } else if (this.orderForm.invalid || this.invoiceForm.invalid) {
+        this.validateAllFormFields(this.orderForm);
+        this.validateAllFormFields(this.invoiceForm);
+        this.showSnack('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!');
+      } else if (this.selectedProducts.length === 0) {
+        this.showSnack('Neboli zvolené žiadne produkty!');
       }
-
-      const order = this.createOrderDTO();
-
-      if (order.orderStatus === 'Zasielanie čísla zásielky' && !order.packageCode?.trim()) {
-        const packageCodeControl = this.orderForm.get('packageCode');
-        packageCodeControl?.setErrors({ invalid: true });
-        packageCodeControl?.markAsTouched();
-        return this.showSnack('Pre odoslanie e-mailu je potrebné zadať podacie číslo!');
-      }
-
-      this.invoiceCreated = true;
-
-      this.orderService.updateOrder(this.existingOrderId, order).subscribe({
-        next: (response) => {
-          if (arrayChanged) {
-            this.productService.updateOrderProducts(response.body.id, this.newSelectedProducts).subscribe({
-              next: (resp: HttpResponse<boolean>) => {
-                if (resp.status === 200 || resp.status === 204) {
-                  this.checkOrderStatusAndSendEmails(order);
-                  this.showSuccessAndNavigate('Objednávka bola úspešne upravená!');
-                }
-              },
-              error: (err) => this.handleError("An error occurred while trying to update order products", err)
-            });
-          } else {
-            this.checkOrderStatusAndSendEmails(order);
-            this.showSuccessAndNavigate('Objednávka bola úspešne upravená!');
-          }
-        },
-        error: (err) => this.handleError("An error occurred while trying to update order", err)
-      });
-    } else if (this.orderForm.invalid || this.invoiceForm.invalid) {
-      this.validateAllFormFields(this.orderForm);
-      this.validateAllFormFields(this.invoiceForm);
-      this.showSnack('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!');
-    } else if (this.selectedProducts.length === 0) {
-      this.showSnack('Neboli zvolené žiadne produkty!');
-    }
+    }, 100);
   }
 
   private showSnack(msg: string, duration: number = 3000) {
@@ -723,7 +745,7 @@ export class OrderFormComponent implements OnInit {
 
     fields.forEach(field => {
       const control = this.orderForm.get(field);
-      if (!control?.value || control.value.trim() === '') {
+      if (!control?.value || ('' + control.value).trim() === '') {
         control.setValue(this.DEFAULTS[field]);
       }
     });
@@ -749,6 +771,9 @@ export class OrderFormComponent implements OnInit {
     this.isLoadingEdit = true;
     this.orderService.getOrderDetails(orderId).subscribe((order) => {
       this.orderForm.patchValue(order); //patchValue robi ze vyplni hodnoty objednavky
+
+      if(order.phoneNumber.length > 0) this.orderForm.get('phoneNumber')?.markAsTouched();
+      if(order.invoicePhoneNumber.length > 0) this.orderForm.get('invoicePhoneNumber')?.markAsTouched();
 
       this.userMessage = order.note;
       this.charactersCount = this.userMessage.length;
@@ -844,57 +869,59 @@ export class OrderFormComponent implements OnInit {
 
     this.orderForm.get('packageCode')?.setErrors(null);
 
-    if(this.orderForm.valid && this.invoiceForm.valid && this.selectedProducts.length > 0){
-      let order = this.createOrderDTO();
+    setTimeout(() => {
+      if(this.orderForm.valid && this.invoiceForm.valid && this.selectedProducts.length > 0){
+        let order = this.createOrderDTO();
 
-      if(order.orderStatus === 'Zasielanie čísla zásielky'){
-        if(!order.packageCode || order.packageCode.trim() === ''){
-            packageCodeControl?.setErrors({ invalid: true });
-            packageCodeControl?.markAsTouched();
-            return this.showSnack('Pre odoslanie e-mailu je potrebné zadať podacie číslo!');
-        }
-      }
-
-      this.orderService.createOrder(order).subscribe({
-        next: (response: OrderDTO) => {
-          if (!response) {
-            this.checkOrderStatusAndSendEmails(order);
-            this.isLoading = false;
-            return;
+        if(order.orderStatus === 'Zasielanie čísla zásielky'){
+          if(!order.packageCode || order.packageCode.trim() === ''){
+              packageCodeControl?.setErrors({ invalid: true });
+              packageCodeControl?.markAsTouched();
+              return this.showSnack('Pre odoslanie e-mailu je potrebné zadať podacie číslo!');
           }
+        }
 
-          this.productService.addProductsToOrder(response.id, this.selectedProducts).subscribe({
-            next: (res) => {
-              if (res.status === 204 || res.status === 200) {
-                this.checkOrderStatusAndSendEmails(order);
+        this.orderService.createOrder(order).subscribe({
+          next: (response: OrderDTO) => {
+            if (!response) {
+              this.checkOrderStatusAndSendEmails(order);
+              this.isLoading = false;
+              return;
+            }
 
-                if (!this.invoiceCreated) {
-                  this.downloadInvoice();
+            this.productService.addProductsToOrder(response.id, this.selectedProducts).subscribe({
+              next: (res) => {
+                if (res.status === 204 || res.status === 200) {
+                  this.checkOrderStatusAndSendEmails(order);
+
+                  if (!this.invoiceCreated) {
+                    this.downloadInvoice();
+                  } else {
+                    this.showSnack('Objednávka bola úspešne vytvorená!', 1500);
+                  }
+
+                  this.router.navigate(['/orders-page']);
                 } else {
-                  this.showSnack('Objednávka bola úspešne vytvorená!', 1500);
+                  console.warn('Unexpected status:', res.status);
                 }
 
-                this.router.navigate(['/orders-page']);
-              } else {
-                console.warn('Unexpected status:', res.status);
-              }
-
-              this.isLoading = false;
-            },
-            error: (err) => this.handleError('An error has occurred while trying to add products to order', err)
-          });
-        },
-        error: (err) => this.handleError('An error occurred while trying to create order', err)
-      });
-    }else if(this.selectedProducts.length === 0) {
-      const element = document.getElementById('selected-products-id');
-      element.scrollIntoView({behavior: 'smooth', block: 'start'});
-      this.showSnack('Nemáte zvolené produkty pre túto objednávku!');
-    }else if(this.orderForm.invalid || this.invoiceForm.invalid){
-      this.validateAllFormFields(this.orderForm);
-      this.validateAllFormFields(this.invoiceForm);
-      this.showSnack('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!');
-    }
+                this.isLoading = false;
+              },
+              error: (err) => this.handleError('An error has occurred while trying to add products to order', err)
+            });
+          },
+          error: (err) => this.handleError('An error occurred while trying to create order', err)
+        });
+      }else if(this.selectedProducts.length === 0) {
+        const element = document.getElementById('selected-products-id');
+        element.scrollIntoView({behavior: 'smooth', block: 'start'});
+        this.showSnack('Nemáte zvolené produkty pre túto objednávku!');
+      }else if(this.orderForm.invalid || this.invoiceForm.invalid){
+        this.validateAllFormFields(this.orderForm);
+        this.validateAllFormFields(this.invoiceForm);
+        this.showSnack('Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!');
+      }
+    }, 100);
   }
 
   validateAllFormFields(formGroup: FormGroup){
@@ -912,13 +939,6 @@ export class OrderFormComponent implements OnInit {
       return { invalidEmail: true };
     }
     return null;
-  }
-  phoneValidator(control: FormControl){
-    const phoneRegex = /^(0(?:2[0-9]{2}|[9][0-9]{2}))\s?([0-9]{3})\s?([0-9]{3})$|^(0[1-9][0-9]{8})$/;
-    if(control.value && !phoneRegex.test(control.value)){
-      return { invalidPhone: true };
-    }
-    return null
   }
 
   checkPackageCodeFormat(code: string): boolean {
@@ -1066,8 +1086,6 @@ export class OrderFormComponent implements OnInit {
 
     try {
       const orderData = this.createOrderDTO();
-
-      console.log(orderData);
 
       await this.invoiceService.generateInvoice(orderData, this.selectedProducts);
       this.snackBar.open('Faktúra bola úspešne stiahnutá!', '', { duration: 2000 });

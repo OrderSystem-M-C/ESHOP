@@ -565,7 +565,6 @@ namespace AspNetCoreAPI.Controllers
         private async Task<XElement> ProcessOrderAsync(OrderModel order, XNamespace tns)
         {
             string druhZasielky = (order.DeliveryOption == "Kuriér") ? "8" : "1";
-            decimal totalWithoutPaymentCost = order.TotalPrice - order.PaymentCost;
 
             return new XElement(tns + "Zasielka",
                 new XElement(tns + "Adresat",
@@ -585,9 +584,9 @@ namespace AspNetCoreAPI.Controllers
                     new XElement(tns + "CiarovyKod", order.PackageCode),
                     new XElement(tns + "Hmotnost", "1"), 
                     new XElement(tns + "CenaPoistneho", "100"),
-                    (order.PaymentOption == "Hotovosť" ? new XElement(tns + "CenaDobierky", totalWithoutPaymentCost.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)) : null),
+                    (order.PaymentOption == "Hotovosť" ? new XElement(tns + "CenaDobierky", order.TotalPrice.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)) : null),
                     new XElement(tns + "DruhZasielky", druhZasielky),
-                    new XElement(tns + "Poznamka", order.Note),
+                    new XElement(tns + "Poznamka", ""),
                     new XElement(tns + "SymbolPrevodu", order.VariableSymbol)
                 ),
                 new XElement(tns + "DalsieUdaje",

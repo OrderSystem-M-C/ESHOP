@@ -70,9 +70,10 @@
                         <option disabled selected value="">Zvoliť možnosť</option>
                         <option value="Kuriér">Kuriér</option>
                         <option value="Osobný odber">Osobný odber</option>
+                        <option value="Zahraničie">Zahraničie</option>
                     </select>
                     <div class="delivery-price">
-                      @if(orderForm.get('deliveryOption')?.value !== 'Kuriér'){
+                      @if(orderForm.get('deliveryOption')?.value !== 'Kuriér' && orderForm.get('deliveryOption')?.value !== 'Zahraničie'){
                         <p>0€</p>
                       }@else{
                         <div class="delivery-price-container">
@@ -174,9 +175,29 @@
                 <label for="email" class="form-label">E-mailová adresa*</label>
                 <input formControlName="email" type="email" id="email" class="form-control" placeholder="Zadajte e-mailovú adresu" [ngClass]="{'is-invalid': orderForm.get('email').invalid && orderForm.get('email').touched}">
             </div>
-            <div class="field">
+            <div class="phone-number-field">
                 <label for="phoneNumber" class="form-label">Telefónne číslo*</label>
-                <input formControlName="phoneNumber" type="text" id="phoneNumber" class="form-control" placeholder="Zadajte telefónne číslo" [ngClass]="{'is-invalid': orderForm.get('phoneNumber').invalid && orderForm.get('phoneNumber').touched}">
+                <ngx-intl-tel-input
+                  [cssClass]="
+                  orderForm.get('phoneNumber').invalid && orderForm.get('phoneNumber').touched
+                    ? 'form-control is-invalid'
+                    : (orderForm.get('phoneNumber').valid && orderForm.get('phoneNumber').touched && orderForm.get('phoneNumber').value
+                      ? 'form-control is-valid'
+                      : 'form-control')"
+                  [preferredCountries]="['sk', 'cz']"
+                  [onlyCountries]="preferredCountries"
+                  [enableAutoCountrySelect]="false"
+                  [enablePlaceholder]="true"
+                  [searchCountryFlag]="true"
+                  [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                  [selectFirstCountry]="false"
+                  [selectedCountryISO]="CountryISO.Slovakia"
+                  [maxLength]="15"
+                  formControlName="phoneNumber"
+                  [separateDialCode]="true"
+                  id="phoneNumber"
+                  (ngModelChange)="onPhoneNumberChange($event)">
+                </ngx-intl-tel-input>
             </div>
             <div class="field">
                 <label for="note" class="form-label">Poznámka</label>
@@ -228,9 +249,29 @@
               <label for="invoiceEmail" class="form-label">E-mailová adresa</label>
               <input type="text" id="invoiceEmail" class="form-control" placeholder="Zadajte e-malovú adresu na faktúre" formControlName="invoiceEmail" [ngClass]="{'is-invalid': invoiceForm.get('invoiceEmail').invalid && invoiceForm.get('invoiceEmail').touched}">
             </div>
-            <div class="field">
-              <label for="invoicePhoneNumber" class="form-label">Telefónne číslo</label>
-              <input type="text" id="invoicePhoneNumber" class="form-control" placeholder="Zadajte telefónne číslo na faktúre" formControlName="invoicePhoneNumber" [ngClass]="{'is-invalid': invoiceForm.get('invoicePhoneNumber').invalid && invoiceForm.get('invoicePhoneNumber').touched}">
+            <div class="phone-number-field">
+              <label for="phoneNumber" class="form-label">Telefónne číslo</label>
+              <ngx-intl-tel-input
+                [cssClass]="
+                  invoiceForm.get('invoicePhoneNumber')?.invalid && invoiceForm.get('invoicePhoneNumber')?.touched
+                    ? 'form-control is-invalid'
+                    : (invoiceForm.get('invoicePhoneNumber')?.valid && invoiceForm.get('invoicePhoneNumber')?.touched && invoiceForm.get('invoicePhoneNumber')?.value
+                      ? 'form-control is-valid'
+                      : 'form-control')"
+                [preferredCountries]="['sk', 'cz']"
+                [onlyCountries]="preferredCountries"
+                [enableAutoCountrySelect]="false"
+                [enablePlaceholder]="true"
+                [searchCountryFlag]="true"
+                [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                [selectFirstCountry]="false"
+                [selectedCountryISO]="CountryISO.Slovakia"
+                [maxLength]="15"
+                formControlName="invoicePhoneNumber"
+                [separateDialCode]="true"
+                id="invoicePhoneNumber"
+                (ngModelChange)="onInvoicePhoneNumberChange($event)">
+              </ngx-intl-tel-input>
             </div>
             <div class="field">
               <p><strong>Poznámka:</strong> Faktúra bude automaticky vygenerovaná pri odoslaní objednávky. Toto tlačidlo slúži na jej náhľad a kontrolu.</p>
@@ -347,12 +388,12 @@
       <div class="search">
         <input class="search-bar form-control" [(ngModel)]="searchText" type="search" placeholder="Kliknite sem pre vyhľadávanie" (ngModelChange)="searchProducts()">
         <select class="form-control search-select" [(ngModel)]="searchOption" (change)="searchProducts()">
-        <option selected value="auto">Automatické vyhľadávanie</option>
-        <option value="productId">Vyhľadávanie podľa čísla produktu</option>
-        <option value="productName">Vyhľadávanie podľa názvu produktu</option>
-        <option value="productCode">Vyhľadávanie podľa kódu produktu</option>
-        <option value="productPrice">Vyhľadávanie podľa ceny produktu</option>
-      </select>
+          <option selected value="auto">Automatické vyhľadávanie</option>
+          <option value="productId">Vyhľadávanie podľa čísla produktu</option>
+          <option value="productName">Vyhľadávanie podľa názvu produktu</option>
+          <option value="productCode">Vyhľadávanie podľa kódu produktu</option>
+          <option value="productPrice">Vyhľadávanie podľa ceny produktu</option>
+        </select>
       </div>
       @if(sortedProducts.length === 0){
         <h3 class="no-products-found">Neboli nájdené žiadne produkty!</h3>
