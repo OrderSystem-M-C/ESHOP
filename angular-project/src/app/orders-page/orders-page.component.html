@@ -2,49 +2,29 @@
 <div class="orders-page-component">
   <div class="title">
     <div class="title-container-1">
-      <h1>Prehľad objednávok a štatistík</h1>
+      <h1>Prehľad objednávok</h1>
       <p>{{currentDate}}</p>
     </div>
     <div class="button-container">
-      <button class="btn btn-secondary" [routerLink]="['/products-page']"><img src="../../assets/Images/products-icon.png" alt="products-icon" class="products-icon"> Moje produkty</button>
-      <button class="btn btn-primary" [routerLink]="['/order-form']"><img src="../../assets/Images/create-icon.png" alt="create-icon"> Vytvoriť objednávku</button>
-      <button class="btn btn-warning" [routerLink]="['/eph-settings']"><img src="./../assets/Images/settings-icon.png" alt="settings-icon"> Nastavenia EPH a poplatkov</button>
-      <button class="btn btn-outline-danger" (click)="authService.logout()">Odhlásiť sa</button>
-    </div>
-  </div>
-  <div class="title-charts">
-    <h2>Štatistiky</h2>
-  </div>
-  <div class="charts-revenue-section" [ngClass]="{'visible-chart': !isLoading, 'not-visible-chart': isLoading}">
-    <div class="canvas-chart">
-      <canvas #ordersStatusChart></canvas>
-    </div>
-    <div class="canvas-chart">
-      <canvas #ordersDate></canvas>
-      <div class="select-range">
-        <select class="form-control" (change)="onRangeChange($event, 'orders')">
-          <option value="1d">1 deň</option>
-          <option value="7d">7 dní</option>
-          <option value="1m">1 mesiac</option>
-          <option value="1y">1 rok</option>
-          <option value="all" selected>Celý čas</option>
-        </select>
-      </div>
-    </div>
-    <div class="canvas-chart">
-      <canvas #revenueChart></canvas>
-      <div class="select-range">
-        <select class="form-control" (change)="onRangeChange($event, 'revenue')">
-          <option value="1d">1 deň</option>
-          <option value="7d">7 dní</option>
-          <option value="1m">1 mesiac</option>
-          <option value="1y">1 rok</option>
-          <option value="all" selected>Celý čas</option>
-        </select>
-        <div class="total-revenue">
-          <p><b>Celkový príjem:</b> {{ totalRevenue }}€</p>
-        </div>
-      </div>
+      <button type="button" class="btn btn-primary" [routerLink]="['/analytics-page']">
+        <img src="../../assets/Images/chart-icon.png" alt="chart-icon"> 
+        Štatistiky
+      </button>
+      <button type="button" class="btn btn-secondary" [routerLink]="['/products-page']">
+        <img src="../../assets/Images/products-icon.png" alt="products-icon"> 
+        Moje produkty
+      </button>
+      <button type="button" class="btn btn-success" [routerLink]="['/order-form']">
+        <img src="../../assets/Images/create-icon.png" alt="create-icon"> 
+        Vytvoriť objednávku
+      </button>
+      <button type="button" class="btn btn-warning" [routerLink]="['/eph-settings']">
+        <img src="./../assets/Images/settings-icon.png" alt="settings-icon"> 
+        Nastavenia EPH a poplatkov
+      </button>
+      <button type="button" class="btn btn-outline-danger" (click)="authService.logout()">
+        Odhlásiť sa
+      </button>
     </div>
   </div>
   @if(isLoading){
@@ -60,12 +40,12 @@
       </div>
       <div class="service-container">
         <div class="copy-container">
-          <button class="btn btn-light" (click)="copySelectedOrders()"><img src="../../assets/Images/copy-icon.png" alt="copy-icon"> 
+          <button type="button" class="btn btn-light" (click)="copySelectedOrders()"><img src="../../assets/Images/copy-icon.png" alt="copy-icon"> 
             Skopírovať objednávku/y
           </button>
         </div>
         <div class="change-status-container">
-          <button class="btn btn-light" (click)="toggleDropdown('changeStatus')">
+          <button type="button" class="btn btn-light" (click)="toggleDropdown('changeStatus')">
             <img src="../../assets/Images/change-status-icon.png"> Rýchla zmena stavu objednávky
           </button>
           <div class="dropdown-content" [ngClass]="dropdownState['changeStatus'] ? 'is-visible': 'is-not-visible'">
@@ -80,22 +60,22 @@
           </div>
         </div>
         <div class="select-orders-to-remove-container">
-          <button class="btn btn-light" (click)="removeSelectedOrders()"><img src="../../assets/Images/bin-icon.png" alt="bit-icon"> 
+          <button type="button" class="btn btn-light" (click)="removeSelectedOrders()"><img src="../../assets/Images/bin-icon.png" alt="bit-icon"> 
             Odstrániť zvolenú/é objednávku/y
           </button>
         </div>
         <div class="generate-xml-file-from-orders-container">
-          <button class="btn btn-light" (click)="downloadXmlFiles()"><img src="../../assets/Images/xml-icon.png" alt="xml-icon"> 
+          <button type="button" class="btn btn-light" (click)="downloadXmlFiles()"><img src="../../assets/Images/xml-icon.png" alt="xml-icon"> 
             Vygenerovať XML
           </button>
         </div>
         <div class="download-invoice-container">
-          <button class="btn btn-light" (click)="downloadInvoices()">
+          <button type="button" class="btn btn-light" (click)="downloadInvoices()">
             <img src="../../assets/Images/download-file-icon.png" alt="download-icon" class="download-icon"> Stiahnuť faktúru/y
           </button>
         </div>
         <div class="cancel-selection-container">
-          <button class="btn btn-outline-danger" (click)="clearSelection(true)">
+          <button type="button" class="btn btn-outline-danger" (click)="clearSelection(true)">
             Zrušiť výber
           </button>
         </div>
@@ -167,7 +147,7 @@
           </div>
         </div>
         <div class="select-all-orders-container">
-          <button class="btn btn-outline-success" (click)="selectAllOrders()" *ngIf="ordersData.length > 0"> 
+          <button type="button" class="btn btn-outline-primary" (click)="selectAllOrders()" *ngIf="ordersData.length > 0"> 
             Zvoliť všetky
           </button>
         </div>
@@ -188,13 +168,14 @@
       <table class="orders-table">
         <thead>
           <tr>
-            <th style="text-align: center;">Náhľad</th>
+            <th class="text-center">Náhľad</th>
             <th>Dátum</th>
-            <th>Číslo objednávky</th>
+            <th class="text-center">Číslo objednávky</th>
             <th>Meno</th>
-            <th style="text-align: center;">Celková cena</th>
+            <th class="text-center">Celková cena</th>
+            <th class="text-center">Platba</th>
             <th>Stav objednávky</th>
-            <th style="text-align: center;">Podacie číslo</th>
+            <th class="text-center">Podacie číslo</th>
             <th style="width: 100px !important; text-align: center;">Zvoliť</th>
           </tr>
         </thead>
@@ -203,6 +184,11 @@
             *ngFor="let order of ourFilteredOrders"
             class="order-row"
             [class.selected]="selectedOrders.includes(order)"
+            [ngClass]="{
+              'danger-status': order.orderStatus === 'Objednávka stornovaná' || 
+                                order.orderStatus === 'Oprava objednávky' || 
+                                order.orderStatus === 'Rozbité, zničené, vrátené' || 
+                                order.orderStatus === 'Neznáma príčina' }"
             (click)="navigateToDetails(order, $event)">
             <td>
               <div class="preview-container"
@@ -219,11 +205,18 @@
               </div>
             </td>
             <td>{{ order.orderDate }}</td>
-            <td>{{ order.orderId }}</td>
-            <td>{{ order.customerName }}</td>
-            <td style="text-align: center;">{{ order.totalPrice }}€</td>
-            <td>{{ order.orderStatus }}</td>
-            <td style="text-align: center;">{{ order.packageCode ? order.packageCode : 'Nezadané' }}</td>
+            <td class="text-center">{{ order.orderId }}</td>
+            <td>
+              <div class="scrollable-cell">{{ order.customerName }}</div>
+            </td>
+            <td class="text-center">{{ order.totalPrice }}€</td>
+            <td class="text-center">{{ order.paymentOption }}</td>
+            <td>
+              <div class="scrollable-cell">
+                {{ order.orderStatus }}
+              </div>
+            </td>
+            <td class="text-center">{{ order.packageCode ? order.packageCode : 'Nezadané' }}</td>
             <td
               class="checkbox-section"
               [attr.title]="order.orderStatus"

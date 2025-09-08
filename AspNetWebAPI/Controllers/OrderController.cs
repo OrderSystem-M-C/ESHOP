@@ -44,6 +44,53 @@ namespace AspNetCoreAPI.Controllers
                 return StatusCode(500, new { message = $"An error occurred while generating random orderId: {ex.Message}" });
             }
         }
+        [HttpGet("get-product-stats")]
+        public async Task<ActionResult<IEnumerable<ProductStatsDTO>>> GetProductStatsAsync()
+        {
+            try
+            {
+                var orders = await _context.Orders
+                    .Include(o => o.OrderProducts)
+                        .ThenInclude(op => op.Product)
+                    .ToListAsync();
+
+                var productCounts = new Dictionary<string, int>();
+
+                foreach(var order in orders)
+                {
+                    foreach(var op in order.OrderProducts)
+                    {
+                        var productName = op.ProductNameSnapshot;
+                        var quantity = op.Quantity;
+
+                        if (productCounts.ContainsKey(productName))
+                        {
+                            productCounts[productName] += quantity;
+                        }
+                        else
+                        {
+                            productCounts[productName] = quantity;
+                        }
+                    }
+                }
+
+                var topProducts = productCounts
+                    .OrderByDescending(p => p.Value)
+                    .Take(15)
+                    .Select(p => new ProductStatsDTO
+                    {
+                        ProductName = p.Key,
+                        Quantity = p.Value
+                    })
+                    .ToList();
+
+                return Ok(topProducts);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, new { message = $"An error occurred while trying to calculate statistics: {ex.Message}" });
+            }
+        }
         [HttpPost("create-order")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDTO orderDto)
         {
@@ -119,6 +166,7 @@ namespace AspNetCoreAPI.Controllers
                         OrderDate = o.OrderDate,
                         TotalPrice = o.TotalPrice,
                         PackageCode = o.PackageCode ?? "",
+                        PaymentOption = o.PaymentOption,
                         ProductNames = o.OrderProducts
                             .Select(op => op.ProductNameSnapshot)
                             .ToList()
@@ -766,8 +814,8 @@ namespace AspNetCoreAPI.Controllers
 
             return next;
         }
-        [HttpGet("validate-package-code/{packageCode}")]
-        public async Task<IActionResult> ValidatePackageCode([FromRoute] string packageCode)
+        [HttpGet("validate-package-code")]
+        public async Task<IActionResult> ValidatePackageCode([FromQuery] string packageCode, [FromQuery] int orderId)
         {
             try
             {
@@ -839,7 +887,7 @@ namespace AspNetCoreAPI.Controllers
                 };
 
                 var existingOrder = await _context.Orders
-                    .FirstOrDefaultAsync(o => o.PackageCode == packageCode);
+                    .FirstOrDefaultAsync(o => o.PackageCode == packageCode && o.OrderId != orderId);
 
                 if (existingOrder != null)
                 {

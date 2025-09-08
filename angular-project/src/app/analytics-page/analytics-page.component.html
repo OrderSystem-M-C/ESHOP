@@ -1,0 +1,115 @@
+<title>Štatistiky</title>
+<div class="analytics-page-component">
+  <div class="title">
+    <div class="title-container-1">
+      <h1>Štatistiky objednávok a produktov</h1>
+      <p>{{currentDate}}</p>
+    </div>
+    <div class="button-container">
+      <button type="button" class="btn btn-success" (click)="exportData()">
+        <img src="../../assets/Images/csv-icon.png" alt="csv-icon" class="csv-icon"> Exportovať dáta do CSV
+      </button>
+      <button type="button" class="btn btn-secondary" [routerLink]="['/orders-page']">
+        <img src="../../assets/Images/return-home-icon.png" alt="return-home-icon" class="return-home-icon"> Vrátiť sa späť na objednávky
+      </button>
+    </div>
+  </div>
+  @if(isLoading){
+    <div class="spinner-container">
+       <div class="spinner">
+       </div>
+       Načítava sa
+    </div>
+  }@else{
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h2>Denný počet objednávok (ks)</h2>
+      <apx-chart
+        *ngIf="ordersChartOptions"
+        [series]="ordersChartOptions.series"
+        [chart]="ordersChartOptions.chart"
+        [xaxis]="ordersChartOptions.xaxis"
+        [yaxis]="ordersChartOptions.yaxis"
+        [dataLabels]="ordersChartOptions.dataLabels"
+        [colors]="ordersChartOptions.colors">
+      </apx-chart>
+      <div class="total-orders-container">
+        <p class="total-orders">
+          <b>Celkový počet za zvolené obdobie:</b> {{ totalOrders }} ks
+        </p>
+        <p class="total-orders-all">
+          <b>Celkový počet objednávok:</b> {{ totalOrdersAllTime }} ks 
+        </p>
+      </div>
+      <div class="select-range">
+        <p>Vyberte časové obdobie:</p>
+        <select class="form-control" (change)="onRangeChange($event, 'orders')">
+          <option value="1d">1 deň</option>
+          <option value="7d">7 dní</option>
+          <option value="1m">1 mesiac</option>
+          <option value="1y">1 rok</option>
+          <option value="all" selected>Celý čas</option>
+        </select>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h2>Denné tržby (€)</h2>
+      <apx-chart
+        *ngIf="revenueChartOptions"
+        [series]="revenueChartOptions.series"
+        [chart]="revenueChartOptions.chart"
+        [xaxis]="revenueChartOptions.xaxis"
+        [yaxis]="revenueChartOptions.yaxis"
+        [dataLabels]="revenueChartOptions.dataLabels"
+        [stroke]="revenueChartOptions.stroke"
+        [fill]="revenueChartOptions.fill"
+        [colors]="revenueChartOptions.colors">
+      </apx-chart>
+      <div class="total-revenue-container">
+        <p class="total-revenue">
+          <b>Celkový príjem za zvolené obdobie:</b> {{ totalRevenue }}€
+        </p>
+        <p class="total-revenue-all">
+          <b>Celkový príjem:</b> {{ totalRevenueAllTime }}€
+        </p>
+      </div>
+      <div class="select-range">
+        <p>Vyberte časové obdobie:</p>
+        <select class="form-control" (change)="onRangeChange($event, 'revenue')">
+          <option value="1d">1 deň</option>
+          <option value="7d">7 dní</option>
+          <option value="1m">1 mesiac</option>
+          <option value="1y">1 rok</option>
+          <option value="all" selected>Celý čas</option>
+        </select>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h2>Objednávky podľa stavu (ks)</h2>
+      <apx-chart
+        *ngIf="pieChartOptions"
+        [series]="pieChartOptions.series"
+        [chart]="pieChartOptions.chart"
+        [labels]="pieChartOptions.labels"
+        [dataLabels]="pieChartOptions.dataLabels"
+        [legend]="pieChartOptions.legend"
+        [responsive]="pieChartOptions.responsive"
+        [fill]="pieChartOptions.fill">
+      </apx-chart>
+    </div>
+    <div class="chart-card">
+      <h2>Najpredávanejšie produkty (ks)</h2>
+      <apx-chart
+        *ngIf="productsChartOptions"
+        [series]="productsChartOptions.series"
+        [chart]="productsChartOptions.chart"
+        [xaxis]="productsChartOptions.xaxis"
+        [yaxis]="productsChartOptions.yaxis"
+        [dataLabels]="productsChartOptions.dataLabels"
+        [colors]="productsChartOptions.colors">
+      </apx-chart>
+    </div> 
+  </div>
+  }
+</div>
+

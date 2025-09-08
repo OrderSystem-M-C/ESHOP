@@ -73,6 +73,8 @@ export class ManageStatusesDialogComponent implements OnInit {
             this.statusForm.reset();
             this.editingOrderStatusId = null;
             this.loadOrderStatuses();
+
+            this.statusForm.get('statusName')?.enable();
           },
           error: (err) => console.error(err)
         });
@@ -110,7 +112,12 @@ export class ManageStatusesDialogComponent implements OnInit {
     if (
       status.statusName === 'Nezpracované - nová objednávka' ||
       status.statusName === 'Zasielanie čísla zásielky' ||
-      status.statusName === 'Dobierka - Info k objednávke (poslať e-mail)'
+      status.statusName === 'Dobierka - Info k objednávke (poslať e-mail)' ||
+      status.statusName === 'Objednávka stornovaná' || 
+      status.statusName === 'Oprava objednávky' || 
+      status.statusName === 'Rozbité, zničené, vrátené' || 
+      status.statusName === 'Neznáma príčina'
+
     ) {
       this.statusForm.get('statusName')?.disable();
     } else {

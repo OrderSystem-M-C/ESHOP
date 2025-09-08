@@ -115,9 +115,9 @@ h1 {
   padding-left: 8px;
 }
 .warning-text {
-  color: red;
+  color: #dc3545;
   font-weight: bold;
-  background-color: #fee2e2; 
+  background-color: #fde8e8; 
   padding: 4px 8px;
   border-radius: 4px;
 }

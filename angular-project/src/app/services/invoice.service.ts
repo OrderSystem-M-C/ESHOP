@@ -188,12 +188,12 @@ export class InvoiceService {
             <h3 style="margin-bottom: 10px; font-weight: bold;">Objednávateľ</h3>
             <table style="width: 100%; border: 1px solid #e0e0e0;">
               <tr>
-                <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
+                <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff; border-bottom: 1px solid #e4e4e4ff;">Meno a priezvisko</th>
                 <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.displayValue(order.customerName, this.DEFAULTS.customerName)}</td>
               </tr>
               ${companyRowHTML}
               <tr>
-                <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Adresa</th>
+                <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff; border-bottom: 1px solid #e4e4e4ff;">Adresa</th>
                 <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
                   ${this.displayValue(order.address, this.DEFAULTS.address)}, 
                   ${this.displayValue(order.postalCode, this.DEFAULTS.postalCode)}, 
@@ -201,12 +201,16 @@ export class InvoiceService {
                 </td>
               </tr>
               <tr>
-                <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
+                <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff; border-bottom: 1px solid #e4e4e4ff;">E-mail</th>
                 <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.displayValue(order.email, this.DEFAULTS.email)}</td>
               </tr>
               <tr>
-                <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
-                <td style="padding: 8px;">${this.displayValue(order.phoneNumber, this.DEFAULTS.phoneNumber)}</td>
+                <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff; border-bottom: 1px solid #e4e4e4ff;">Tel.č.</th>
+                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;"">${this.displayValue(order.phoneNumber, this.DEFAULTS.phoneNumber)}</td>
+              </tr>
+              <tr>
+                <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Poznámka</th>
+                <td style="padding: 8px;">${order.note || 'Nezadané'}</td>
               </tr>
             </table>
           </div>

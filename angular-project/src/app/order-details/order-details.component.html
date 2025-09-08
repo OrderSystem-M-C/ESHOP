@@ -6,11 +6,11 @@
       <p>{{currentDate}}</p>
     </div>
     <div class="button-container">
-      <button class="btn btn-secondary remove-btn" (click)="removeOrder(confirmDialog)">
+      <button type="button" class="btn btn-secondary remove-btn" (click)="removeOrder(confirmDialog)">
         <img src="../../assets/Images/bin-icon.png" class="remove-btn-icon" alt="remove-btn-icon">
         Vymazať objednávku
       </button>
-      <button class="btn btn-primary" (click)="editOrder()">
+      <button type="button" class="btn btn-success" (click)="editOrder()">
         <img src="../../assets/Images/edit-icon.png" class="edit-icon" alt="edit-icon">
         Upraviť objednávku
       </button>
@@ -32,11 +32,11 @@
                   Objednané produkty a súvisiace informácie
                   @if(isEditingProducts){
                     <div class="button-container">
-                      <button class="btn btn-secondary" (click)="saveAllChanges()">
+                      <button type="button" class="btn btn-secondary" (click)="saveAllChanges()">
                         <img src="../../assets/Images/save-icon.png" alt="save-icon">
                         Uložiť zmeny
                       </button>
-                      <button class="btn btn-danger" (click)="cancelEditing()">Zahodiť zmeny</button>
+                      <button type="button" class="btn btn-danger" (click)="cancelEditing()">Zahodiť zmeny</button>
                     </div>
                   }
                 </div>
@@ -221,7 +221,7 @@
         </table>
       </div>
       <div class="return-home">
-        <button class="btn btn-secondary" (click)="returnHome()">
+        <button type="button" class="btn btn-secondary" (click)="returnHome()">
           <img src="../../assets/Images/return-home-icon.png" alt="return-home-icon" class="return-home-icon">
           Vrátiť sa späť na objednávky
         </button>
@@ -236,8 +236,8 @@
       <p>Ste si istý, že chcete vymazať objednávku č. {{orderId}}?</p>
     </div>
     <div class="dialog-buttons">
-      <button class="btn btn-secondary" (click)="dialogRef.close(true)">Áno</button>
-      <button class="btn btn-primary" (click)="dialogRef.close(false)">Nie</button>
+      <button type="button" class="btn btn-secondary" (click)="dialogRef.close(true)">Áno</button>
+      <button type="button" class="btn btn-success" (click)="dialogRef.close(false)">Nie</button>
     </div>
   </div>
 </ng-template>

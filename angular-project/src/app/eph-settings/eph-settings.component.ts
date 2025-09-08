@@ -16,7 +16,7 @@ import { finalize, forkJoin, switchMap } from 'rxjs';
   styleUrl: './eph-settings.component.css'
 })
 export class EphSettingsComponent implements OnInit {
-  currentDate: string = '';
+  currentDate: string = 'Načítava sa...';
   isLoading: boolean = false;
 
   ephSettings: EphSettingsDTO | null = null;
@@ -31,19 +31,18 @@ export class EphSettingsComponent implements OnInit {
     private snackBar: MatSnackBar
   ){}
 
-  ephForm = new FormGroup({
-    ephPrefix: new FormControl('EB', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)]),
-    ephStartingNumber: new FormControl('', [Validators.required, Validators.pattern(/^\d{8}$/)]),
-    ephEndingNumber: new FormControl('', [Validators.required, Validators.pattern(/^\d{8}$/)]),
-    ephSuffix: new FormControl('SK', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)]),
-  }, {
-    validators: this.endingNumberGreaterThanStarting
-  });
-  
-  systemSettingsForm = new FormGroup({
-    deliveryFee: new FormControl(0, [Validators.required, Validators.min(0)]),
-    paymentFee: new FormControl(0, [Validators.required, Validators.min(0)]),
-    bankAccount: new FormControl('', [Validators.required, this.ibanValidator])
+  mainForm = new FormGroup({
+    ephForm: new FormGroup({
+      ephPrefix: new FormControl('EB', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)]),
+      ephStartingNumber: new FormControl('', [Validators.required, Validators.pattern(/^\d{8}$/)]),
+      ephEndingNumber: new FormControl('', [Validators.required, Validators.pattern(/^\d{8}$/)]),
+      ephSuffix: new FormControl('SK', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)]),
+    }, { validators: this.endingNumberGreaterThanStarting.bind(this) }),
+    systemSettingsForm: new FormGroup({
+      deliveryFee: new FormControl(0, [Validators.required, Validators.min(0)]),
+      paymentFee: new FormControl(0, [Validators.required, Validators.min(0)]),
+      bankAccount: new FormControl('', [Validators.required, this.ibanValidator.bind(this)]),
+    })
   });
 
   private endingNumberGreaterThanStarting(control: FormGroup){
@@ -88,31 +87,30 @@ export class EphSettingsComponent implements OnInit {
     let value = input.value.replace(/\s+/g, '').toUpperCase();
     value = value.match(/.{1,4}/g)?.join(' ') ?? value;
     input.value = value;
-    this.systemSettingsForm.get('bankAccount')?.setValue(value, { emitEvent: false });
+    this.mainForm.get('systemSettingsForm.bankAccount')?.setValue(value, { emitEvent: false });
   }
 
   saveSettings(): void {
-    if (!this.ephForm.valid || !this.systemSettingsForm.valid) {
+    if (!this.mainForm.valid) {
       this.snackBar.open(
         "Zadané údaje nie sú správne alebo polia označené hviezdičkou boli vynechané!",
         "",
         { duration: 2000 }
       );
-      this.ephForm.markAllAsTouched();
-      this.systemSettingsForm.markAllAsTouched();
+      this.mainForm.markAllAsTouched();
       return;
     }
 
     this.isLoading = true;
 
     const ephSettings: EphSettingsDTO = {
-      ephPrefix: this.ephForm.value.ephPrefix!,
-      ephStartingNumber: Number(this.ephForm.value.ephStartingNumber),
-      ephEndingNumber: Number(this.ephForm.value.ephEndingNumber),
-      ephSuffix: this.ephForm.value.ephSuffix!
+      ephPrefix: this.mainForm.value.ephForm.ephPrefix!,
+      ephStartingNumber: Number(this.mainForm.value.ephForm.ephStartingNumber),
+      ephEndingNumber: Number(this.mainForm.value.ephForm.ephEndingNumber),
+      ephSuffix: this.mainForm.value.ephForm.ephSuffix!
     };
 
-    const systemSettings: SystemSettingsDTO = this.systemSettingsForm.value as SystemSettingsDTO;
+    const systemSettings: SystemSettingsDTO = this.mainForm.value.systemSettingsForm as SystemSettingsDTO;
 
     this.ephService.saveEphSettings(ephSettings).pipe(
       switchMap((savedEph) => {
@@ -153,14 +151,14 @@ export class EphSettingsComponent implements OnInit {
         this.ephSettings = eph;
         this.systemSettings = system;
 
-        this.ephForm.patchValue({
+        this.mainForm.get('ephForm').patchValue({
           ephPrefix: eph.ephPrefix,
           ephStartingNumber: String(eph.ephStartingNumber),
           ephEndingNumber: String(eph.ephEndingNumber),
           ephSuffix: eph.ephSuffix
         });
 
-        this.systemSettingsForm.patchValue(system);
+        this.mainForm.get('systemSettingsForm')?.patchValue(system);
         this.totalPackageCodes = codes.availableCount;
       },
       error: (err) => console.error("Chyba pri načítaní nastavení:", err),

@@ -27,7 +27,7 @@ import { NgxIntlTelInputModule, CountryISO, SearchCountryField } from 'ngx-intl-
   styleUrl: './order-form.component.css'
 })
 export class OrderFormComponent implements OnInit {
-  currentDate: string;
+  currentDate: string = 'Načítava sa...';
 
   userMessage: string = '';
   charactersCount: number = 0;
@@ -1014,7 +1014,10 @@ export class OrderFormComponent implements OnInit {
       this.isLoadingPackageCode = false;
       return of(false);
     }
-    return this.ephService.validatePackageCode(packageCode).pipe(
+
+    const orderId = this.isEditMode ? this.existingOrderId : undefined;
+
+    return this.ephService.validatePackageCode(packageCode, orderId).pipe(
       map(response => {
         if(response.valid){
           this.orderForm.get('packageCode')?.setErrors(null);

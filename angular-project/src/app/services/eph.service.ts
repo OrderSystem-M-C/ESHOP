@@ -19,8 +19,12 @@ export class EphService {
   generatePackageCode(): Observable<any> {
     return this.get<any>('generate-package-code');
   }
-  validatePackageCode(packageCode: string): Observable<any> {
-    return this.get<any>(`validate-package-code/${packageCode}`);
+  validatePackageCode(packageCode: string, orderId?: number): Observable<any> {
+    let url = `validate-package-code?packageCode=${packageCode}`;
+    if (orderId) {
+      url += `&orderId=${orderId}`;
+    }
+    return this.get<any>(url);
   }
   countAvailablePackageCode(): Observable<{ availableCount: number }> {
     return this.get<any>('count-available-package-codes').pipe(

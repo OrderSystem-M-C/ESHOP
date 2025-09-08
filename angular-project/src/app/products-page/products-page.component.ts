@@ -17,7 +17,7 @@ import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
   styleUrl: './products-page.component.css'
 })
 export class ProductsPageComponent implements OnInit {
-  currentDate: string = '';
+  currentDate: string = 'Načítava sa...';
   dialogRef!: MatDialogRef<any>; // ! tu znamena ze premenna bude urcite inicializovana predtym ako sa na nu pristupi to znamena ze v TS nebude hadzat chybu aj ked dialogRef nebola inicializovana v konstruktore, TS si mysli ze v nejakom bode kod zabezpeci aby dialogRef malo hodnotu pred pouzitim
 
   public productsData: ProductDTO[] = [];
@@ -159,8 +159,11 @@ export class ProductsPageComponent implements OnInit {
         }
 
         this.applyFilters();
+        
         this.isLoadingForm = false;
+
         this.dialogRef.close(true);
+        this.productForm.reset();
       },
       error: (err) => {
         console.error("Chyba pri úprave produktu:", err);

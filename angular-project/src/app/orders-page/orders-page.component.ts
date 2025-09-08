@@ -3,7 +3,6 @@ import { OrderDTO, OrderService, OrderStatusDTO } from '../services/order.servic
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Chart } from 'chart.js/auto';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -24,14 +23,15 @@ import { ProductService } from '../services/product.service';
   styleUrl: './orders-page.component.scss'
 })
 export class OrdersPageComponent implements OnInit, AfterViewInit {
-  public ordersData: OrderDTO[] = [];
+  ordersData: OrderDTO[] = [];
   filteredOrders = [...this.ordersData];
   ourFilteredOrders: OrderDTO[] = [];
+
   statuses: OrderStatusDTO[] = [];
-  
+
   selectedStatuses: string[] = [];
 
-  currentDate: string;
+  currentDate: string = 'Načítava sa...';
 
   isLoading: boolean = true;
   
@@ -51,34 +51,18 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
   searchText: string = '';
   searchOption: string = 'auto';
 
-  totalRevenue: number = 0;
-
-  revenue_chartInstance: any;
-  revenue_ctx: any;
-  @ViewChild('revenueChart', { static: false }) revenueChart!: { nativeElement: HTMLCanvasElement };
-
-  orders_chartInstance: any;
-  orders_ctx: any;
-  @ViewChild('ordersDate', { static: false }) ordersDate!: { nativeElement: HTMLCanvasElement };
-
-  pie_chartInstance: any;
-  pie_ctx: any;
-  @ViewChild('ordersStatusChart', { static: false }) ordersStatusChart!: { nativeElement: HTMLCanvasElement };
-
   totalItems: number = 0;
   pageIndex: number = 0;
   pageSize: number = 10;
 
   selectedOrders: OrderDTO[] = [];
 
-  selectedRange: '1d' | '7d' | '1m' | '1y' | 'all' = 'all';
-
   hoveredOrder: OrderDTO = null;
 
   constructor(
     private orderService: OrderService, 
     private datePipe: DatePipe, 
-    private router: Router, 
+    private router: Router,
     private snackBar: MatSnackBar, 
     public authService: AuthenticationService, 
     private emailService: EmailService,
@@ -233,7 +217,6 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
       finalize(() => {
         this.isLoading = false;
         this.dropdownState['changeStatus'] = false;
-        this.updateStatusChart();
       })
     ).subscribe({
       next: () => {},
@@ -384,10 +367,6 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
         this.totalItems = this.filteredOrders.length;
 
         this.updatePagedOrders();
-
-        this.updateOrdersChart();
-        this.updateRevenueChart();
-        this.updateStatusChart();
       }),
       catchError((error) => {
         console.error("An error has occured while trying to reload orders.", error);
@@ -412,174 +391,6 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
     }
   }
 
-  filterOrdersByRange(): any[] {
-    const now = new Date();
-    let fromDate: Date;
-    switch(this.selectedRange){
-      case '1d':
-        fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        break;
-      case '7d':
-        fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case '1m':
-        fromDate = new Date(now);
-        fromDate.setMonth(fromDate.getMonth() - 1);
-        break;
-      case '1y':
-        fromDate = new Date(now);
-        fromDate.setFullYear(fromDate.getFullYear() - 1);
-        break;
-      case 'all':
-        default:
-          return this.ordersData;
-    }
-    return this.ordersData.filter(order => {
-      const orderDate = this.parseDate(order.orderDate);
-      return orderDate >= fromDate;
-    })
-  }
-
-  onRangeChange(event: Event, chart: 'orders' | 'revenue'): void {
-    const value = (event.target as HTMLSelectElement).value as '1d' | '7d' | '1m' | '1y' | 'all';
-    this.changeRange(value, chart);
-  }
-
-  changeRange(range: '1d' | '7d' | '1m' | '1y' | 'all', chart: 'orders' | 'revenue'){
-    this.selectedRange = range;
-
-    setTimeout(() => {
-      if (chart === 'orders' && this.ordersDate?.nativeElement) {
-        this.orders_chartInstance?.destroy();
-        this.createChart(chart);
-      } else if (chart === 'revenue' && this.revenueChart?.nativeElement) {
-        this.revenue_chartInstance?.destroy();
-        this.createChart(chart);
-      }
-    }, 0);
-  }
-
-  createChart(chart: 'status' | 'orders' | 'revenue'): void {
-    if(chart === 'status'){
-      this.pie_chartInstance = this.ordersStatusChart.nativeElement;
-      this.pie_ctx = this.pie_chartInstance.getContext('2d');
-  
-      const statusCounts: { [key: string]: number } = {};
-      this.ordersData.forEach(order => {
-        statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;
-      });
-
-      const backgroundColors = this.statuses.map(s => s.statusColor);
-
-      const activeStatusNames = Object.keys(statusCounts);
-      const labels = this.statuses.filter(status => activeStatusNames.includes(status.statusName));
-      const data = labels.map(status => statusCounts[status.statusName]);
-      const colors = labels.map(status => {
-        const idx = this.statuses.findIndex(originalStatus => originalStatus.statusName === status.statusName);
-        return idx !== -1 ? backgroundColors[idx] : '#ccc';
-      });
-
-      this.pie_chartInstance = new Chart(this.pie_ctx, {
-        type: 'doughnut',
-        data: {
-          labels: labels.map(s => s.statusName),
-          datasets: [
-            {
-              label: 'Počet objednávok',
-              data: data,
-              backgroundColor: colors,
-              hoverOffset: 8
-            }
-          ]
-        },
-      });
-    }else if(chart === 'orders'){
-      this.orders_chartInstance = this.ordersDate.nativeElement;
-      this.orders_ctx = this.orders_chartInstance.getContext('2d');
-
-      const filteredOrders = this.filterOrdersByRange();
-      const ordersByDate = this.groupOrdersByDate(filteredOrders);
-
-      const labels = Object.keys(ordersByDate);
-      const data = Object.values(ordersByDate).map(o => o.totalCount);
-
-      this.orders_chartInstance = new Chart(this.orders_ctx, {
-        type: 'bar',
-        data: {
-          labels:labels,
-          datasets: [{
-            label: 'Počet objednávok',
-            data: data, 
-            backgroundColor: '#198754',
-            borderColor: '#198754',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: 'Dátum'
-              }
-            },
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Počet objednávok'
-              },
-              ticks: {
-                stepSize: 1,
-                precision: 0
-              }
-            }
-          }
-        }
-      })
-    }else if(chart === 'revenue') {
-      this.revenue_chartInstance= this.revenueChart.nativeElement;
-      this.revenue_ctx = this.revenue_chartInstance.getContext('2d');
-
-      const filteredOrders = this.filterOrdersByRange();
-      const ordersRevenue = this.groupOrdersByDateRevenue(filteredOrders);
-
-      const labels = Object.keys(ordersRevenue);
-      const data = Object.values(ordersRevenue).map(o => o.totalRevenue);
-
-      this.revenue_chartInstance = new Chart(this.revenue_ctx, {
-        type: 'line',
-        data: {
-          labels: [0, ...labels],
-          datasets: [{
-            label: 'Denná tržba (€)',
-            data: [0, ...data], 
-            backgroundColor: '#198754',
-            borderColor: '#198754',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: 'Dátum'
-              }
-            },
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Tržba v €'
-              }
-            }
-          }
-        }
-      })
-    }
-  }
-
   getStatusColor(orderStatus: string): string {
     const statusIndex = this.statuses.findIndex(s => s.statusName === orderStatus);
     const backgroundColors = this.statuses.map(s => s.statusColor);
@@ -587,85 +398,6 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
       return backgroundColors[statusIndex];
     }
     return '#ccc';
-  }
-
-  updateStatusChart(): void {
-    const backgroundColors = this.statuses.map(s => s.statusColor);
-    const statusCounts: { [key: string]: number } = {};
-    this.filteredOrders.forEach(order => {
-      statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;
-    });
-  
-    const labels = this.statuses.filter(status => statusCounts[status.statusName] !== undefined);
-    const data = labels.map(status => statusCounts[status.statusName]);
-    const colors = labels.map(status => {
-      const idx = this.statuses.indexOf(status);
-      return idx !== -1 ? backgroundColors[idx] : '#ccc'; 
-    });
-  
-    this.pie_chartInstance.data.labels = labels.map(s => s.statusName);
-    this.pie_chartInstance.data.datasets[0].data = data;
-    this.pie_chartInstance.data.datasets[0].backgroundColor = colors;
-    this.pie_chartInstance.update();
-  }
-  updateOrdersChart(): void {
-    const ordersByDate = this.groupOrdersByDate(this.filteredOrders);
-    const dates = Object.keys(ordersByDate);
-    const orderCounts = Object.values(ordersByDate).map(o => o.totalCount);
-
-    this.orders_chartInstance.data.labels = dates;
-    this.orders_chartInstance.data.datasets[0].data = orderCounts;
-    this.orders_chartInstance.update();
-  }
-  updateRevenueChart(): void {
-    const ordersRevenue = this.groupOrdersByDateRevenue(this.filteredOrders);
-    const labels = Object.keys(ordersRevenue);
-    const data = Object.values(ordersRevenue).map(o => o.totalRevenue);
-
-    this.revenue_chartInstance.data.labels = [0, ...labels];
-    this.revenue_chartInstance.data.datasets[0].data = [0, ...data];
-    this.revenue_chartInstance.update();
-  }
-
-  groupOrdersByDate(orders: OrderDTO[]): { [date: string] : { totalCount: number } } {
-    const grouped = orders.reduce((acc, order) => {
-      const [datePart] = order.orderDate.split(' ');
-      const [day, month, year] = datePart.split('.').map(Number);
-      const formattedDate = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
-
-      if(!acc[formattedDate]){
-        acc[formattedDate] = { totalCount: 0};
-      }
-      acc[formattedDate].totalCount += 1;
-
-      return acc;
-    }, {} as { [date: string]: { totalCount: number }});
-
-    return this.sortObjectsByDateAsc(grouped);
-  }
-  groupOrdersByDateRevenue(orders: OrderDTO[]): { [date: string]: { totalRevenue: number } } {
-    const grouped = orders.reduce((acc, order) => {
-      const [datePart] = order.orderDate.split(' ');
-      const [day, month, year] = datePart.split('.').map(Number);
-      const formattedDate = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
-
-      if (!acc[formattedDate]) acc[formattedDate] = { totalRevenue: 0 };
-      acc[formattedDate].totalRevenue += parseFloat(order.totalPrice.toFixed(2));
-
-      return acc;
-    }, {} as { [date: string]: { totalRevenue: number } });
-
-    return this.sortObjectsByDateAsc(grouped);
-  }
-
-  private sortObjectsByDateAsc<T>(obj: { [date: string]: T}): { [date: string]: T } {
-    return Object.fromEntries(
-      Object.entries(obj).sort((a, b) => {
-        const [dateA, monthA, yearA] = a[0].split('.').map(Number);
-        const [dateB, monthB, yearB] = b[0].split('.').map(Number);
-        return new Date(yearA, monthA - 1, dateA).getTime() - new Date(yearB, monthB - 1, dateB).getTime();
-      })
-    )
   }
 
   setSort(field: 'date' | 'price' | 'name', order: 'asc' | 'desc' | 'newest' | 'oldest'): void {
@@ -812,17 +544,10 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
         this.filteredOrders = orders;
         this.statuses = statuses;
 
-        this.totalRevenue = parseFloat(
-          orders.reduce((total, order) => total + (order.totalPrice || 0), 0).toFixed(2)
-        );
         this.totalItems = orders.length;
         this.pageIndex = 0;
 
         this.applyFilters();
-        
-        this.createChart('status');
-        this.createChart('orders');
-        this.createChart('revenue');
       },
       error: (err) => {
         console.error("An error has occurred while trying to fetch data.", err);

@@ -1,6 +1,6 @@
 <title>Prihlásenie</title>
 <div class="login-component">
-  <form class="login-form" [formGroup]="loginForm">
+  <form class="login-form" [formGroup]="loginForm" (ngSubmit)="login()">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Default_pfp.svg/2048px-Default_pfp.svg.png" class="user-icon">
     <h1>Prihlásiť sa</h1>
     <div class="field">
@@ -18,7 +18,7 @@
       <p>Prihlasuje sa, prosím čakajte...</p>
     </div>
     <div class="submit">
-      <button class="btn btn-secondary" (click)="login()">Potvrdiť</button>
+      <button type="submit" class="btn btn-secondary">Potvrdiť</button>
     </div>
   </form>
 </div>

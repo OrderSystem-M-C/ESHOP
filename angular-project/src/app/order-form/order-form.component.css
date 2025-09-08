@@ -46,6 +46,12 @@ textarea {
   text-align: center;
   margin-top: 20px;
 }
+button .btn-content {
+  display: flex;
+  align-items: center;  
+  justify-content: center; 
+  gap: 5px;           
+}
 .no-products-selected,
 .selected-products {
   display: flex;

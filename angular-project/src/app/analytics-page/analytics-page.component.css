@@ -1,0 +1,70 @@
+.analytics-page-component {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 20px auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+h1 {
+  text-align: left;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+}
+.title {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.button-container, .button-container button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-direction: row;
+  gap: 10px;
+}
+.csv-icon, .return-home-icon {
+  height: 17px;
+  width: 17px;
+}
+.csv-icon {
+    filter: invert(1);
+}
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+  gap: 2rem;
+}
+.chart-card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.chart-card h2 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: #333;
+}
+.select-range {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start; 
+  gap: 10px;
+}
+.select-range p {
+  margin: 0;
+  white-space: nowrap;
+  font-weight: 500;    
+}
+.select-range select {
+  flex: 1;           
+}
+.total-revenue-container, .total-orders-container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}

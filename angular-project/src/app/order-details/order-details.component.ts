@@ -5,9 +5,8 @@ import { OrderDTO, OrderService } from '../services/order.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
-import * as html2pdf from 'html2pdf.js';
 import { ProductDTO, ProductService, ProductUpdateDTO } from '../services/product.service';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InvoiceService } from '../services/invoice.service';
 
 @Component({
@@ -22,7 +21,7 @@ export class OrderDetailsComponent implements OnInit{
   @Input() order: OrderDTO | null = null;
   @Input() previewOrderId: number | null = null;
   orderId: number | null = null
-  currentDate: string = '';
+  currentDate: string = 'Načítava sa...';
 
   readonly DEFAULTS = {
     email: 'nezadany@objednavky.local',

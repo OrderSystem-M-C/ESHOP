@@ -14,6 +14,9 @@ export class OrderService {
   generateOrderId(): Observable<number> {
     return this.get<number>('generate-order-id');
   }
+  getProductStats(): Observable<ProductStatsDTO[]> {
+    return this.get<ProductStatsDTO[]>('get-product-stats');
+  }
   createOrder(order: OrderDTO): Observable<OrderDTO> {
     return this.post<OrderDTO>('create-order', order);
   }
@@ -158,4 +161,9 @@ export interface OrderStatusDTO {
   statusName: string;
   sortOrder?: number;
   statusColor: string;
+}
+
+export interface ProductStatsDTO {
+  productName: string;
+  quantity: number;
 }

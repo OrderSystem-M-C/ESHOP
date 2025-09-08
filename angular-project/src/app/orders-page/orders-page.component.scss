@@ -16,6 +16,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 30px;
 }
 .title-charts h2 {
   margin: 0;
@@ -56,12 +57,17 @@ h1 {
   height: 20px;
   width: 20px;
 }
-.button-container img {
+.button-container img:not(.button-container button:first-child img) {
   filter: invert(1) brightness(2);
 }
-.button-container button:nth-child(even) img {
+.button-container button:nth-child(odd) img {
   height: 23px !important;
   width: 25px !important;
+}
+.button-container button:first-child img {
+  height: 20px !important;
+  width: 20px !important;
+  margin-bottom: 1px;
 }
 .select-orders-to-remove-container button img {
   filter: brightness(0%);
@@ -200,6 +206,7 @@ h1 {
   width: 100%;
   border-collapse: collapse;
   margin: 0 auto;
+  table-layout: auto;
 }
 .orders-table th,
 .orders-table td {
@@ -216,15 +223,35 @@ h1 {
 .orders-table td {
   background-color: #fff;
 }
+.scrollable-cell {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  margin-bottom: -10px;
+}
 .orders-table tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 tr.selected {
   border: 2px solid #198754 !important;
 }
+tr.danger-status {
+  border: 2px solid #dc3545 !important; 
+}
 tr.selected td {
   background-color: #e8f5f0 !important;
   transition: background-color 0.3s ease;
+}
+tr.danger-status td {
+  background-color: #fde8e8 !important; 
+  transition: background-color 0.3s ease;
+}
+tr.danger-status.selected {
+  border: 2px solid #198754 !important;
+}
+tr.danger-status.selected td {
+  background-color: #e8f5f0 !important;
 }
 .orders-table thead {
   border-right: 8px solid #198754;

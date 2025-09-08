@@ -1,6 +1,9 @@
 <title>Vytvorenie objednávky</title>
 <div class="order-form-component">
-    <form class="order-form" [formGroup]="orderForm" id="selected-products-id">
+    <form class="order-form" 
+    [formGroup]="orderForm"
+    (ngSubmit)="isEditMode ? updateOrder() : submitOrder()" 
+    id="selected-products-id">
       @if(isEditMode){
         <div class="title-date">
           <h1>Upraviť objednávku č. {{existingOrderId}}</h1>
@@ -51,14 +54,14 @@
                     </table>
                   </div>
                   <div class="edit-products-buttons">
-                    <button class="btn btn-primary" (click)="openDialog(selectProductsDialog, true)"><img src="../../assets/Images/edit-icon.png" alt="edit-icon" class="edit-icon"> Upraviť produkty</button>
-                    <button class="btn btn-outline-danger" (click)="clearProducts()"> Zmazať všetky</button>
+                    <button type="button" class="btn btn-success" (click)="openDialog(selectProductsDialog, true)"><img src="../../assets/Images/edit-icon.png" alt="edit-icon" class="edit-icon"> Upraviť produkty</button>
+                    <button type="button" class="btn btn-outline-danger" (click)="clearProducts()"> Zmazať všetky</button>
                   </div>
                 </div>
               }@else{
                 <div class="no-products-selected">
                   <p>Nemáte vybraté žiadne produkty</p>
-                  <button class="btn btn-primary" (click)="openDialog(selectProductsDialog, false)"><img src="../../assets/Images/add-icon.png" alt="add-icon" class="add-icon"> Pridať produkty</button>
+                  <button type="button" class="btn btn-success" (click)="openDialog(selectProductsDialog, false)"><img src="../../assets/Images/add-icon.png" alt="add-icon" class="add-icon"> Pridať produkty</button>
                 </div>
               }
             </div>
@@ -212,72 +215,72 @@
         </div>
         <div class="invoice-settings">
             <h3>Nastavenia faktúry</h3>
-            <form [formGroup]="invoiceForm" (ngSubmit)="downloadInvoice()">
+            <div [formGroup]="invoiceForm">
               <div class="field">
                 <label for="invoiceNumber" class="form-label">Číslo faktúry* (automaticky vyplnené z č. objednávky)</label>
                 <input type="number" id="invoiceNumber" class="form-control" readonly placeholder="Zadajte číslo faktúry" formControlName="invoiceNumber" [ngClass]="{'is-invalid': invoiceForm.get('invoiceNumber').invalid && invoiceForm.get('invoiceNumber').touched}">
+              </div>
+              <div class="field">
+                  <label for="variableSymbol" class="form-label">Variabilný symbol* (Ak je iný ako číslo faktúry)</label>
+                  <input type="number" id="variableSymbol" class="form-control" readonly placeholder="Zadajte variabilný symbol" formControlName="invoiceVariable" [ngClass]="{'is-invalid': invoiceForm.get('invoiceVariable').invalid && invoiceForm.get('invoiceVariable').touched}">
+              </div>
+              <div class="field">
+                  <label for="documentType">Typ dokladu*</label>
+                  <input id="documentType" class="form-control" value="Faktúra" readonly placeholder="Typ dokladu (Faktúra)">
+              </div>
+              <div class="field">
+                  <label for="invoiceIssueDate" class="form-label">Dátum vystavenia faktúry*</label>
+                  <input type="date" id="invoiceIssueDate" class="form-control" placeholder="Vyberte dátum splatnosti" formControlName="invoiceIssueDate">
+              </div>
+              <div class="field">
+                <label for="invoiceName" class="form-label">Meno a priezvisko</label>
+                <input type="text" id="invoiceName" class="form-control" placeholder="Zadajte meno a priezvisko na faktúre" formControlName="invoiceName" [ngClass]="{'is-invalid': invoiceForm.get('invoiceName').invalid && invoiceForm.get('invoiceName').touched}">
+              </div>
+              <div class="field">
+                <label for="invoiceCompany" class="form-label">Firma</label>
+                <input type="text" id="invoiceCompany" class="form-control" placeholder="Zadajte názov firmy na faktúre" formControlName="invoiceCompany" (input)="onCompanyChange($event, 'invoice')" (change)="onCompanyChange($event, 'invoice')">
+              </div>
+              <div class="field">
+                <label for="invoiceICO" class="form-label">IČO* (povinné v prípade firmy)</label>
+                <input type="text" id="invoiceICO" class="form-control" placeholder="Zadajte IČO" formControlName="invoiceICO" [ngClass]="{'is-invalid': invoiceForm.get('invoiceCompany').value?.trim().length > 0 && invoiceForm.get('invoiceICO').invalid && invoiceForm.get('invoiceICO').touched}">
+              </div>
+              <div class="field">
+                <label for="invoiceDIC" class="form-label">DIČ* (povinné v prípade firmy)</label>
+                <input type="text" id="invoiceDIC" class="form-control" placeholder="Zadajte DIČ" formControlName="invoiceDIC" [ngClass]="{'is-invalid': invoiceForm.get('invoiceCompany').value?.trim().length > 0 && invoiceForm.get('invoiceDIC').invalid && invoiceForm.get('invoiceDIC').touched}">
+              </div>
+              <div class="field">
+                <label for="invoiceEmail" class="form-label">E-mailová adresa</label>
+                <input type="text" id="invoiceEmail" class="form-control" placeholder="Zadajte e-malovú adresu na faktúre" formControlName="invoiceEmail" [ngClass]="{'is-invalid': invoiceForm.get('invoiceEmail').invalid && invoiceForm.get('invoiceEmail').touched}">
+              </div>
+              <div class="phone-number-field">
+                <label for="phoneNumber" class="form-label">Telefónne číslo</label>
+                <ngx-intl-tel-input
+                  [cssClass]="
+                    invoiceForm.get('invoicePhoneNumber')?.invalid && invoiceForm.get('invoicePhoneNumber')?.touched
+                      ? 'form-control is-invalid'
+                      : (invoiceForm.get('invoicePhoneNumber')?.valid && invoiceForm.get('invoicePhoneNumber')?.touched && invoiceForm.get('invoicePhoneNumber')?.value
+                        ? 'form-control is-valid'
+                        : 'form-control')"
+                  [preferredCountries]="['sk', 'cz']"
+                  [onlyCountries]="preferredCountries"
+                  [enableAutoCountrySelect]="false"
+                  [enablePlaceholder]="true"
+                  [searchCountryFlag]="true"
+                  [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                  [selectFirstCountry]="false"
+                  [selectedCountryISO]="CountryISO.Slovakia"
+                  [maxLength]="15"
+                  formControlName="invoicePhoneNumber"
+                  [separateDialCode]="true"
+                  id="invoicePhoneNumber"
+                  (ngModelChange)="onInvoicePhoneNumberChange($event)">
+                </ngx-intl-tel-input>
+              </div>
+              <div class="field">
+                <p><strong>Poznámka:</strong> Faktúra bude automaticky vygenerovaná pri odoslaní objednávky. Toto tlačidlo slúži na jej náhľad a kontrolu.</p>
+                <button type="button" class="create-invoice-btn btn btn-secondary" id="create-invoice-btn" (click)="downloadInvoice()" [disabled]="invoiceCreated">Vytvoriť faktúru</button>
+              </div>
             </div>
-            <div class="field">
-                <label for="variableSymbol" class="form-label">Variabilný symbol* (Ak je iný ako číslo faktúry)</label>
-                <input type="number" id="variableSymbol" class="form-control" readonly placeholder="Zadajte variabilný symbol" formControlName="invoiceVariable" [ngClass]="{'is-invalid': invoiceForm.get('invoiceVariable').invalid && invoiceForm.get('invoiceVariable').touched}">
-            </div>
-            <div class="field">
-                <label for="documentType">Typ dokladu*</label>
-                <input id="documentType" class="form-control" value="Faktúra" readonly placeholder="Typ dokladu (Faktúra)">
-            </div>
-            <div class="field">
-                <label for="invoiceIssueDate" class="form-label">Dátum vystavenia faktúry*</label>
-                <input type="date" id="invoiceIssueDate" class="form-control" placeholder="Vyberte dátum splatnosti" formControlName="invoiceIssueDate">
-            </div>
-            <div class="field">
-              <label for="invoiceName" class="form-label">Meno a priezvisko</label>
-              <input type="text" id="invoiceName" class="form-control" placeholder="Zadajte meno a priezvisko na faktúre" formControlName="invoiceName" [ngClass]="{'is-invalid': invoiceForm.get('invoiceName').invalid && invoiceForm.get('invoiceName').touched}">
-            </div>
-            <div class="field">
-              <label for="invoiceCompany" class="form-label">Firma</label>
-              <input type="text" id="invoiceCompany" class="form-control" placeholder="Zadajte názov firmy na faktúre" formControlName="invoiceCompany" (input)="onCompanyChange($event, 'invoice')" (change)="onCompanyChange($event, 'invoice')">
-            </div>
-            <div class="field">
-              <label for="invoiceICO" class="form-label">IČO* (povinné v prípade firmy)</label>
-              <input type="text" id="invoiceICO" class="form-control" placeholder="Zadajte IČO" formControlName="invoiceICO" [ngClass]="{'is-invalid': invoiceForm.get('invoiceCompany').value?.trim().length > 0 && invoiceForm.get('invoiceICO').invalid && invoiceForm.get('invoiceICO').touched}">
-            </div>
-            <div class="field">
-              <label for="invoiceDIC" class="form-label">DIČ* (povinné v prípade firmy)</label>
-              <input type="text" id="invoiceDIC" class="form-control" placeholder="Zadajte DIČ" formControlName="invoiceDIC" [ngClass]="{'is-invalid': invoiceForm.get('invoiceCompany').value?.trim().length > 0 && invoiceForm.get('invoiceDIC').invalid && invoiceForm.get('invoiceDIC').touched}">
-            </div>
-            <div class="field">
-              <label for="invoiceEmail" class="form-label">E-mailová adresa</label>
-              <input type="text" id="invoiceEmail" class="form-control" placeholder="Zadajte e-malovú adresu na faktúre" formControlName="invoiceEmail" [ngClass]="{'is-invalid': invoiceForm.get('invoiceEmail').invalid && invoiceForm.get('invoiceEmail').touched}">
-            </div>
-            <div class="phone-number-field">
-              <label for="phoneNumber" class="form-label">Telefónne číslo</label>
-              <ngx-intl-tel-input
-                [cssClass]="
-                  invoiceForm.get('invoicePhoneNumber')?.invalid && invoiceForm.get('invoicePhoneNumber')?.touched
-                    ? 'form-control is-invalid'
-                    : (invoiceForm.get('invoicePhoneNumber')?.valid && invoiceForm.get('invoicePhoneNumber')?.touched && invoiceForm.get('invoicePhoneNumber')?.value
-                      ? 'form-control is-valid'
-                      : 'form-control')"
-                [preferredCountries]="['sk', 'cz']"
-                [onlyCountries]="preferredCountries"
-                [enableAutoCountrySelect]="false"
-                [enablePlaceholder]="true"
-                [searchCountryFlag]="true"
-                [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
-                [selectFirstCountry]="false"
-                [selectedCountryISO]="CountryISO.Slovakia"
-                [maxLength]="15"
-                formControlName="invoicePhoneNumber"
-                [separateDialCode]="true"
-                id="invoicePhoneNumber"
-                (ngModelChange)="onInvoicePhoneNumberChange($event)">
-              </ngx-intl-tel-input>
-            </div>
-            <div class="field">
-              <p><strong>Poznámka:</strong> Faktúra bude automaticky vygenerovaná pri odoslaní objednávky. Toto tlačidlo slúži na jej náhľad a kontrolu.</p>
-              <button class="create-invoice-btn btn btn-secondary" id="create-invoice-btn" (click)="downloadInvoice()" [disabled]="invoiceCreated">Vytvoriť faktúru</button>
-            </div>
-            </form>
         </div>
     </div>
     <div class="package-code">
@@ -293,16 +296,16 @@
             }@else{
               <input formControlName="packageCode" type="text" id="packageCode" class="form-control" placeholder="Zadajte podacie číslo o dĺžke 13 znakov a s dodržaním formátu (napr.: RR123456789SK)" maxlength="13" [ngClass]="{'is-invalid': orderForm.get('packageCode').invalid && orderForm.get('packageCode').touched}">
 
-              <button class="btn btn-secondary" (click)="generatePackageCode()"><img src="../../assets/Images/envelope-icon.png" alt="envelope-icon">Požiadať o číslo</button>
+              <button type="button" class="btn btn-secondary" (click)="generatePackageCode()"><img src="../../assets/Images/envelope-icon.png" alt="envelope-icon">Požiadať o číslo</button>
               
-              <button class="btn btn-primary" (click)="validatePackageCode(orderForm.get('packageCode').value)"><img src="../../assets/Images/check-circle-icon.png" alt="check-circle-icon">Skontrolovať</button>
+              <button type="button" class="btn btn-success" (click)="validatePackageCode(orderForm.get('packageCode').value)"><img src="../../assets/Images/check-circle-icon.png" alt="check-circle-icon">Skontrolovať</button>
             }
          </div>
     </div>
     <div class="order-status">
       <h3>Stav objednávky
         <div class="order-status-buttons">
-          <button class="btn btn-secondary" [class.is-editing]="isEditOrderStatus" (click)="toggleEditOrderStatus()">
+          <button type="button" class="btn btn-secondary" [class.is-editing]="isEditOrderStatus" (click)="toggleEditOrderStatus()">
             @if(!isEditOrderStatus){
               <img src="../../assets/Images/edit-icon.png" alt="edit-icon"> Upraviť poradie
             }@else{
@@ -310,10 +313,10 @@
             }
           </button>
           @if(isEditOrderStatus){
-            <button class="btn btn-outline-danger" (click)="cancelEditOrderStatus()">Zrušiť</button>
+            <button type="button" class="btn btn-outline-danger" (click)="cancelEditOrderStatus()">Zrušiť</button>
           }
           @if(!isEditOrderStatus){
-            <button class="btn btn-primary order-status-settings-button" (click)="openManageStatusesDialog()">
+            <button type="button" class="btn btn-success order-status-settings-button" (click)="openManageStatusesDialog()">
               <img src="../../assets/Images/settings-icon.png" alt="settings-icon">
               Spravovať stavy
             </button>
@@ -352,11 +355,21 @@
     @if(!isLoading){
       @if(isEditMode){
         <div class="submit">
-          <button type="button" class="btn btn-primary save-button" (click)="updateOrder()"><img src="../../assets/Images/save-icon.png" height="17px" width="17px" alt="save-icon" style="margin: 0 5px 3px 0;">Uložiť zmeny</button>
+          <button type="submit" class="btn btn-success save-button">
+            <span class="btn-content">
+              <img src="../../assets/Images/save-icon.png" height="17" width="17" alt="save-icon">
+              Uložiť zmeny
+            </span>
+          </button>
         </div>
       }@else{
         <div class="submit">
-          <button type="submit" class="btn btn-primary" (click)="submitOrder()"><img src="../../assets/Images/create-icon.png" height="23px" width="23px" alt="create-icon" style="margin: 0 5px 2px 0; filter: invert(1) brightness(2);">Vytvoriť objednávku</button>
+          <button type="submit" class="btn btn-success">
+            <span class="btn-content">
+              <img src="../../assets/Images/create-icon.png" height="23" width="23" alt="create-icon" style="filter: invert(1) brightness(2);">
+              Vytvoriť objednávku
+            </span>
+          </button>
         </div> 
       }
     }@else{
@@ -381,8 +394,8 @@
       <div class="title-submit">
         <h2>Vaše zvolené produkty <img src="../../assets/Images/products-icon.png"></h2>
         <div class="dialog-button-container">
-          <button class="btn btn-primary" (click)="confirmSelection()">Potvrdiť</button>
-          <button class="btn btn-secondary" (click)="closeDialog()">Zavrieť okno</button>
+          <button type="button" class="btn btn-success" (click)="confirmSelection()">Potvrdiť</button>
+          <button type="button" class="btn btn-secondary" (click)="closeDialog()">Zavrieť okno</button>
         </div>
       </div>
       <div class="search">
@@ -401,25 +414,25 @@
         <table class="products-table">
           <tbody>
             <tr>
-              <th style="text-align: center;">Č. produktu</th>
+              <th class="text-center">Č. produktu</th>
               <th>Názov produktu</th>
-              <th style="text-align: center;">Kód produktu</th>
-              <th style="text-align: center;">Cena/ks</th>
-              <th style="text-align: center;">Stav</th>
-              <th style="text-align: center;">Počet</th>
-              <th style="text-align: center;">Zvoliť</th>
+              <th class="text-center">Kód produktu</th>
+              <th class="text-center">Cena/ks</th>
+              <th class="text-center">Stav</th>
+              <th class="text-center">Počet</th>
+              <th class="text-center">Zvoliť</th>
             </tr>
             <tr *ngFor="let product of ourSortedProducts" 
                 class="product-row" 
                 [class.selectedProduct]="isSelected(product)">
-              <td style="text-align: center;">{{ product.productId }}</td>
+              <td class="text-center">{{ product.productId }}</td>
               <td>{{ product.productName }}</td>
-              <td style="text-align: center;">{{ product.productCode }}</td>
+              <td class="text-center">{{ product.productCode }}</td>
               <td style="width: 100px; text-align: center;">{{ product.productPrice }}€</td>
-              <td style="text-align: center;" [ngClass]="product.stockAmount > 0 ? 'in-stock' : 'out-of-stock'">
+              <td class="text-center" [ngClass]="product.stockAmount > 0 ? 'in-stock' : 'out-of-stock'">
                 {{ product.stockAmount > 0 ? 'Na sklade' : 'Vypredané' }} 
               </td>
-              <td style="text-align: center;">{{product.stockAmount}} ks</td>
+              <td class="text-center">{{product.stockAmount}} ks</td>
               <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="form-check-input" [(ngModel)]="product.productSelected" (change)="toggleProductSelection(product)" [checked]="selectedProducts.includes(product)" ></td>
             </tr>
           </tbody>

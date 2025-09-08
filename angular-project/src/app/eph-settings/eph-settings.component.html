@@ -1,99 +1,101 @@
 <title>Nastavenia EPH a obchodných údajov</title>
 <div class="eph-settings-component">
-  <div class="title">
-    <div class="title-container-1">
-      <h1>Nastavenia EPH a obchodných údajov</h1>
-      <p>{{currentDate}}</p>
+  <form [formGroup]="mainForm" (ngSubmit)="saveSettings()">
+    <div class="title">
+      <div class="title-container-1">
+        <h1>Nastavenia EPH a obchodných údajov</h1>
+        <p>{{currentDate}}</p>
+      </div>
+      <div class="button-container">
+        <button type="button" class="btn btn-secondary return-home" [routerLink]="['/orders-page']"><img src="../../assets/Images/return-home-icon.png" alt="return-home-icon"> Vrátiť sa späť na objednávky</button>
+        <button type="submit" class="btn btn-success save-button"><img src="../../assets/Images/save-icon.png" alt="save-icon"> Uložiť nastavenia</button>
+      </div>
     </div>
-    <div class="button-container">
-      <button class="btn btn-secondary return-home" [routerLink]="['/orders-page']"><img src="../../assets/Images/return-home-icon.png" alt="return-home-icon"> Vrátiť sa späť na objednávky</button>
-      <button class="btn btn-primary save-button" (click)="saveSettings()"><img src="../../assets/Images/save-icon.png" alt="save-icon"> Uložiť nastavenia</button>
-    </div>
-  </div>
-  @if(isLoading){
-    <div class="spinner-container">
-        <div class="spinner">
-        </div>
-        Načítava sa
-    </div>
-  }@else{
-    <div class="form-container">
-      <form [formGroup]="ephForm">
-          <div class="eph-settings-form-container">
-              <h3>EPH formulár</h3>
-                <div class="eph-prefix-suffix-container">
-                  <div class="eph-prefix">
-                    <label for="ephPrefix" class="form-label">Zadajte prefix EPH*</label>
-                    <input formControlName="ephPrefix" id="ephPrefix" type="text" class="form-control" placeholder="napr.: EB" [ngClass]="{'is-invalid': ephForm.get('ephPrefix').invalid && ephForm.get('ephPrefix').touched}">
-                  </div>
-                  <div class="eph-suffix">
-                    <label for="ephSuffix" class="form-label">Zadajte suffix EPH*</label>
-                    <input formControlName="ephSuffix" id="ephSuffix" type="text" class="form-control" placeholder="napr.: SK" [ngClass]="{'is-invalid': ephForm.get('ephSuffix').invalid && ephForm.get('ephSuffix').touched}">
-                  </div>
-                </div>
-                <div class="eph-range-container">
-                  <label class="form-label" for="ephStartingNumber">Rozsah od*</label>
-                  <input formControlName="ephStartingNumber" id="ephStartingNumber" type="number" inputmode="numeric" class="form-control" placeholder="napr.: 12345678" [ngClass]="{'is-invalid': ephForm.get('ephStartingNumber').invalid && ephForm.get('ephStartingNumber').touched}">
-                  <label class="form-label" for="ephEndingNumber">Rozsah do*</label>
-                  <input formControlName="ephEndingNumber" id="ephEndingNumber" type="number" inputmode="numeric" class="form-control" placeholder="napr.: 12345690" [ngClass]="{'is-invalid': ephForm.get('ephEndingNumber').invalid && ephForm.get('ephEndingNumber').touched}">
-                </div>
-              <p><strong>Poznámka:</strong> Kontrolné číslo „x“ dopočíta program automaticky.</p>
+    @if(isLoading){
+      <div class="spinner-container">
+          <div class="spinner">
           </div>
-      </form>
-      <form [formGroup]="systemSettingsForm">
-        <div class="settings-form-container">
-          <h3>Formulár obchodných nastavení</h3>
-            <div class="delivery-payment-container">
-                <div class="field">
-                  <label for="deliveryFee" class="form-label">Poplatok za doručenie*</label>
-                  <div class="delivery-fee">
-                    <input formControlName="deliveryFee" id="deliveryFee" type="number" class="form-control" min="0" step="0.10" placeholder="Zadajte sumu, napr. 3.50" [ngClass]="{'is-invalid': systemSettingsForm.get('deliveryFee').invalid && systemSettingsForm.get('deliveryFee').touched}">
-                    <p>€</p>
+          Načítava sa
+      </div>
+    }@else{
+      <div class="form-container">
+        <div [formGroupName]="'ephForm'">
+            <div class="eph-settings-form-container">
+                <h3>EPH formulár</h3>
+                  <div class="eph-prefix-suffix-container">
+                    <div class="eph-prefix">
+                      <label for="ephPrefix" class="form-label">Zadajte prefix EPH*</label>
+                      <input formControlName="ephPrefix" id="ephPrefix" type="text" class="form-control" placeholder="napr.: EB" [ngClass]="{'is-invalid': mainForm.get('ephForm.ephPrefix')?.invalid && mainForm.get('ephForm.ephPrefix')?.touched}">
+                    </div>
+                    <div class="eph-suffix">
+                      <label for="ephSuffix" class="form-label">Zadajte suffix EPH*</label>
+                      <input formControlName="ephSuffix" id="ephSuffix" type="text" class="form-control" placeholder="napr.: SK" [ngClass]="{'is-invalid': mainForm.get('ephForm.ephSuffix')?.invalid && mainForm.get('ephForm.ephSuffix')?.touched}">
+                    </div>
                   </div>
-                </div>
-                <div class="field">
-                  <label for="paymentFee" class="form-label">Poplatok za dobierku*</label>
-                  <div class="payment-fee">
-                    <input formControlName="paymentFee" id="paymentFee" type="number" class="form-control" min="0" step="0.10" placeholder="Zadajte sumu, napr. 1.20" [ngClass]="{'is-invalid': systemSettingsForm.get('paymentFee').invalid && systemSettingsForm.get('paymentFee').touched}">
-                    <p>€</p>
+                  <div class="eph-range-container">
+                    <label class="form-label" for="ephStartingNumber">Rozsah od*</label>
+                    <input formControlName="ephStartingNumber" id="ephStartingNumber" type="number" inputmode="numeric" class="form-control" placeholder="napr.: 12345678" [ngClass]="{'is-invalid': mainForm.get('ephForm.ephStartingNumber')?.invalid && mainForm.get('ephForm.ephStartingNumber')?.touched}">
+                    <label class="form-label" for="ephEndingNumber">Rozsah do*</label>
+                    <input formControlName="ephEndingNumber" id="ephEndingNumber" type="number" inputmode="numeric" class="form-control" placeholder="napr.: 12345690" [ngClass]="{'is-invalid': mainForm.get('ephForm.ephEndingNumber')?.invalid && mainForm.get('ephForm.ephEndingNumber')?.touched}">
                   </div>
-                </div>
+                <p><strong>Poznámka:</strong> Kontrolné číslo „x“ dopočíta program automaticky.</p>
             </div>
-            <div class="bank-account-container">
-              <div class="field">
-                <label for="bankAccount" class="form-label">Číslo bankového účtu v XML súbore (IBAN)*</label>
-                <input formControlName="bankAccount" 
-                       (input)="onIbanInput($event)" 
-                       maxlength="29" 
-                       id="bankAccount" 
-                       type="text" 
-                       class="form-control" 
-                       placeholder="Zadajte IBAN" 
-                       [ngClass]="{'is-invalid': systemSettingsForm.get('bankAccount').invalid && systemSettingsForm.get('bankAccount').touched}">
+          </div>
+        <div [formGroupName]="'systemSettingsForm'">
+          <div class="settings-form-container">
+            <h3>Formulár obchodných nastavení</h3>
+              <div class="delivery-payment-container">
+                  <div class="field">
+                    <label for="deliveryFee" class="form-label">Poplatok za doručenie*</label>
+                    <div class="delivery-fee">
+                      <input formControlName="deliveryFee" id="deliveryFee" type="number" class="form-control" min="0" step="0.10" placeholder="Zadajte sumu, napr. 3.50" [ngClass]="{'is-invalid': mainForm.get('systemSettingsForm.deliveryFee')?.invalid && mainForm.get('systemSettingsForm.deliveryFee')?.touched}">
+                      <p>€</p>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="paymentFee" class="form-label">Poplatok za dobierku*</label>
+                    <div class="payment-fee">
+                      <input formControlName="paymentFee" id="paymentFee" type="number" class="form-control" min="0" step="0.10" placeholder="Zadajte sumu, napr. 1.20" [ngClass]="{'is-invalid': mainForm.get('systemSettingsForm.deliveryFee')?.invalid && mainForm.get('systemSettingsForm.deliveryFee')?.touched}">
+                      <p>€</p>
+                    </div>
+                  </div>
               </div>
-            </div>
+              <div class="bank-account-container">
+                <div class="field">
+                  <label for="bankAccount" class="form-label">Číslo bankového účtu v XML súbore (IBAN)*</label>
+                  <input formControlName="bankAccount" 
+                        (input)="onIbanInput($event)" 
+                        maxlength="29" 
+                        id="bankAccount" 
+                        type="text" 
+                        class="form-control" 
+                        placeholder="Zadajte IBAN" 
+                        [ngClass]="{'is-invalid': mainForm.get('systemSettingsForm.bankAccount')?.invalid && mainForm.get('systemSettingsForm.bankAccount')?.touched}">
+                </div>
+              </div>
+          </div>
         </div>
-      </form>
-    <div class="user-eph-settings">
-      <h3>Aktuálna konfigurácia podacích čísel (EPH)</h3>
-      @if(ephSettings != null && systemSettings != null){
-        <p [ngClass]="{ 'warning-text': totalPackageCodes === 0, 'success-text': totalPackageCodes > 0 }">
-          <strong>Celkový počet dostupných podacích čísel:</strong> {{ totalPackageCodes }}
-        </p>
-        <p class="info-text"><strong>EPH Prefix:</strong> {{ ephSettings.ephPrefix }}</p>
-        <p class="info-text"><strong>EPH rozsah (od - do):</strong> {{ ephSettings.ephStartingNumber }} - {{ ephSettings.ephEndingNumber }}</p>
-        <p class="info-text"><strong>EPH Suffix:</strong> {{ ephSettings.ephSuffix }}</p>
-        <p class="info-text">
-          <strong>Poplatky: </strong>
-          <span class="fee">Doprava: {{ systemSettings?.deliveryFee?.toFixed(2) || 'neuvedený' }} €</span>
-          &nbsp;|&nbsp;
-          <span class="fee">Platba: {{ systemSettings?.paymentFee?.toFixed(2) || 'neuvedený' }} €</span>
-        </p>
-        <p class="info-text"><strong>IBAN v XML súbore:</strong> {{ systemSettings.bankAccount || 'neuvedený' }}</p>
-      }@else{
-         <p>Systém nenašiel žiadne uložené nastavenia pre EPH a poplatky!</p>
-      }
-    </div>
-  </div> 
-  }
+      <div class="user-eph-settings">
+        <h3>Aktuálna konfigurácia podacích čísel (EPH)</h3>
+        @if(ephSettings != null && systemSettings != null){
+          <p [ngClass]="{ 'warning-text': totalPackageCodes === 0, 'success-text': totalPackageCodes > 0 }">
+            <strong>Celkový počet dostupných podacích čísel:</strong> {{ totalPackageCodes }}
+          </p>
+          <p class="info-text"><strong>EPH Prefix:</strong> {{ ephSettings.ephPrefix }}</p>
+          <p class="info-text"><strong>EPH rozsah (od - do):</strong> {{ ephSettings.ephStartingNumber }} - {{ ephSettings.ephEndingNumber }}</p>
+          <p class="info-text"><strong>EPH Suffix:</strong> {{ ephSettings.ephSuffix }}</p>
+          <p class="info-text">
+            <strong>Poplatky: </strong>
+            <span class="fee">Doprava: {{ systemSettings?.deliveryFee?.toFixed(2) || 'neuvedený' }} €</span>
+            &nbsp;|&nbsp;
+            <span class="fee">Platba: {{ systemSettings?.paymentFee?.toFixed(2) || 'neuvedený' }} €</span>
+          </p>
+          <p class="info-text"><strong>IBAN v XML súbore:</strong> {{ systemSettings.bankAccount || 'neuvedený' }}</p>
+        }@else{
+          <p>Systém nenašiel žiadne uložené nastavenia pre EPH a poplatky!</p>
+        }
+      </div>
+    </div> 
+    }
+  </form>
 </div>

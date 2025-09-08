@@ -21,25 +21,42 @@ input::placeholder {
   transition: all 0.15s ease;
 }
 .form-control:focus {
-  border-color: #198754;
-  box-shadow: 0 0 5px #198754;
+  border-color: #084298;
+  box-shadow: 0 0 5px #084298;
   outline: none;
 }
 .btn-primary {
-  background-color: #198754;
-  border-color: #198754;
+  background-color: #084298;
+  border-color: #084298;
   color: #ffffff;
   transition: all 0.15s ease;
 }
 .btn-primary:hover,
 .btn-primary:focus {
-  background-color: #146c43; 
-  border-color: #146c43;
+  background-color: #06357a; 
+  border-color: #06357a;
   color: #ffffff;
 }
 .btn-primary:active {
-  background-color: #146c43 !important; 
-  border-color: #146c43 !important;
+  background-color: #06357a !important; 
+  border-color: #06357a !important;
+  color: #ffffff !important;
+}
+.btn-outline-primary {
+  background-color: transparent;
+  border-color: #084298;
+  color: #084298;
+  transition: all 0.15s ease;
+}
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background-color: #084298;
+  border-color: #084298;
+  color: #ffffff;
+}
+.btn-outline-primary:active {
+  background-color: #06357a !important;
+  border-color: #06357a !important;
   color: #ffffff !important;
 }
 .btn-light {
