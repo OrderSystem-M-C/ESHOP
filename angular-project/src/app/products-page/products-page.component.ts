@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
 import { ProductDTO, ProductService, ProductUpdateDTO } from '../services/product.service';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
+import { observeNotification } from 'rxjs/internal/Notification';
 
 @Component({
   selector: 'app-products-page',
@@ -79,17 +80,35 @@ export class ProductsPageComponent implements OnInit {
   }
 
   onProductFieldChange(productId: number, field: 'stockAmount' | 'productCode', newValue: any) {
-    this.isEditingProducts = true;
+    const originalProduct = this.productsData.find(p => p.productId === productId);
+    if(!originalProduct) return;
+
     const value = Number(newValue);
+    const originalValue = originalProduct[field] ?? 0;
 
-    if (!this.editedProducts[productId]) {
-      this.editedProducts[productId] = {};
+    if(value === originalValue){
+      if(this.editedProducts[productId]){
+        delete this.editedProducts[productId][field];
+        if(Object.keys(this.editedProducts[productId]).length === 0){
+          delete this.editedProducts[productId];
+        }
+      }
+    }else {
+      if (!this.editedProducts[productId]) this.editedProducts[productId] = {};
+      this.editedProducts[productId][field] = value;
     }
-    this.editedProducts[productId][field] = value;
 
-    if (!this.hasShownEditingSnackbar) {
+    const wasEditing = this.isEditingProducts;
+    this.isEditingProducts = Object.keys(this.editedProducts).length > 0;
+
+    if (this.isEditingProducts && !this.hasShownEditingSnackbar) {
       this.snackBar.open('Vstúpili ste do editačného režimu!', '', { duration: 1000 });
       this.hasShownEditingSnackbar = true;
+    }
+
+    if (wasEditing && !this.isEditingProducts) {
+      this.hasShownEditingSnackbar = false;
+      this.snackBar.open('Úpravy boli zrušené!', '', { duration: 2000 });
     }
   }
 
@@ -122,7 +141,7 @@ export class ProductsPageComponent implements OnInit {
     this.dialogRef.afterClosed().subscribe(result => {
       if (!result) {
         this.productForm.reset();
-        this.snackBar.open('Upravovanie produktu bolo zrušené.', '', { duration: 1000 });
+        this.snackBar.open('Upravovanie produktu bolo zrušené!', '', { duration: 1000 });
       }
     })
   }
@@ -148,7 +167,7 @@ export class ProductsPageComponent implements OnInit {
 
     this.productService.updateProduct([updatedProduct]).subscribe({
       next: () => {
-        this.snackBar.open('Produkt bol úspešne upravený.', '', { duration: 1000 });
+        this.snackBar.open('Produkt bol úspešne upravený!', '', { duration: 1000 });
 
         const index = this.productsData.findIndex(p => p.productId === productId);
         if(index !== -1){
@@ -343,7 +362,7 @@ export class ProductsPageComponent implements OnInit {
       this.isLoadingForm = true;
 
       this.productService.createProduct(product).subscribe((response) => {
-        this.snackBar.open('Produkt bol úspešne vytvorený.', '', { duration: 1000 });
+        this.snackBar.open('Produkt bol úspešne vytvorený!', '', { duration: 1000 });
         this.creationSuccessful = true;
         this.productForm.reset();
 
@@ -381,7 +400,7 @@ export class ProductsPageComponent implements OnInit {
         this.createProduct();
       }else if(!this.creationSuccessful){
         this.productForm.reset();
-        this.snackBar.open('Vytváranie produktu bolo zrušené.', '', { duration: 1000 });
+        this.snackBar.open('Vytváranie produktu bolo zrušené!', '', { duration: 1000 });
       }
     })
   }

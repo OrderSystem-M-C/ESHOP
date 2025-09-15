@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { OrderDTO, OrderService, OrderStatusDTO } from '../services/order.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -349,7 +349,7 @@ export class OrderFormComponent implements OnInit {
   cancelEditOrderStatus(): void {
     this.statuses = this.originalStatusesOrder;
     this.isEditOrderStatus = false;
-    this.snackBar.open("Úpravy poradia boli zrušené.", "", {
+    this.snackBar.open("Úpravy poradia boli zrušené!", "", {
       duration: 2000
     });
   }
@@ -975,7 +975,7 @@ export class OrderFormComponent implements OnInit {
 
     if (this.isEditMode && packageCode === this.originalPackageCode) {
       this.orderForm.get('packageCode')?.setErrors(null);
-      this.snackBar.open('Podacie číslo ostáva nezmenené a je platné.', '', { duration: 2000 });
+      this.snackBar.open('Podacie číslo ostáva nezmenené a je platné!', '', { duration: 2000 });
       this.isLoadingPackageCode = false;
       return;
     }
@@ -992,7 +992,7 @@ export class OrderFormComponent implements OnInit {
           setTimeout(() => {
             if(response.valid){
               this.orderForm.get('packageCode')?.setErrors(null);
-              this.snackBar.open(response.message || 'Podacie číslo je platné a dostupné.', '', { duration: 2000 });
+              this.snackBar.open(response.message || 'Podacie číslo je platné a dostupné!', '', { duration: 2000 });
             }else{
               this.orderForm.get('packageCode')?.setErrors({ invalid: true });
               this.snackBar.open(response.message || 'Neznáma chyba pri validácií podacieho čísla!', '', { duration: 2000 });
@@ -1010,6 +1010,11 @@ export class OrderFormComponent implements OnInit {
   }
 
   validatePackageCodeForSubmit(packageCode: string): Observable<boolean> {
+    if(this.isEditMode && packageCode === this.originalPackageCode) {
+      this.orderForm.get('packageCode')?.setErrors(null);
+      return of(true);
+    }
+
     if (!this.checkPackageCodeFormat(packageCode)) {
       this.isLoadingPackageCode = false;
       return of(false);
@@ -1085,7 +1090,7 @@ export class OrderFormComponent implements OnInit {
     }
 
     this.invoiceCreated = true;
-    const loadingSnack = this.snackBar.open('Sťahuje sa faktúra...', '', { duration: undefined });
+    const loadingSnack = this.snackBar.open('Generuje sa faktúra...', '', { duration: undefined });
 
     try {
       const orderData = this.createOrderDTO();
@@ -1094,7 +1099,7 @@ export class OrderFormComponent implements OnInit {
       this.snackBar.open('Faktúra bola úspešne stiahnutá!', '', { duration: 2000 });
     } catch (err) {
       console.error(err);
-      this.snackBar.open('Nastala chyba pri sťahovaní faktúry!', '', { duration: 2000 });
+      this.snackBar.open('Nastala chyba pri generovaní faktúry!', '', { duration: 2000 });
     } finally {
       this.invoiceCreated = false;
       loadingSnack.dismiss();

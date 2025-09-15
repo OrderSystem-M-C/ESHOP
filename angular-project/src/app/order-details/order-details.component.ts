@@ -174,7 +174,7 @@ export class OrderDetailsComponent implements OnInit{
       return;
     }
 
-    const loadingSnack = this.snackBar.open('Sťahuje sa faktúra...', '', { duration: undefined });
+    const loadingSnack = this.snackBar.open('Generuje sa faktúra...', '', { duration: undefined });
 
     try {
       await this.invoiceService.generateInvoice(this.order, this.selectedProducts);
@@ -205,7 +205,7 @@ export class OrderDetailsComponent implements OnInit{
           console.error(error);
         })
       }else{
-        this.snackBar.open('Vymazanie objednávky bolo zrušené.', '', { duration: 1000 });
+        this.snackBar.open('Vymazanie objednávky bolo zrušené!', '', { duration: 1000 });
       }
     })
   }

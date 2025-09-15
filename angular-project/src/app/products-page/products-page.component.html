@@ -7,11 +7,11 @@
     </div>
     <div class="button-container">
       @if(isEditingProducts && !isLoading){
-        <button type="button" class="btn btn-secondary" (click)="openCreateDialog(productDialog)"><img src="../../assets/Images/add-icon.png" alt="add-icon"> Pridať produkt</button>
-        <button type="button" class="btn btn-success" (click)="saveAllChanges()"><img src="../../assets/Images/save-icon.png" height="17px" width="17px" alt="save-icon" style="margin: 0 0 1px 0;">Uložiť zmeny</button>
+        <button type="button" class="btn btn-secondary" (click)="openCreateDialog(productDialog)"><img src="../../assets/Images/add-product-icon.png" alt="add-product-icon"> Pridať produkt</button>
+        <button type="button" class="btn btn-success" (click)="saveAllChanges()"><img src="../../assets/Images/save-icon.png" class="save-icon" alt="save-icon">Uložiť zmeny</button>
         <button type="button" class="btn btn-outline-danger" (click)="cancelEditing()">Zahodiť zmeny</button>
       }@else{
-        <button type="button" class="btn btn-success" (click)="openCreateDialog(productDialog)"><img src="../../assets/Images/add-icon.png" alt="add-icon"> Pridať produkt</button>
+        <button type="button" class="btn btn-success" (click)="openCreateDialog(productDialog)"><img src="../../assets/Images/add-product-icon.png" alt="add-product-icon"> Pridať produkt</button>
       }
     </div>
   </div>
@@ -138,11 +138,11 @@
     <div class="product-info">
         <div class="field">
             <label for="product-name" class="form-label">Názov produktu*</label>
-            <input type="text" formControlName="productName" id="product-name" class="form-control" placeholder="Zadajte názov produktu" [ngClass]="{'is-invalid': productForm.get('productName').invalid && productForm.get('productName').touched}">
+            <input type="text" formControlName="productName" id="product-name" class="form-control" placeholder="Zadajte názov produktu" [ngClass]="{'is-invalid': productForm.get('productName').invalid && productForm.get('productName').touched}" maxlength="100">
         </div>
         <div class="field">
             <label for="product-description" class="form-label">Popis produktu</label>
-            <input type="text" formControlName="productDescription" id="product-description" class="form-control" placeholder="Zadajte popis produktu" [ngClass]="{'is-invalid': productForm.get('productDescription').invalid}">
+            <input type="text" formControlName="productDescription" id="product-description" class="form-control" placeholder="Zadajte popis produktu" [ngClass]="{'is-invalid': productForm.get('productDescription').invalid}" maxlength="100">
         </div>
         <div class="custom-field">
           <div class="product-price-container">
@@ -180,6 +180,7 @@
                 <img src="../../assets/Images/save-icon.png" alt="save-icon" style="height: 17px; width: 17px; margin-right:5px;" />
                 Uložiť zmeny
               }@else {
+                <img src="../../assets/Images/add-product-icon.png" alt="add-product-icon" style="height: 20px; width: 20px; margin-right:5px;" />
                 Vytvoriť produkt
               }
             </button>

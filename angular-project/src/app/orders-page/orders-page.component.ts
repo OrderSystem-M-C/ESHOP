@@ -258,7 +258,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
     }
 
     this.isLoading = true;
-    const loadingRef = this.snackBar.open("Sťahuje sa XML súbor...", "", { duration: undefined });
+    const loadingRef = this.snackBar.open("Generuje sa XML súbor...", "", { duration: undefined });
 
     this.orderService.getOrdersXmlFile(this.selectedOrders.map(o => o.orderId)).pipe(
       tap((response) => {
@@ -303,7 +303,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
         if (backendError?.error === "NO_CODES_LEFT") {
           this.snackBar.open(backendError.message, "", { duration: 3000 });
         } else {
-          this.snackBar.open("Chyba pri generovaní alebo sťahovaní XML.", "", { duration: 3000 });
+          this.snackBar.open("Nastala chyba pri generovaní XML!", "", { duration: 3000 });
         }
 
         this.clearSelection();
@@ -320,7 +320,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    const loadingSnack = this.snackBar.open('Generuje sa faktúra...', '', { duration: undefined });
+    const loadingSnack = this.snackBar.open('Generujú sa faktúry...', '', { duration: undefined });
 
     const observables = this.selectedOrders.map(selected =>
       this.orderService.getOrderDetails(selected.orderId).pipe(
@@ -339,7 +339,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
       next: async results => {
         try {
           await this.invoiceService.generateInvoices(results);
-          this.snackBar.open('PDF faktúry boli úspešne stiahnuté!', '', { duration: 2000 });
+          this.snackBar.open('PDF s faktúrami bolo úspešne stiahnuté!', '', { duration: 2000 });
         } catch (err) {
           console.error(err);
           this.snackBar.open('Nastala chyba pri generovaní faktúr!', '', { duration: 3000 });
@@ -387,7 +387,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
     this.selectedOrders = [];
     this.filteredOrders.forEach(order => order.orderSelected = false);
     if (showSnackbar) {
-      this.snackBar.open('Výber bol zrušený.', '', { duration: 3000 });
+      this.snackBar.open('Výber bol zrušený!', '', { duration: 3000 });
     }
   }
 
