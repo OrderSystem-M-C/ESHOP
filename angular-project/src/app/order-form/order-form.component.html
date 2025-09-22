@@ -286,7 +286,7 @@
     <div class="package-code">
       <h3>Podacie číslo objednávky</h3>
       <label for="packageCode" class="form-label">Podacie číslo vašej objednávky (Pošta)</label>
-         <div class="field">
+        <div class="field">
             @if(isLoadingPackageCode){
               <div class="spinner-container">
                 <div class="spinner">
@@ -433,7 +433,13 @@
                 {{ product.stockAmount > 0 ? 'Na sklade' : 'Vypredané' }} 
               </td>
               <td class="text-center">{{product.stockAmount}} ks</td>
-              <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="form-check-input" [(ngModel)]="product.productSelected" (change)="toggleProductSelection(product)" [checked]="selectedProducts.includes(product)" ></td>
+              <td style="text-align: center; vertical-align: middle;">
+                <input 
+                  type="checkbox" 
+                  class="form-check-input"
+                  (change)="toggleProductSelection(product)" 
+                  [checked]="isProductSelected(product)">
+              </td>
             </tr>
           </tbody>
         </table>

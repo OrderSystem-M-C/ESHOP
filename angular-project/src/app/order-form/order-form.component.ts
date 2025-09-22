@@ -406,6 +406,14 @@ export class OrderFormComponent implements OnInit {
       : '';
   }
 
+  private getActiveProducts(): ProductDTO[] {
+    return this.isEditMode ? this.newSelectedProducts : this.selectedProducts;
+  }
+
+  private getOriginalProducts(): ProductDTO[] {
+    return this.isEditMode ? this.selectedProducts : this.selectedProducts;
+  }
+
   onProductFieldChange(productId: number, newValue: any) {
     this.isEditingProductPrices = true;
     const value = Number(newValue);
@@ -444,9 +452,16 @@ export class OrderFormComponent implements OnInit {
     return this.editedProducts[productId]['productPrice'] !== originalProduct['productPrice'];
   }
 
+  isProductSelected(product: ProductDTO): boolean {
+    return this.selectedProducts.some(p => p.productId === product.productId) 
+        || this.newSelectedProducts.some(p => p.productId === product.productId);
+  }
+
   openDialog(selectProductsDialog: TemplateRef<any>, edit: boolean | null){
     this.dialogClosed = false;
     this.isLoading = true;
+
+    const activeProducts = this.getActiveProducts();
 
     const hadNoProductsBefore = this.selectedProducts.length === 0;
 
@@ -458,9 +473,8 @@ export class OrderFormComponent implements OnInit {
       this.productsData = result.map(product => ({
         ...product,
         productAmount: 1,
-        productSelected: this.selectedProducts.some(p => p.productId === product.productId) 
+        productSelected: activeProducts.some(p => p.productId === product.productId)
       }));
-  
       this.sortedProducts = this.productsData;
       this.isLoading = false;
       this.totalItems = this.sortedProducts.length;
@@ -474,6 +488,9 @@ export class OrderFormComponent implements OnInit {
     this.isEditingProducts = edit;
     
     this.dialogRef.afterClosed().subscribe((result) => {
+      const activeProducts = this.getActiveProducts();
+      const originalProducts = this.getOriginalProducts();
+
       if (result === true) {
         this.snackBar.open('Výber produktov bol úspešne zmenený!', '', { duration: 1500 });
       } else if (result === false) {
@@ -484,37 +501,31 @@ export class OrderFormComponent implements OnInit {
         }
       } else {
         this.snackBar.open('Výber produktov bol zrušený!', '', { duration: 1500 });
-        this.selectedProducts = JSON.parse(JSON.stringify(this.newSelectedProducts));
-        this.totalPrice = this.selectedProducts.reduce((sum, p) => sum + p.productPrice, 0);
+        if (this.isEditMode) {
+          this.newSelectedProducts = JSON.parse(JSON.stringify(originalProducts));
+        } else {
+          this.selectedProducts = JSON.parse(JSON.stringify(originalProducts));
+        }
       }
       this.recalculateTotalPrice();
     });
   }
   toggleProductSelection(product: ProductDTO) {
-  if (this.isEditMode) {
-    const index = this.newSelectedProducts.findIndex(p => p.productId === product.productId);
+    const targetArray = this.getActiveProducts();
+    const index = targetArray.findIndex(p => p.productId === product.productId);
+
     if (index !== -1) {
-      this.newSelectedProducts.splice(index, 1);
-      this.totalPrice -= product.productPrice;
+        targetArray.splice(index, 1);
     } else {
-      this.newSelectedProducts.push({ ...product });
-      this.totalPrice += product.productPrice;
+        targetArray.push({ ...product });
     }
-  } else {
-    const index = this.selectedProducts.findIndex(p => p.productId === product.productId);
-    if (index !== -1) {
-      this.selectedProducts.splice(index, 1);
-      this.totalPrice -= product.productPrice;
-    } else {
-      this.selectedProducts.push({ ...product });
-      this.totalPrice += product.productPrice;
-    }
+
+    this.recalculateTotalPrice();
   }
-}
   confirmSelection() {
-    if(this.selectedProducts.length > 0){
-      const isEdit = this.isEditingProducts === true;
-      this.dialogRef.close(isEdit); 
+    const activeProducts = this.getActiveProducts();
+    if(activeProducts.length > 0){
+      this.dialogRef.close(false);
     }
   }
   closeDialog(){
@@ -527,13 +538,16 @@ export class OrderFormComponent implements OnInit {
     this.dialogRef.close(null);
   }
   hasUnsavedChanges(): boolean {
-    if (this.selectedProducts.length !== this.newSelectedProducts.length) return true;
+    const active = this.getActiveProducts();
+    const original = this.isEditMode ? this.selectedProducts : this.selectedProducts;
 
-    const sortedSelected = [...this.selectedProducts].sort((a,b) => a.productId - b.productId);
-    const sortedOriginal = [...this.newSelectedProducts].sort((a,b) => a.productId - b.productId);
+    if (active.length !== original.length) return true;
 
-    for (let i = 0; i < sortedSelected.length; i++) {
-      if (sortedSelected[i].productId !== sortedOriginal[i].productId) return true;
+    const sortedActive = [...active].sort((a,b) => a.productId - b.productId);
+    const sortedOriginal = [...original].sort((a,b) => a.productId - b.productId);
+
+    for (let i = 0; i < sortedActive.length; i++) {
+      if (sortedActive[i].productId !== sortedOriginal[i].productId) return true;
     }
     return false;
   }
@@ -560,8 +574,9 @@ export class OrderFormComponent implements OnInit {
   }
 
 
-  clearProducts(): void{
+  clearProducts(): void {
     this.selectedProducts = [];
+    this.newSelectedProducts = [];
     this.totalPrice = 0;
     this.snackBar.open('Vaše zvolené produkty boli úspešne premazané!', '', { duration: 2000 });
   }
@@ -578,7 +593,6 @@ export class OrderFormComponent implements OnInit {
     }
   }
 
-
   updateCost(optionType: 'delivery' | 'payment'): void {
     if(optionType === 'delivery') {
       const deliveryOption = this.orderForm.get('deliveryOption')?.value;
@@ -589,7 +603,6 @@ export class OrderFormComponent implements OnInit {
     }
     this.recalculateTotalPrice();
   }
-
 
   recalculateTotalPrice(): void {
     const targetArray = this.isEditMode ? this.newSelectedProducts : this.selectedProducts;
