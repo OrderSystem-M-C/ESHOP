@@ -124,9 +124,11 @@ button .btn-content {
   height: 15px;
   width: 15px;
 }
-.edit-icon {
+.edit-icon, .cancel-icon {
   height: 20px;
   width: 20px;
+}
+.edit-icon {
   filter: invert(1) brightness(2);
 }
 .edit-products-buttons {

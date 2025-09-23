@@ -74,8 +74,10 @@ export class OrderFormComponent implements OnInit {
   productsData: ProductDTO[] = [];
   sortedProducts: ProductDTO[] = [];
   ourSortedProducts: ProductDTO[] = [];
+
   selectedProducts: ProductDTO[] = [];
   newSelectedProducts: ProductDTO[] = [];
+  snapshotProducts: ProductDTO[] = [];
 
   searchText: string = ''; 
   searchOption: string = 'auto';
@@ -115,7 +117,7 @@ export class OrderFormComponent implements OnInit {
     private emailService: EmailService, 
     private ephService: EphService,
     private systemSettingsService: SystemSettingsService,
-    private invoiceService: InvoiceService
+    private invoiceService: InvoiceService,
   ){}
 
   updatePagedProducts(): void {
@@ -358,6 +360,10 @@ export class OrderFormComponent implements OnInit {
     return status.statusId;
   }
 
+  trackByProductId(index: number, product: ProductDTO): number {
+    return product.productId;
+  }
+
   isSelected(product: ProductDTO): boolean {
     return this.selectedProducts.some(p => p.productId === product.productId) || this.newSelectedProducts.some(p => p.productId === product.productId);
   }
@@ -411,19 +417,25 @@ export class OrderFormComponent implements OnInit {
   }
 
   private getOriginalProducts(): ProductDTO[] {
-    return this.isEditMode ? this.selectedProducts : this.selectedProducts;
+    return this.snapshotProducts;
   }
 
   onProductFieldChange(productId: number, newValue: any) {
-    this.isEditingProductPrices = true;
     const value = Number(newValue);
+
+    if (!this.isEditingProductPrices) {
+      this.snapshotProducts = this.getActiveProducts().map(p => ({ ...p }));
+      this.isEditingProductPrices = true;
+    }
 
     if (!this.editedProducts[productId]) {
       this.editedProducts[productId] = {};
     }
     this.editedProducts[productId]['productPrice'] = value;
 
-    const productToUpdate = this.selectedProducts.find(product => product.productId === productId);
+    const targetArray = this.getActiveProducts();
+
+    const productToUpdate = targetArray.find(product => product.productId === productId);
     if (productToUpdate) {
       productToUpdate.productPrice = value;
     }
@@ -437,8 +449,16 @@ export class OrderFormComponent implements OnInit {
   }
 
   cancelEditing() {
-    this.editedProducts = {};
     this.isEditingProductPrices = this.hasShownEditingSnackbar = false;
+
+    if (this.isEditMode) {
+      this.newSelectedProducts = this.snapshotProducts.map(p => ({ ...p }));
+    } else {
+      this.selectedProducts = this.snapshotProducts.map(p => ({ ...p }));
+    }
+
+    this.editedProducts = {};
+    this.recalculateTotalPrice();
     this.snackBar.open('Úpravy boli zrušené!', '', { duration: 2000 });
   }
 
@@ -462,6 +482,7 @@ export class OrderFormComponent implements OnInit {
     this.isLoading = true;
 
     const activeProducts = this.getActiveProducts();
+    this.snapshotProducts = JSON.parse(JSON.stringify(this.getActiveProducts()));
 
     const hadNoProductsBefore = this.selectedProducts.length === 0;
 
@@ -488,9 +509,6 @@ export class OrderFormComponent implements OnInit {
     this.isEditingProducts = edit;
     
     this.dialogRef.afterClosed().subscribe((result) => {
-      const activeProducts = this.getActiveProducts();
-      const originalProducts = this.getOriginalProducts();
-
       if (result === true) {
         this.snackBar.open('Výber produktov bol úspešne zmenený!', '', { duration: 1500 });
       } else if (result === false) {
@@ -502,9 +520,9 @@ export class OrderFormComponent implements OnInit {
       } else {
         this.snackBar.open('Výber produktov bol zrušený!', '', { duration: 1500 });
         if (this.isEditMode) {
-          this.newSelectedProducts = JSON.parse(JSON.stringify(originalProducts));
+          this.newSelectedProducts = this.snapshotProducts;
         } else {
-          this.selectedProducts = JSON.parse(JSON.stringify(originalProducts));
+          this.selectedProducts = this.snapshotProducts;
         }
       }
       this.recalculateTotalPrice();
@@ -513,6 +531,8 @@ export class OrderFormComponent implements OnInit {
   toggleProductSelection(product: ProductDTO) {
     const targetArray = this.getActiveProducts();
     const index = targetArray.findIndex(p => p.productId === product.productId);
+
+    console.log(targetArray);
 
     if (index !== -1) {
         targetArray.splice(index, 1);
@@ -539,7 +559,7 @@ export class OrderFormComponent implements OnInit {
   }
   hasUnsavedChanges(): boolean {
     const active = this.getActiveProducts();
-    const original = this.isEditMode ? this.selectedProducts : this.selectedProducts;
+    const original = this.getOriginalProducts();
 
     if (active.length !== original.length) return true;
 
@@ -573,18 +593,26 @@ export class OrderFormComponent implements OnInit {
     }
   }
 
-
   clearProducts(): void {
-    this.selectedProducts = [];
     this.newSelectedProducts = [];
-    this.totalPrice = 0;
+    this.selectedProducts = [];
+    this.editedProducts = {};
+
+    if(this.isEditMode) {
+      this.newSelectedProducts = [...this.newSelectedProducts];
+    } else {
+      this.selectedProducts = [...this.selectedProducts];
+    }
+
+    this.recalculateTotalPrice();
+
     this.snackBar.open('Vaše zvolené produkty boli úspešne premazané!', '', { duration: 2000 });
   }
 
   updateAmount(productId: number, productAmount: number) {
     if (productAmount <= 0) return;
 
-    const targetArray = this.isEditingProducts ? this.newSelectedProducts : this.selectedProducts;
+    const targetArray = this.getActiveProducts();
     const product = targetArray.find(p => p.productId === productId);
 
     if (product) {

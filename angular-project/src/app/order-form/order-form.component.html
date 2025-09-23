@@ -26,7 +26,7 @@
           <h3>Výber produktov, spôsobu dopravy a platby</h3>
           <div class="form-group">
             <div class="product-display">
-              @if(selectedProducts.length > 0){
+              @if(selectedProducts.length > 0 || newSelectedProducts.length > 0){
                 <label class="form-label">Zvolené produkty*</label>
                 <div class="selected-products">
                   <div class="table-container">
@@ -48,14 +48,20 @@
                         <td class="product-amount-control-column">
                           <input type="number" [(ngModel)]="product.productAmount" [ngModelOptions]="{standalone: true}" (change)="updateAmount(product.productId, product.productAmount)" value="1" min="1" class="form-control product-amount-control">
                         </td>
-                        <td>{{ (product.productAmount * product.productPrice).toFixed(2) }}€</td>
+                        <td>{{ (product.productAmount * (editedProducts[product.productId]?.productPrice ?? product.productPrice)).toFixed(2) }}€</td>
                         <td class="remove-product" (click)="removeProduct(product.productId)"><img src="https://cdn-icons-png.flaticon.com/512/75/75519.png"></td>
                       </tr>
                     </table>
                   </div>
                   <div class="edit-products-buttons">
-                    <button type="button" class="btn btn-success" (click)="openDialog(selectProductsDialog, true)"><img src="../../assets/Images/edit-icon.png" alt="edit-icon" class="edit-icon"> Upraviť produkty</button>
-                    <button type="button" class="btn btn-outline-danger" (click)="clearProducts()"> Zmazať všetky</button>
+                    @if(isEditingProductPrices){
+                      <button type="button" class="btn btn-outline-danger" (click)="cancelEditing()">
+                        Zahodiť zmeny
+                      </button>
+                    }@else{
+                      <button type="button" class="btn btn-success" (click)="openDialog(selectProductsDialog, true)"><img src="../../assets/Images/edit-icon.png" alt="edit-icon" class="edit-icon"> Upraviť produkty</button>
+                      <button type="button" class="btn btn-outline-danger" (click)="clearProducts()"> Zmazať všetky</button>
+                    }
                   </div>
                 </div>
               }@else{
