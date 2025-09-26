@@ -117,46 +117,20 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
       switchMap((response: any) => {
         if (response?.message?.includes("dostupných podacích čísiel")) {
           this.snackBar.open(response.message, "", { duration: 3000 });
-          this.isLoading = false;
           this.clearSelection();
           return EMPTY; 
         }
 
         this.snackBar.open("Objednávka/y bola/i úspešne skopírované!", "", { duration: 1000 });
 
-        const emailDtos = this.selectedOrders.map(order => ({
-          email: order.email,
-          orderId: order.orderId,
-          packageCode: order.packageCode
-        }));
-
-        const emailObservables = this.selectedOrders.map(order => {
-          if(order.orderStatus === 'Zasielanie čísla zásielky' && order.packageCode?.trim()){
-            return this.emailService.sendPackageCodeEmails(emailDtos).pipe(
-              catchError(err => {
-                console.error('Email error.', err);
-                return of(null);
-              })
-            )
-          } else if(order.orderStatus === 'Dobierka - Info k objednávke (poslať e-mail)') {
-            return this.emailService.sendOrderConfirmationEmails(emailDtos).pipe(
-              catchError(err => {
-                console.error('Email error.', err);
-                return of(null);
-              })
-            )
-          } else {
-            return of(null);
-          }
-        })
-        
-        return forkJoin(emailObservables).pipe(
-          switchMap(() => this.reloadOrders()),
-          tap(() => this.clearSelection())
+        return this.reloadOrders().pipe(
+          tap(() => {
+            this.clearSelection();
+          })
         )
       })
     ).subscribe({
-      next: () => this.isLoading = false,
+      next: () =>  this.isLoading = false,
       error: (err: HttpErrorResponse) => {
         console.error("An error has occurred while trying to copy order/orders.", err);
         this.isLoading = false;

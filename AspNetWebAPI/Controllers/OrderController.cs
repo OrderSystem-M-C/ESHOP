@@ -345,7 +345,7 @@ namespace AspNetCoreAPI.Controllers
                         DeliveryOption = original.DeliveryOption,
                         PaymentOption = original.PaymentOption,
                         DiscountAmount = original.DiscountAmount,
-                        OrderStatus = original.OrderStatus,
+                        OrderStatus = "Nezpracované - nová objednávka",
                         TotalPrice = original.TotalPrice,
                         InvoiceNumber = newOrderId,
                         VariableSymbol = newOrderId.ToString(),

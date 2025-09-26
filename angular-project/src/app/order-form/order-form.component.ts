@@ -364,10 +364,6 @@ export class OrderFormComponent implements OnInit {
     return product.productId;
   }
 
-  isSelected(product: ProductDTO): boolean {
-    return this.selectedProducts.some(p => p.productId === product.productId) || this.newSelectedProducts.some(p => p.productId === product.productId);
-  }
-
   searchProducts() {
     let filtered = [...this.productsData];
     const searchNormalized = this.removeDiacritics(this.searchText.trim().toLowerCase());
@@ -412,11 +408,11 @@ export class OrderFormComponent implements OnInit {
       : '';
   }
 
-  private getActiveProducts(): ProductDTO[] {
+  public getActiveProducts(): ProductDTO[] {
     return this.isEditMode ? this.newSelectedProducts : this.selectedProducts;
   }
 
-  private getOriginalProducts(): ProductDTO[] {
+  public getOriginalProducts(): ProductDTO[] {
     return this.snapshotProducts;
   }
 
@@ -473,8 +469,8 @@ export class OrderFormComponent implements OnInit {
   }
 
   isProductSelected(product: ProductDTO): boolean {
-    return this.selectedProducts.some(p => p.productId === product.productId) 
-        || this.newSelectedProducts.some(p => p.productId === product.productId);
+    const targetArray = this.isEditMode ? this.newSelectedProducts : this.selectedProducts;
+    return targetArray.some(p => p.productId === product.productId);
   }
 
   openDialog(selectProductsDialog: TemplateRef<any>, edit: boolean | null){
@@ -532,8 +528,6 @@ export class OrderFormComponent implements OnInit {
     const targetArray = this.getActiveProducts();
     const index = targetArray.findIndex(p => p.productId === product.productId);
 
-    console.log(targetArray);
-
     if (index !== -1) {
         targetArray.splice(index, 1);
     } else {
@@ -544,7 +538,7 @@ export class OrderFormComponent implements OnInit {
   }
   confirmSelection() {
     const activeProducts = this.getActiveProducts();
-    if(activeProducts.length > 0){
+    if(activeProducts.length >= 0){
       this.dialogRef.close(false);
     }
   }
@@ -701,7 +695,7 @@ export class OrderFormComponent implements OnInit {
     const arrayChanged = this.checkChanges(this.selectedProducts, this.newSelectedProducts);
 
     setTimeout(() => {
-      if (this.orderForm.valid && this.invoiceForm.valid) {
+      if (this.orderForm.valid && this.invoiceForm.valid && this.newSelectedProducts.length > 0) {
         if (this.orderForm.pristine && !arrayChanged) {
           return this.showSnack('Nebola vykonaná žiadna zmena v objednávke!', 1500);
         }
