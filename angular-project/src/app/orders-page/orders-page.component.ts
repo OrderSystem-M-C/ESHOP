@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { OrderDTO, OrderService, OrderStatusDTO } from '../services/order.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -22,7 +22,7 @@ import { ProductService } from '../services/product.service';
   templateUrl: './orders-page.component.html',
   styleUrl: './orders-page.component.scss'
 })
-export class OrdersPageComponent implements OnInit, AfterViewInit {
+export class OrdersPageComponent implements OnInit, AfterViewInit, OnDestroy {
   ordersData: OrderDTO[] = [];
   filteredOrders = [...this.ordersData];
   ourFilteredOrders: OrderDTO[] = [];
@@ -379,7 +379,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
     this.applyFilters();
   }
   
-  applyFilters(): void {
+  applyFilters(isLocal?: boolean): void {
     let filtered = [...this.ordersData];
     const searchNormalized = this.removeDiacritics(this.searchText);
 
@@ -459,7 +459,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
 
     this.filteredOrders = filtered;
     this.totalItems = this.filteredOrders.length;
-    this.pageIndex = 0;
+    if(!isLocal) this.pageIndex = 0;
     this.updatePagedOrders();
   }
 
@@ -519,9 +519,9 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
         this.statuses = statuses;
 
         this.totalItems = orders.length;
-        this.pageIndex = 0;
+        this.pageIndex = Number(localStorage.getItem('pageIndex')) ?? 0;
 
-        this.applyFilters();
+        this.applyFilters(true);
       },
       error: (err) => {
         console.error("An error has occurred while trying to fetch data.", err);
@@ -544,5 +544,8 @@ export class OrdersPageComponent implements OnInit, AfterViewInit {
   }
   ngAfterViewInit(): void{
     this.updatePagedOrders();
+  }
+  ngOnDestroy(): void {
+    localStorage.setItem('pageIndex', String(this.pageIndex));
   }
 }

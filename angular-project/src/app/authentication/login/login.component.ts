@@ -8,6 +8,7 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RecaptchaModule } from 'ng-recaptcha';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +22,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   private router = inject(Router);
 
   siteKey: string | null = null;
+
+  isLoading: boolean = false;
 
   isLogging: boolean = false;
 
@@ -84,15 +87,20 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.isLoading = true;
+
     document.body.classList.add('login-layout');
     document.body.classList.remove('default-layout');
 
-    this.authService.getRecaptchaSiteKey().subscribe({
+    this.authService.getRecaptchaSiteKey()
+    .pipe(
+      finalize(() => this.isLoading = false))
+    .subscribe({
       next: (response) => {
         this.siteKey = response;
       },
       error: (err) => console.error('Error getting site key:', err)
-    })
+    });
   }
 
   ngOnDestroy() {

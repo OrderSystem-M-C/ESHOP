@@ -118,7 +118,7 @@
                 <label for="discountAmount" class="form-label">Zľava (%)</label>
                 <div class="discount-input">
                   <input formControlName="discountAmount" [value]="orderForm.get('discountAmount')?.value || ''" type="number" id="discountAmount" class="form-control" min="0" max="100" placeholder="Zadajte zľavu" [ngClass]="{'is-invalid': orderForm.get('discountAmount').invalid}" (input)="recalculateTotalPrice()">
-                  <p>% (-0€)</p>
+                  <p>% (zľava: -{{calculatedDiscountAmount.toFixed(2)}}€)</p>
                 </div>
             </div>
         </div>

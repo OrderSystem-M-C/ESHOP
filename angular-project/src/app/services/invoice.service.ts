@@ -176,7 +176,7 @@ export class InvoiceService {
                   <td style="padding: 8px; text-align: center; font-weight: bold;">CELKOM:</td>
                   <td style="padding: 8px; text-align: center; font-weight: bold;">
                     ${order.discountAmount > 0
-                      ? `${order.totalPrice.toFixed(2)} € <span style="color: #6c757d;">(zľava: -${order.discountAmount}%)</span>`
+                      ? `${order.totalPrice.toFixed(2)} € <span style="color: #6c757d;">(zľava: ${order.discountAmount}%)</span>`
                       : `${order.totalPrice.toFixed(2)} €`}
                   </td>
                 </tr>
