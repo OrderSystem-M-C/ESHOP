@@ -132,7 +132,7 @@
               <p>{{ deliveryCost | number : '1.2-2' }}€</p>
             }
 
-            @if(paymentCost > 0 && orderForm.get('paymentOption')?.value === 'Dobierka') {
+            @if(paymentCost >= 0) {
               <p><b>Platba:</b></p>
               <p>{{ paymentCost | number : '1.2-2' }}€</p>
             }

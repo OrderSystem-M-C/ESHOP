@@ -86,13 +86,18 @@ export class OrdersPageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dropdownState[dropdown] = !this.dropdownState[dropdown];
   }
 
-  navigateToDetails(order: OrderDTO, event: MouseEvent){
+  navigateToDetails(order: OrderDTO, event: MouseEvent): void {
     const target = event.target as HTMLElement;
 
     if (target.hasAttribute('data-skip-navigation') || target.closest('[data-skip-navigation]')) {
       return;
     }
     this.router.navigate(['/order-details', order.orderId])
+  }
+
+  navigateToEdit(orderId: number, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/order-form', orderId]);
   }
 
   selectOrder(){

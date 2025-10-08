@@ -207,7 +207,9 @@
             <td>{{ order.orderDate }}</td>
             <td class="text-center">{{ order.orderId }}</td>
             <td>
-              <div class="scrollable-cell">{{ order.customerName }}</div>
+              <div class="scrollable-cell text-decoration-underline" (click)="navigateToEdit(order.orderId, $event)">
+                {{ order.customerName }}
+              </div>
             </td>
             <td class="text-center">{{ order.totalPrice }}€</td>
             <td class="text-center">{{ order.paymentOption }}</td>
