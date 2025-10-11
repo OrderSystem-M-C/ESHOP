@@ -33,7 +33,7 @@ namespace AspNetCoreAPI.DTOs
         [Required]
         public decimal PaymentCost { get; set; } = 0.0m;
         [Range(0, 100)]
-        public int DiscountAmount { get; set; }
+        public decimal DiscountAmount { get; set; }
         [Required]
         public string OrderStatus { get; set; }
         public string? OrderDate { get; set; }

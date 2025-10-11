@@ -57,11 +57,11 @@
               <td>
                 <div class="product-price-container">
                   <input type="number"
-                         class="form-control"
-                         [ngModel]="isProductEdited(product.productId) ? editedProducts[product.productId].productPrice : product.productPrice"
-                         step="0.01"
-                         (ngModelChange)="onProductFieldChange(product.productId, $event)"
-                         min="1">
+                        class="form-control"
+                        [ngModel]="isProductEdited(product.productId) ? editedProducts[product.productId].productPrice : product.productPrice"
+                        step="0.01"
+                        (ngModelChange)="onProductFieldChange(product.productId, $event)"
+                        min="1">
                   €
                 </div>
               </td>
@@ -92,7 +92,7 @@
               <td><strong>{{calculateTotalWeight().toFixed(2)}} kg</strong></td>
               <td>
                 <strong>
-                  {{this.order.discountAmount ? (this.order.totalPrice.toFixed(2) + ' € (-' + this.order.discountAmount + '%)') : (this.order.totalPrice.toFixed(2) + ' €')}}
+                  {{this.order.discountAmount ? this.order.totalPrice.toFixed(2) + ' € (-' + ((calculateBasePrice() / 100) * order?.discountAmount).toFixed(2) + ' €, ' + order?.discountAmount + '%)' : (this.order.totalPrice.toFixed(2) + ' €')}}
                 </strong>
               </td>
             </tr>
@@ -159,7 +159,9 @@
         <tr>
           <td><b>Zľava:</b></td>
           <td>
-            {{order?.discountAmount > 0 ? 'Áno (-' + order?.discountAmount + '%)' : 'Nezadané'}}
+            <div [ngClass]="{'text-bold': order?.discountAmount && order.discountAmount > 0}">
+              {{order?.discountAmount > 0 ? 'Áno (-' + ((calculateBasePrice() / 100) * order?.discountAmount).toFixed(2) + ' €, ' + order?.discountAmount + '%)' : 'Nezadané'}}
+            </div>
           </td>
         </tr>
         <tr>

@@ -218,6 +218,17 @@ export class OrderDetailsComponent implements OnInit{
     return this.selectedProducts.reduce((sum, product) => sum + product.productWeight * product.productAmount, 0);
   }
 
+  calculateBasePrice(): number {
+    const productsTotal = this.selectedProducts.reduce((sum, product) => {
+      return sum + product.productPrice * product.productAmount;
+    }, 0);
+
+    const deliveryCost = this.order?.deliveryCost || 0;
+    const paymentCost = this.order?.paymentCost || 0;
+
+    return productsTotal + deliveryCost + paymentCost;
+  }
+
   ngOnInit(): void {
     const orderIdParam = this.route.snapshot.paramMap.get('orderId');
     this.orderId = orderIdParam ? parseInt(orderIdParam, 10): this.previewOrderId;

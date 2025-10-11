@@ -414,17 +414,21 @@ namespace AspNetCoreAPI.Controllers
             {
                 return NotFound("Data transfer object was not found.");
             }
+
             var orders = await _context.Orders
                 .Where(o => changeOrderStatusDTO.OrderIds.Contains(o.OrderId))
                 .ToListAsync();
+
             if (!orders.Any())
             {
                 return NotFound("Orders with specified OrderId's were not found.");
             }
+
             foreach (var order in orders)
             {
                 order.OrderStatus = changeOrderStatusDTO.OrderStatus;
             };
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -501,6 +505,7 @@ namespace AspNetCoreAPI.Controllers
 
                 var orders = await _context.Orders
                     .Where(o => ordersXmlDTO.OrderIds.Contains(o.OrderId))
+                    .OrderBy(o => o.CustomerName)
                     .ToListAsync();
                 ;
                 if (orders == null || !orders.Any())

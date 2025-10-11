@@ -176,7 +176,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit, OnDestroy {
           return this.emailService.sendPackageCodeEmails(emailDtos).pipe(
             catchError((error) => {
               console.error("An error has occurred while trying to send emails.", error?.message);
-               return of(null);
+              return of(null);
             }),
             switchMap(() => this.reloadOrders())
           );
@@ -185,7 +185,7 @@ export class OrdersPageComponent implements OnInit, AfterViewInit, OnDestroy {
           return this.emailService.sendOrderConfirmationEmails(emailDtos).pipe(
             catchError((error) => {
               console.error("An error has occurred while trying to send emails.", error?.message);
-               return of(null);
+              return of(null);
             }),
             switchMap(() => this.reloadOrders())
           )

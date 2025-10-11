@@ -40,6 +40,8 @@ export class InvoiceService {
     const iframe = document.createElement('iframe');
     iframe.style.position = 'absolute';
     iframe.style.top = '-10000px';
+    iframe.style.scale = '1';
+    iframe.style.fontSize = '12px !important';
     document.body.appendChild(iframe);
 
     const doc = iframe.contentDocument || iframe.contentWindow?.document;

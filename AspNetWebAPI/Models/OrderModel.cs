@@ -48,7 +48,7 @@ namespace AspNetCoreAPI.Models
         [Required(ErrorMessage = "Poplatok za platbu je povinný.")]
         public decimal PaymentCost { get; set; }
         [Range(0, 100, ErrorMessage = "Zľava nemôže byť záporná.")]
-        public int DiscountAmount { get; set; } = 0;
+        public decimal DiscountAmount { get; set; } = 0;
         [Required(ErrorMessage = "Stav objednávky je povinný.")]
         public string OrderStatus { get; set; }
         public string? OrderDate { get; set; }

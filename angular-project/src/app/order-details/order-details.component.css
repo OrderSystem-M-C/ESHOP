@@ -215,6 +215,9 @@ h1 {
   color: gray;
   font-style: italic;
 }
+.text-bold {
+  font-weight: bold;
+}
 /*Pre neplatné polia*/
 .form-control.is-invalid {
   border-color: red !important;

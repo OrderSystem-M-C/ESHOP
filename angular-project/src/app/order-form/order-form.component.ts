@@ -11,7 +11,7 @@ import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/materi
 import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 import { EmailService } from '../services/email.service';
 import { EphService, EphSettingsDTO } from '../services/eph.service';
-import { catchError, finalize, forkJoin, map, Observable, of } from 'rxjs';
+import { catchError, finalize, forkJoin, map, Observable, of, switchMap } from 'rxjs';
 import { CdkDrag, DragDropModule, moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ManageStatusesDialogComponent } from '../manage-statuses-dialog/manage-statuses-dialog.component';
 import { InvoiceService } from '../services/invoice.service';
@@ -85,8 +85,13 @@ export class OrderFormComponent implements OnInit {
   isEditingProducts: boolean = false;
 
   totalPrice: number = 0;
+  totalPriceCopy: number = 0;
+  
   productsTotalPrice: number = 0; 
+
   calculatedDiscountAmount: number = 0; 
+  calculatedDiscountPercent: number = 0;
+
   deliveryCost: number = 0;
   paymentCost: number = 0;
 
@@ -262,7 +267,7 @@ export class OrderFormComponent implements OnInit {
       deliveryCost: this.orderForm.value.deliveryCost,
       paymentOption: this.orderForm.value.paymentOption,
       paymentCost: this.orderForm.value.paymentCost,
-      discountAmount: this.orderForm.value.discountAmount || 0,
+      discountAmount: this.calculatedDiscountPercent || 0,
       orderStatus: this.orderForm.value.orderStatus,
       ...(this.isEditMode ? {} : {orderDate: this.currentDate}),
       packageCode: this.orderForm.value.packageCode,
@@ -638,7 +643,7 @@ export class OrderFormComponent implements OnInit {
     let currentDeliveryCost = 0;
     let currentPaymentCost = 0;
 
-    if (this.orderForm.get('deliveryOption')?.value === 'Kuriér') {
+    if (this.orderForm.get('deliveryOption')?.value === 'Kuriér' || this.orderForm.get('deliveryOption')?.value === 'Zahraničie') {
       currentDeliveryCost = this.orderForm.get('deliveryCost')?.value || 0;
     }
     this.deliveryCost = currentDeliveryCost;
@@ -648,13 +653,15 @@ export class OrderFormComponent implements OnInit {
     }
     this.paymentCost = currentPaymentCost;
 
-    const discountPercentage = this.orderForm.get('discountAmount')?.value || 0;
-
+    const discountAmount = this.orderForm.get('discountAmount')?.value || 0;
     let currentTotal = this.productsTotalPrice + this.deliveryCost + this.paymentCost;
 
-    this.calculatedDiscountAmount = (currentTotal * discountPercentage) / 100;
+    this.calculatedDiscountAmount = discountAmount;
+    this.calculatedDiscountPercent = currentTotal > 0 
+    ? (discountAmount / currentTotal) * 100
+    : 0;
 
-    this.totalPrice = currentTotal - this.calculatedDiscountAmount;
+    this.totalPrice = currentTotal - discountAmount;
 
     if (this.totalPrice < 0) {
       this.totalPrice = 0;
@@ -796,19 +803,27 @@ export class OrderFormComponent implements OnInit {
     }));
 
     if(orderStatus === 'Zasielanie čísla zásielky') {
-       this.emailService.sendPackageCodeEmails(emailDtos).subscribe();
+      this.emailService.sendPackageCodeEmails(emailDtos).subscribe();
     } else if(orderStatus === 'Dobierka - Info k objednávke (poslať e-mail)') {
       this.emailService.sendOrderConfirmationEmails(emailDtos).subscribe();
     }
   }
 
-  loadOrder(orderId: number){
+  loadOrder(orderId: number) {
     this.isLoadingEdit = true;
-    this.orderService.getOrderDetails(orderId).subscribe((order) => {
-      this.orderForm.patchValue(order); //patchValue robi ze vyplni hodnoty objednavky
 
-      if(order.phoneNumber.length > 0) this.orderForm.get('phoneNumber')?.markAsTouched();
-      if(order.invoicePhoneNumber.length > 0) this.orderForm.get('invoicePhoneNumber')?.markAsTouched();
+    this.orderService.getOrderDetails(orderId).pipe(
+      switchMap(order => forkJoin({
+        order: of(order),
+        products: this.productService.getOrderProducts(order.id)
+      }))
+    ).subscribe(({ order, products }) => {
+      this.orderForm.patchValue(order);
+
+      ['phoneNumber', 'invoicePhoneNumber'].forEach(field => {
+        const control = this.orderForm.get(field);
+        if (control?.value) control.markAsTouched();
+      });
 
       this.userMessage = order.note;
       this.charactersCount = this.userMessage.length;
@@ -816,6 +831,7 @@ export class OrderFormComponent implements OnInit {
       this.originalPackageCode = order.packageCode;
 
       this.totalPrice = order.totalPrice;
+      this.totalPriceCopy = order.totalPrice;
 
       this.invoiceForm.patchValue({
         invoiceNumber: String(order.invoiceNumber),
@@ -829,15 +845,27 @@ export class OrderFormComponent implements OnInit {
         invoicePhoneNumber: order.invoicePhoneNumber,
       });
 
-      this.productService.getOrderProducts(order.id).subscribe((result) => {
-        this.selectedProducts = result;
-        this.newSelectedProducts = JSON.parse(JSON.stringify(this.selectedProducts));
+      this.selectedProducts = products;
+      this.newSelectedProducts = JSON.parse(JSON.stringify(products));
 
-        this.recalculateTotalPrice();
+      const productsTotal = this.newSelectedProducts.reduce(
+        (sum, p) => sum + p.productPrice * p.productAmount, 0
+      );
 
-        this.isLoadingEdit = false;
+      const totalBeforeDiscount = productsTotal + order.deliveryCost + order.paymentCost;
+
+      const discountAmountInEuro = Math.round((totalBeforeDiscount * order.discountAmount) / 100);
+
+      this.orderForm.patchValue({
+        discountAmount: discountAmountInEuro
       });
-    })
+
+      this.recalculateTotalPrice();
+      this.isLoadingEdit = false;
+    }, error => {
+      console.error('Error loading order', error);
+      this.isLoadingEdit = false;
+    });
   }
 
   onCompanyChange(event: Event, formType: 'order' | 'invoice'){
