@@ -666,6 +666,8 @@ export class OrderFormComponent implements OnInit {
     if (this.totalPrice < 0) {
       this.totalPrice = 0;
     }
+
+    this.totalPriceCopy = currentTotal;
   }
 
   async updateOrder() {
