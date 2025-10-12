@@ -70,7 +70,7 @@ export class InvoiceService {
     const companyRowHTML = hasCompanyData ? `
       <tr>
         <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Spoločnosť, IČO, DIČ, IČ DPH</th>
-        <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
+        <td style="padding: 8px; border-bottom: 1px solid #e4e4e4ff;">
           ${order.company || 'Nezadané'}, ${this.displayValue(order.ico, this.DEFAULTS.ico)}, ${this.displayValue(order.dic, this.DEFAULTS.dic)}, ${this.displayValue(order.icdph, this.DEFAULTS.icdph)}
         </td>
       </tr>` : '';
@@ -78,7 +78,7 @@ export class InvoiceService {
     const invoiceCompanyRowHTML = hasInvoiceCompanyData ? `
       <tr>
         <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Spoločnosť, IČO, DIČ, IČ DPH</th>
-        <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
+        <td style="padding: 8px; border-bottom: 1px solid #e4e4e4ff;">
           ${order.invoiceCompany || 'Nezadané'}, ${this.displayValue(order.invoiceICO, this.DEFAULTS.ico)}, ${this.displayValue(order.invoiceDIC, this.DEFAULTS.dic)}
         </td>
       </tr>` : '';
@@ -86,15 +86,15 @@ export class InvoiceService {
     const invoiceDataHTML = hasInvoiceBasicData ? `
       <div style="margin-bottom: 20px;">
         <h3 style="margin-bottom: 10px; font-weight: bold;">Fakturačné údaje</h3>
-        <table style="width: 100%; border: 1px solid #e0e0e0;">
+        <table style="width: 100%; border: 1px solid #e4e4e4ff;">
           <tr>
             <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Meno a priezvisko</th>
-            <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${order.invoiceName || 'Nezadané'}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e4e4e4ff;">${order.invoiceName || 'Nezadané'}</td>
           </tr>
           ${invoiceCompanyRowHTML}
           <tr>
             <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">E-mail</th>
-            <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${order.invoiceEmail || 'Nezadané'}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e4e4e4ff;">${order.invoiceEmail || 'Nezadané'}</td>
           </tr>
           <tr>
             <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Tel.č.</th>
@@ -104,8 +104,8 @@ export class InvoiceService {
       </div>` : '';
 
     return `
-      <div style="width: 100%; margin: 10px auto; box-sizing: border-box; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333;">
-        <div style="background-color: #e4e4e4ff; padding: 8px; text-align: center; border-bottom: 1px solid #e0e0e0;">
+      <div style="width: 100%; margin: 10px auto; box-sizing: border-box; border: 1px solid #e4e4e4ff; border-radius: 10px; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333;">
+        <div style="background-color: #e4e4e4ff; padding: 8px; text-align: center; border-bottom: 1px solid #e4e4e4ff;">
           <h2 style="margin-top: 14px;">Číslo objednávky: <strong>${order.orderId}</strong></h2>
         </div>
         <div style="padding: 20px;">
@@ -113,27 +113,27 @@ export class InvoiceService {
           <div style="margin-bottom: 20px;">
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
-                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0; width: 40%;">Dátum vystavenia faktúry</th>
-                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.formatDate(order.invoiceIssueDate)}</td>
+                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e4e4e4ff; width: 40%;">Dátum vystavenia faktúry</th>
+                <td style="padding: 8px; border-bottom: 1px solid #e4e4e4ff;">${this.formatDate(order.invoiceIssueDate)}</td>
               </tr>
               <tr>
-                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Číslo faktúry</th>
-                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${order.invoiceNumber || ''}</td>
+                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e4e4e4ff;">Číslo faktúry</th>
+                <td style="padding: 8px; border-bottom: 1px solid #e4e4e4ff;">${order.invoiceNumber || ''}</td>
               </tr>
               <tr>
-                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Celkový počet produktov</th>
-                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${selectedProducts.reduce((sum, p) => sum + p.productAmount, 0)} ks</td>
+                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e4e4e4ff;">Celkový počet produktov</th>
+                <td style="padding: 8px; border-bottom: 1px solid #e4e4e4ff;">${selectedProducts.reduce((sum, p) => sum + p.productAmount, 0)} ks</td>
               </tr>
               <tr>
-                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Celková hmotnosť</th>
-                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">1 kg</td>
+                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e4e4e4ff;">Celková hmotnosť</th>
+                <td style="padding: 8px; border-bottom: 1px solid #e4e4e4ff;">1 kg</td>
               </tr>
             </table>
           </div>
 
           <div style="margin-bottom: 20px;">
             <h3 style="margin-bottom: 10px; font-weight: bold;">Objednané produkty</h3>
-            <table style="width: 100%; border: 1px solid #e0e0e0;">
+            <table style="width: 100%; border: 1px solid #e4e4e4ff;">
               <thead style="background-color: #e4e4e4ff;">
                 <tr>
                   <th style="padding: 8px; text-align: left;">Názov produktu</th>
@@ -145,10 +145,10 @@ export class InvoiceService {
               <tbody>
                 ${selectedProducts.map((p, i) => `
                   <tr>
-                    <td style="padding: 8px; text-align: left; border-bottom: ${i === selectedProducts.length - 1 ? 'none' : '1px solid #e0e0e0'};">${p.productName}</td>
-                    <td style="padding: 8px; text-align: center; border-bottom: ${i === selectedProducts.length - 1 ? 'none' : '1px solid #e0e0e0'};">${p.productPrice} €</td>
-                    <td style="padding: 8px; text-align: center; border-bottom: ${i === selectedProducts.length - 1 ? 'none' : '1px solid #e0e0e0'};">${p.productAmount} ks</td>
-                    <td style="padding: 8px; text-align: center; border-bottom: ${i === selectedProducts.length - 1 ? 'none' : '1px solid #e0e0e0'};">${(p.productPrice*p.productAmount).toFixed(2)} €</td>
+                    <td style="padding: 8px; text-align: left; border-bottom: ${i === selectedProducts.length - 1 ? 'none' : '1px solid #e4e4e4ff'};">${p.productName}</td>
+                    <td style="padding: 8px; text-align: center; border-bottom: ${i === selectedProducts.length - 1 ? 'none' : '1px solid #e4e4e4ff'};">${p.productPrice} €</td>
+                    <td style="padding: 8px; text-align: center; border-bottom: ${i === selectedProducts.length - 1 ? 'none' : '1px solid #e4e4e4ff'};">${p.productAmount} ks</td>
+                    <td style="padding: 8px; text-align: center; border-bottom: ${i === selectedProducts.length - 1 ? 'none' : '1px solid #e4e4e4ff'};">${(p.productPrice*p.productAmount).toFixed(2)} €</td>
                   </tr>
                 `).join('')}
                 <tr style="border-top: 1px solid #000; background-color: #f8f9fa;">
@@ -176,15 +176,15 @@ export class InvoiceService {
 
           <div style="margin-bottom: 20px;">
             <h3 style="margin-bottom: 10px; font-weight: bold;">Objednávateľ</h3>
-            <table style="width: 100%; border: 1px solid #e0e0e0;">
+            <table style="width: 100%; border: 1px solid #e4e4e4ff;">
               <tr>
                 <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff; border-bottom: 1px solid #e4e4e4ff;">Meno a priezvisko</th>
-                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.displayValue(order.customerName, this.DEFAULTS.customerName)}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e4e4e4ff;">${this.displayValue(order.customerName, this.DEFAULTS.customerName)}</td>
               </tr>
               ${companyRowHTML}
               <tr>
                 <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff; border-bottom: 1px solid #e4e4e4ff;">Adresa</th>
-                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
+                <td style="padding: 8px; border-bottom: 1px solid #e4e4e4ff;">
                   ${this.displayValue(order.address, this.DEFAULTS.address)}, 
                   ${this.displayValue(order.postalCode, this.DEFAULTS.postalCode)}, 
                   ${this.displayValue(order.city, this.DEFAULTS.city)}
@@ -192,11 +192,11 @@ export class InvoiceService {
               </tr>
               <tr>
                 <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff; border-bottom: 1px solid #e4e4e4ff;">E-mail</th>
-                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">${this.displayValue(order.email, this.DEFAULTS.email)}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e4e4e4ff;">${this.displayValue(order.email, this.DEFAULTS.email)}</td>
               </tr>
               <tr>
                 <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff; border-bottom: 1px solid #e4e4e4ff;">Tel.č.</th>
-                <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;"">${this.displayValue(order.phoneNumber, this.DEFAULTS.phoneNumber)}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e4e4e4ff;"">${this.displayValue(order.phoneNumber, this.DEFAULTS.phoneNumber)}</td>
               </tr>
               <tr>
                 <th style="padding: 8px; text-align: left; background-color: #e4e4e4ff;">Poznámka</th>
