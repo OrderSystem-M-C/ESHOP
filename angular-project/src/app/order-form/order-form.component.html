@@ -127,7 +127,7 @@
               <p><b>Súčet produktov:</b></p>
               <p>{{ productsTotalPrice | number : '1.2-2' }}€</p> 
             }
-            @if(deliveryCost > 0 && orderForm.get('deliveryOption')?.value === 'Kuriér') {
+            @if(deliveryCost > 0 && (orderForm.get('deliveryOption')?.value === 'Kuriér' || orderForm.get('deliveryOption')?.value === 'Zahraničie')) {
               <p><b>Doprava:</b></p>
               <p>{{ deliveryCost | number : '1.2-2' }}€</p>
             }
@@ -450,7 +450,7 @@
           </tbody>
         </table>
         <div class="pagination-container">
-          <mat-paginator [length]="totalItems" [pageSizeOptions]="[6, 8, 10]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
+          <mat-paginator class="custom-paginator" [length]="totalItems" [pageSizeOptions]="[6, 8, 10]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
         </div>
       }
     }

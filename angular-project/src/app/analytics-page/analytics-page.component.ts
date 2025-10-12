@@ -13,6 +13,8 @@ import {
 } from "ng-apexcharts";
 import { RouterLink } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { CustomPaginatorIntl } from '../services/custom-paginator-intl.service';
 
 export type PieChartOptions = {
   series: ApexNonAxisChartSeries;
@@ -56,8 +58,8 @@ export type ProductsChartOptions = {
 @Component({
   selector: 'app-analytics-page',
   standalone: true,
-  imports: [NgApexchartsModule, CommonModule, RouterLink],
-  providers: [DatePipe],
+  imports: [NgApexchartsModule, CommonModule, RouterLink, MatPaginatorModule],
+  providers: [DatePipe, { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
   templateUrl: './analytics-page.component.html',
   styleUrl: './analytics-page.component.css'
 })
@@ -69,6 +71,9 @@ export class AnalyticsPageComponent implements OnInit{
   productStats: ProductStatsDTO[] = [];
 
   statuses: OrderStatusDTO[] = [];
+
+  emailCounts: Record<string, number> = {};
+  filteredEmailCounts: any[] = [];
 
   isLoading: boolean = true;
 
@@ -85,6 +90,10 @@ export class AnalyticsPageComponent implements OnInit{
   totalOrders: number = 0;
   totalOrdersAllTime: number = 0;
 
+  totalItems: number = 0;
+  pageIndex: number = 0;
+  pageSize: number = 6;
+
   constructor(
     private datePipe: DatePipe,
     private orderService: OrderService,
@@ -93,6 +102,19 @@ export class AnalyticsPageComponent implements OnInit{
 
   exportData() {
     this.snackBar.open("Funkcia exportovania dát do súboru CSV ešte nie je dostupná!", "", { duration: 2500 });
+  }
+
+  updatePagedEmails(): void {
+    const emailEntries = Object.entries(this.emailCounts);
+    const startIndex = this.pageIndex * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.filteredEmailCounts = emailEntries.slice(startIndex, endIndex);
+  }
+  
+  handlePageEvent(pageEvent: PageEvent){
+    this.pageSize = pageEvent.pageSize;
+    this.pageIndex = pageEvent.pageIndex;
+    this.updatePagedEmails();
   }
 
   onRangeChange(event: Event, chart: 'orders' | 'revenue'): void {
@@ -242,6 +264,17 @@ export class AnalyticsPageComponent implements OnInit{
     }
   }
 
+  private prepareEmailsData(emailsList: string[]) {
+    emailsList.forEach(e => {
+      this.emailCounts[e] = (this.emailCounts[e] || 0) + 1;
+    });
+
+    this.totalItems = Object.keys(this.emailCounts).length;
+    this.pageIndex = 0;
+
+    this.updatePagedEmails();
+  }
+
   groupOrdersByDate(orders: OrderDTO[]): { [date: string] : { totalCount: number } } {
       const grouped = orders.reduce((acc, order) => {
         const [datePart] = order.orderDate.split(' ');
@@ -310,6 +343,9 @@ export class AnalyticsPageComponent implements OnInit{
         this.prepareOrdersChartData();
         this.prepareRevenueChartData();
         this.prepareProductsChartData();
+        this.prepareEmailsData(
+          orders.map(o => o.email)
+        );
       },
       error: (err) => console.error(err)
     })

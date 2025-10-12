@@ -115,7 +115,7 @@
           </tbody>
         </table>
         <div class="pagination-container">
-          <mat-paginator [length]="totalItems" [pageSizeOptions]="[6, 8, 10]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
+          <mat-paginator class="custom-paginator" [length]="totalItems" [pageSizeOptions]="[6, 8, 10]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
         </div>
       }@else if(filteredProducts.length === 0){
         <div class="no-products-found-container">

@@ -426,13 +426,6 @@ tr.selectedProduct td {
 .no-products-selected p {
   margin: 0;
 }
-mat-paginator {
-  background-color: #f2f2f2;
-  margin-top: 15px;
-  border-radius: 10px;
-  width: 100%;
-  font-size: 14px;
-}
 .in-stock {
   color: green;
 }

@@ -138,7 +138,7 @@
         </tr>
         <tr>
           <td><b>E-mailová adresa:</b></td>
-          <td [ngClass]="{ 'order-placeholder': order?.email === 'nezadany@objednavky.local' }">
+          <td [ngClass]="{ 'order-placeholder': order?.email === DEFAULTS.email }">
             {{ order?.email }}
           </td>
         </tr>

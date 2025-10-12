@@ -233,13 +233,6 @@ h1 {
   justify-content: flex-end;
   width: 100%;
 }
-mat-paginator {
-  background-color: #f2f2f2;
-  margin-top: 15px;
-  border-radius: 10px;
-  width: 100%;
-  font-size: 14px;
-}
 .stock-input-container, .product-code-input-container {
   display: flex;
   align-items: center;

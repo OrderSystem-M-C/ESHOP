@@ -67,6 +67,18 @@ input::placeholder {
 .btn-light:active {
   border: 1px solid #333 !important;
 }
+mat-paginator.custom-paginator {
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  margin-top: 15px;
+  border-radius: 10px;
+  width: 100%;
+  font-size: 14px;
+}
+.order-placeholder {
+  color: gray;
+  font-style: italic;
+}
 .spinner-container {
   display: flex;
   justify-content: center;

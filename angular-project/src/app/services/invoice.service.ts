@@ -38,29 +38,17 @@ export class InvoiceService {
     if (!orders || orders.length === 0) return;
 
     const iframe = document.createElement('iframe');
+
     iframe.style.position = 'absolute';
     iframe.style.top = '-10000px';
-    iframe.style.scale = '1';
-    iframe.style.fontSize = '12px !important';
+
     document.body.appendChild(iframe);
 
-    const doc = iframe.contentDocument || iframe.contentWindow?.document;
-    if (!doc) return;
-
-    doc.open();
-    doc.write(
-      orders.map(({ order, products }, index) => 
-        `<div style="${index > 0 ? 'page-break-before: always;' : ''}">${this.buildInvoiceHtml(order, products)}</div>`
-      ).join('')
-    );
-    doc.close();
-
-    await doc.fonts.ready;
-
-    await Promise.all(Array.from(doc.querySelectorAll('img')).map(img => {
-      if (img.complete) return Promise.resolve();
-      return new Promise(res => { img.onload = img.onerror = res; });
-    }));
+    const combinedHTML = orders.map(({ order, products }, i) =>
+      `<div style="${i > 0 ? 'page-break-before: always;' : ''}">
+        ${this.buildInvoiceHtml(order, products)}
+      </div>`
+    ).join('');
 
     const options = {
       margin: [5, 5, 5, 5],
@@ -69,7 +57,7 @@ export class InvoiceService {
       filename: 'Hromadne_faktury.pdf'
     };
 
-    await html2pdf().set(options).from(doc.body).save();
+    await html2pdf().set(options).from(combinedHTML).save();
 
     iframe.remove();
   }

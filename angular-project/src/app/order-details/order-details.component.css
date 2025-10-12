@@ -211,10 +211,6 @@ h1 {
 .order-table:nth-child(2), .order-table:nth-child(3){
   margin-top: 15px;
 }
-.order-placeholder {
-  color: gray;
-  font-style: italic;
-}
 .text-bold {
   font-weight: bold;
 }

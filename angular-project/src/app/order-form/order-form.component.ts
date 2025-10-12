@@ -831,7 +831,6 @@ export class OrderFormComponent implements OnInit {
       this.originalPackageCode = order.packageCode;
 
       this.totalPrice = order.totalPrice;
-      this.totalPriceCopy = order.totalPrice;
 
       this.invoiceForm.patchValue({
         invoiceNumber: String(order.invoiceNumber),
@@ -859,6 +858,8 @@ export class OrderFormComponent implements OnInit {
       this.orderForm.patchValue({
         discountAmount: discountAmountInEuro
       });
+
+      this.totalPriceCopy = this.isEditMode ? totalBeforeDiscount : order.totalPrice;
 
       this.recalculateTotalPrice();
       this.isLoadingEdit = false;

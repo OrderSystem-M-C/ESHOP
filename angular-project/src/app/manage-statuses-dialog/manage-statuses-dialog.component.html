@@ -71,7 +71,7 @@
                 </div>
             </div>
             <div class="pagination-container">
-                <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="onPageChange($event)" showFirstLastButtons></mat-paginator>
+                <mat-paginator class="custom-paginator" [length]="totalItems" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="onPageChange($event)" showFirstLastButtons></mat-paginator>
             </div>
         </div>
     </div>

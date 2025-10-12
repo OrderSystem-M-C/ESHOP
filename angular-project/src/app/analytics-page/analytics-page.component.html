@@ -16,9 +16,9 @@
   </div>
   @if(isLoading){
     <div class="spinner-container">
-       <div class="spinner">
-       </div>
-       Načítava sa
+        <div class="spinner">
+        </div>
+        Načítava sa
     </div>
   }@else{
   <div class="charts-grid">
@@ -109,6 +109,28 @@
         [colors]="productsChartOptions.colors">
       </apx-chart>
     </div> 
+    <div class="chart-card">
+      <h2>Zoznam použitých e-mailov v objednávkach (ks)</h2>
+      <table class="emails-table" cellspacing="0" cellpadding="5">
+        <thead>
+          <tr>
+            <th>E-mailová adresa</th>
+            <th>Počet výskytov v objednávkach (ks)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let entry of filteredEmailCounts">
+              <td [ngClass]="{ 'order-placeholder': entry[0] === 'nezadany@objednavky.local' }">
+                {{ entry[0] }}
+              </td>
+              <td>{{ entry[1] }} ks</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pagination-container">
+        <mat-paginator class="custom-paginator" [length]="totalItems" [pageSizeOptions]="[6, 8]" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="handlePageEvent($event)" aria-label="Zvolte si stránku" showFirstLastButtons></mat-paginator>
+      </div>
+    </div>
   </div>
   }
 </div>
