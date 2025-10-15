@@ -27,7 +27,7 @@ export class InvoiceService {
     const options = {
       margin: [5, 5, 5, 5],
       filename: `Faktúra_č${order.orderId}.pdf`,
-      html2canvas: { scale: 2 },
+      html2canvas: { scale: 1.5 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     }
 
@@ -52,7 +52,7 @@ export class InvoiceService {
 
     const options = {
       margin: [5, 5, 5, 5],
-      html2canvas: { scale: 2, useCORS: true },
+      html2canvas: { scale: 1.5, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       filename: 'Hromadne_faktury.pdf'
     };

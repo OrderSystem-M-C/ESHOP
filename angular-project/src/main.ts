@@ -20,7 +20,7 @@ import { EphSettingsComponent } from './app/eph-settings/eph-settings.component'
 import { AnalyticsPageComponent } from './app/analytics-page/analytics-page.component';
 
 export function getBaseUrl() {
-  return 'https://web1244125.bsite.net/api';
+  return 'https://localhost:7186/api';
 }
 
 export function tokenGetter() {
