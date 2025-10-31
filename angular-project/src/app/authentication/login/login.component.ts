@@ -44,6 +44,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   login() {
     if (this.loginForm.valid) {
       this.isLogging = true;
+
       this.authService.loginUser({...this.loginForm.value}).subscribe({
         next: (response) => {
           if(response.isAuthSuccessful){
@@ -52,10 +53,11 @@ export class LoginComponent implements OnInit, OnDestroy {
           }
         },
         error: (err) => {
-          console.error(err?.errorMessage || err);
-          this.snackBar.open("E-mailová adresa alebo heslo nie sú správne!", "", { duration: 3000 });
+          this.snackBar.open(err?.error.errorMessage, "", { duration: 3000 });
+
           this.loginForm.reset();
           this.validateAllFormFields(this.loginForm);
+          
           this.isLogging = false;
         }
       });

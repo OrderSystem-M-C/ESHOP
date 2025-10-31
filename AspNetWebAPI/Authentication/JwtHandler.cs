@@ -24,9 +24,10 @@ namespace AspNetCoreAPI.Registration
         public List<Claim> GetClaims(IdentityUser user)
         {
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.Email)
-        };
+            {
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+            };
             return claims;
         }
         public JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
@@ -35,7 +36,7 @@ namespace AspNetCoreAPI.Registration
                 issuer: _jwtSettings["validIssuer"],
                 audience: _jwtSettings["validAudience"],
                 claims: claims,
-                expires: DateTime.MaxValue,
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: signingCredentials);
             return tokenOptions;
         }

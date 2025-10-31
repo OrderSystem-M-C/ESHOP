@@ -37,7 +37,10 @@ namespace AspNetCoreAPI.Registration
             var user = await _userManager.FindByNameAsync(userLoginDto.Email);
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, userLoginDto.Password))
-                return Unauthorized(new UserLoginResponseDTO { ErrorMessage = "Invalid Authentication.", IsAuthSuccessful = false });
+                return Unauthorized(new UserLoginResponseDTO { ErrorMessage = "E-mailová adresa alebo heslo nie sú správne!", IsAuthSuccessful = false });
+
+            if (user.IsBlocked) 
+                return Unauthorized(new UserLoginResponseDTO { ErrorMessage = "Tento používateľ je zablokovaný!", IsAuthSuccessful = false });
 
             var signingCredentials = _jwtHandler.GetSigningCredentials();
             var claims = _jwtHandler.GetClaims(user);

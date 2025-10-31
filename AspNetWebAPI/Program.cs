@@ -1,4 +1,5 @@
 using AspNetCoreAPI.Data;
+using AspNetCoreAPI.Middleware;
 using AspNetCoreAPI.Models;
 using AspNetCoreAPI.Registration;
 using AspNetCoreAPI.Services;
@@ -47,7 +48,7 @@ builder.Services.AddCors(options =>
         name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+            policy.WithOrigins("https://ordersystem-1-m.web.app").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
         });
 });
 
@@ -78,6 +79,7 @@ app.UsePathBase("/api/");
 app.UseRouting();
 app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthentication();
+app.UseMiddleware<BlockedUserMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 
