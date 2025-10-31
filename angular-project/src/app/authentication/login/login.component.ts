@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -7,7 +7,7 @@ import { AuthenticationService } from '../authentication.service';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { RecaptchaModule } from 'ng-recaptcha';
+import { RecaptchaComponent, RecaptchaModule, RecaptchaV3Module } from 'ng-recaptcha';
 import { finalize } from 'rxjs';
 
 @Component({
@@ -20,7 +20,8 @@ import { finalize } from 'rxjs';
 export class LoginComponent implements OnInit, OnDestroy {
   authService = inject(AuthenticationService);
   private router = inject(Router);
-
+  
+  @ViewChild('captchaRef') captchaRef!: RecaptchaComponent;
   siteKey: string | null = null;
 
   isLoading: boolean = false;
@@ -56,6 +57,8 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.snackBar.open(err?.error.errorMessage, "", { duration: 3000 });
 
           this.loginForm.reset();
+          this.captchaRef.reset();
+          
           this.validateAllFormFields(this.loginForm);
           
           this.isLogging = false;

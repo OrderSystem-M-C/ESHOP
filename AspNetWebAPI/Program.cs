@@ -48,7 +48,7 @@ builder.Services.AddCors(options =>
         name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("https://ordersystem-1-m.web.app").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+            policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
         });
 });
 

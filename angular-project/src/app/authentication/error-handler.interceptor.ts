@@ -3,18 +3,29 @@ import { catchError, throwError } from 'rxjs';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService } from './authentication.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 export const errorHandlerInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
-  const authService = inject(AuthenticationService)
+  const authService = inject(AuthenticationService);
+  const snackBar = inject(MatSnackBar);
 
   return next(req).pipe(catchError((err: HttpErrorResponse) => {
-    if (err.status === 401 || err.status === 403) {
-      console.log(err.status)
-      
+    let message = 'Niečo sa pokazilo';
+
+    if (err.error && err.error.errorMessage) {
+      message = err.error.errorMessage;
+    } else if (err.message) {
+      message = err.message;
+    }
+
+    if (err.status === 401 || err.status === 403) {      
       authService.logout();
+
+      snackBar.open(message, "", { duration: 1500 });
+
       router.navigate(['/login']);
-      return throwError(() => err)
+      return throwError(() => err);
     }
     else if (err.status === 400) {
       const parsedError = JSON.parse(err.error);
